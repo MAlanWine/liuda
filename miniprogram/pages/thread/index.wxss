@@ -1,0 +1,1 @@
+.photo-placeholder { background: #edf0e6; padding: 48rpx 30rpx; border-radius: 18rpx; color: #7c8870; font-size: 25rpx; line-height: 1.8; text-align: center; }

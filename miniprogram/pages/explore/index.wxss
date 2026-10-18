@@ -1,0 +1,13 @@
+.scene-map { height: 430rpx; position: relative; overflow: hidden; border-radius: 30rpx; background: #e9eddf; border: 1rpx solid #d8dfcc; margin-top: 28rpx; }
+.path { position: absolute; background: #faf9f2; }
+.path-one { width: 110%; height: 75rpx; left: -20rpx; top: 190rpx; transform: rotate(-19deg); }
+.path-two { width: 58rpx; height: 120%; left: 390rpx; top: -20rpx; transform: rotate(24deg); }
+.building { position: absolute; background: #d5d9ca; color: #6d7968; text-align: center; border-radius: 12rpx; font-size: 23rpx; }
+.building-one { left: 50rpx; top: 50rpx; width: 200rpx; height: 112rpx; line-height: 112rpx; transform: rotate(-9deg); }
+.building-two { right: 34rpx; bottom: 77rpx; width: 150rpx; height: 100rpx; line-height: 100rpx; transform: rotate(9deg); }
+.green { position: absolute; right: 55rpx; top: 40rpx; width: 150rpx; height: 135rpx; background: #cddbb9; color: #687c50; border-radius: 80rpx; text-align: center; line-height: 135rpx; font-size: 23rpx; }
+.map-pin { position: absolute; width: 64rpx; height: 64rpx; border-radius: 50% 50% 50% 8rpx; background: #315b43; color: #fff; text-align: center; line-height: 64rpx; box-shadow: 0 8rpx 18rpx #315b4326; }
+.pin-one { left: 225rpx; top: 140rpx; }
+.pin-two { right: 130rpx; top: 120rpx; }
+.you { position: absolute; left: 180rpx; top: 320rpx; width: 24rpx; height: 24rpx; border: 6rpx solid #fff; border-radius: 50%; background: #609bc5; box-shadow: 0 0 0 18rpx #609bc522; }
+.map-caption { position: absolute; bottom: 16rpx; left: 20rpx; color: #7b8772; font-size: 19rpx; }

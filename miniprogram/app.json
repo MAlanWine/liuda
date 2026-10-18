@@ -1,0 +1,32 @@
+{
+  "pages": [
+    "pages/explore/index",
+    "pages/compose/index",
+    "pages/thread/index",
+    "pages/messages/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "溜达",
+    "navigationBarBackgroundColor": "#fffef9",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#fffef9"
+  },
+  "tabBar": {
+    "color": "#7c887c",
+    "selectedColor": "#365a3c",
+    "backgroundColor": "#fffef9",
+    "borderStyle": "white",
+    "list": [
+      { "pagePath": "pages/explore/index", "text": "附近" },
+      { "pagePath": "pages/compose/index", "text": "＋ 留下" },
+      { "pagePath": "pages/messages/index", "text": "消息" }
+    ]
+  },
+  "permission": {
+    "scope.userLocation": { "desc": "用于展示你附近的留话、跟随步行位置，并判断是否已到场。" }
+  },
+  "requiredPrivateInfos": ["getLocation", "startLocationUpdate", "onLocationChange"],
+  "__usePrivacyCheck__": true,
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

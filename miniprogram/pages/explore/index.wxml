@@ -1,0 +1,29 @@
+<view class="page">
+  <text class="eyebrow">此处 / 名称暂定</text>
+  <text class="title">走近一点，看看这里在聊什么。</text>
+  <text class="subtitle">有人在这里留下一句话，等下一个路过的人接上。</text>
+  <view class="notice">界面演示 · 下方距离和场景均为模拟数据，不使用或验证真实定位，不能对外发布。</view>
+  <view class="scene-map">
+    <view class="path path-one"></view><view class="path path-two"></view>
+    <view class="building building-one">教学楼</view>
+    <view class="building building-two">食堂</view>
+    <view class="green">小广场</view>
+    <view class="map-pin pin-one" bindtap="openThread" data-id="stairs">6</view>
+    <view class="map-pin pin-two" bindtap="openThread" data-id="bench">3</view>
+    <view class="you"></view>
+    <text class="map-caption">虚构校园示意图 · 非真实地图</text>
+  </view>
+  <view class="card">
+    <view class="row"><text class="card-title">模拟靠近</text><text class="badge">{{demoDistance}} 米</text></view>
+    <slider min="0" max="1000" step="10" value="{{demoDistance}}" bindchange="onDistanceChange" activeColor="#315b43" backgroundColor="#e0e6d8" block-size="22" />
+    <text class="muted">200 米外看数量，走近看开头，50 米内看完整留言。仅为演示参数。</text>
+  </view>
+  <view wx:for="{{posts}}" wx:key="id" class="card" bindtap="openThread" data-id="{{item.id}}">
+    <view class="row"><text class="card-title">{{item.name}}</text><text class="badge">{{item.count}} 段话</text></view>
+    <text wx:if="{{demoDistance > 200}}" class="body muted">再靠近一点，这里的话会慢慢出现。</text>
+    <text wx:elif="{{demoDistance > 50}}" class="body">{{item.teaser}}</text>
+    <text wx:else class="body">{{item.text}}</text>
+  </view>
+  <button bindtap="openCompose">在这里留一句 · 发布页预览</button>
+  <text class="footer">现场相遇，匿名接话。</text>
+</view>

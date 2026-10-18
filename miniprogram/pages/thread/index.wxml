@@ -1,0 +1,29 @@
+<view class="page" wx:if="{{post}}">
+  <text class="eyebrow">{{post.label}} / 虚构场景</text>
+  <text class="title">{{post.name}}</text>
+  <view class="notice">模拟距离 {{distance}} 米。全文已包含在本地演示数据中；正式版本必须由服务器按权限返回内容。</view>
+  <view class="card" wx:if="{{distance > 200}}">
+    <text class="card-title">这里有 {{post.count}} 段话</text>
+    <text class="body muted">走近之后，才能读到开头。</text>
+  </view>
+  <view class="card" wx:elif="{{distance > 50}}">
+    <text class="badge">走近了一点</text>
+    <text class="body">{{post.teaser}}</text>
+    <text class="muted">模拟到场后可读全文、照片和回复。</text>
+  </view>
+  <block wx:else>
+    <view class="card">
+      <text class="badge">现场阅读 · 演示</text>
+      <text class="body">{{post.text}}</text>
+      <view class="photo-placeholder">{{post.photoDescription}}</view>
+      <button class="secondary" bindtap="explainChat">向发布者发起私聊 · 规则预览</button>
+    </view>
+    <text class="section-label">路过的人接上了话</text>
+    <view class="card" wx:for="{{post.comments}}" wx:key="name">
+      <text class="muted">{{item.name}} · 仅在本串内区分</text>
+      <text class="body">{{item.text}}</text>
+    </view>
+    <button bindtap="explainReply">在现场回复 · 流程说明</button>
+  </block>
+</view>
+<view class="page" wx:else><text class="body">没有找到这条示例留言，请返回探索页。</text></view>

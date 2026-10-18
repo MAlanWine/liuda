@@ -1,0 +1,13 @@
+<view class="page">
+  <text class="eyebrow">留给下一个路过的人</text>
+  <text class="title">此刻，想说什么？</text>
+  <view class="notice">发布流程预览。定位接口权限和服务端到场校验尚未接通，真实发布已关闭。</view>
+  <text class="section-label">留一句</text>
+  <textarea maxlength="300" value="{{text}}" bindinput="onTextInput" placeholder="一个吐槽、提醒、问题，或者一句玩笑……" />
+  <view class="row"><text class="muted">公开内容不展示个人身份</text><text class="muted">{{text.length}} / 300</text></view>
+  <text class="section-label">现场照片</text>
+  <button class="secondary" bindtap="capturePhoto">{{photoPath ? '重新拍摄' : '打开相机'}}</button>
+  <image wx:if="{{photoPath}}" class="photo" src="{{photoPath}}" mode="widthFix" />
+  <text class="muted">照片仅作本机临时预览，不上传服务器。</text>
+  <button disabled>等待接通现场验证后发布</button>
+</view>

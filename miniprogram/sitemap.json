@@ -1,0 +1,4 @@
+{
+  "desc": "开发阶段禁止搜索索引",
+  "rules": [{"action": "disallow", "page": "*"}]
+}
