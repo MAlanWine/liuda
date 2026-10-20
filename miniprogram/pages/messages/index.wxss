@@ -1,0 +1,15 @@
+.row .title { margin-bottom: 12rpx; }
+.message-status { margin: 32rpx 0; }
+.message-status > text { display: block; }
+.message-status .muted { margin-top: 10rpx; }
+.local-post .body { font-size: 29rpx; margin: 18rpx 0; }
+.page { padding-bottom: calc(160rpx + env(safe-area-inset-bottom)); }
+
+.brand-row .title { font-size: 38rpx; margin: 0; }
+.empty-message { text-align: center; padding: 38rpx 28rpx; }
+.history-meta { margin:22rpx 0 30rpx; }
+.history-tabs { display:flex; gap:12rpx; padding:7rpx; background:#15171c; border-radius:22rpx; }
+.history-tab { flex:1; margin:0; padding:0 12rpx; line-height:74rpx; font-size:25rpx; color:#989da8; background:transparent; border-radius:17rpx; }
+.history-tab-active { color:#121316; background:#f0f1f3; }
+.post-foot { margin-top:20rpx; gap:12rpx; }
+.post-foot .muted:last-child { flex-shrink:0; }

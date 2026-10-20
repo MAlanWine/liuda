@@ -1,0 +1,11 @@
+{
+  "liuda_members": { "read": false, "write": false },
+  "liuda_scenes": { "read": false, "write": false },
+  "liuda_posts": { "read": false, "write": false },
+  "liuda_comments": { "read": false, "write": false },
+  "liuda_presence": { "read": false, "write": false },
+  "liuda_ops": { "read": false, "write": false },
+  "liuda_likes": { "read": false, "write": false },
+  "liuda_photos": { "read": false, "write": false },
+  "liuda_events": { "read": false, "write": false }
+}

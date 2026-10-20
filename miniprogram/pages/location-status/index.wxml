@@ -1,0 +1,17 @@
+<view class="page">
+  <text class="title">看看定位卡在哪一步</text>
+  <text class="notice">这里只读取错误与授权状态，不会申请新权限或获取位置。</text>
+  <view class="card"><text class="body">{{summary}}</text></view>
+  <view wx:if="{{failure}}" class="card">
+    <text class="section-label">微信返回的错误</text>
+    <text class="detail-label">失败接口：{{failure.api}}</text>
+    <text class="error-copy" selectable="{{true}}">{{failure.errMsg}}</text>
+    <text wx:if="{{failure.errno || failure.errCode || failure.code}}" class="notice">errno：{{failure.errno || '无'}} · errCode：{{failure.errCode || '无'}} · code：{{failure.code || '无'}}</text>
+  </view>
+  <view class="card"><view wx:for="{{rows}}" wx:key="name" class="status-row"><text class="detail-label">{{item.name}}</text><text class="status-value" selectable="{{true}}">{{item.value}}</text></view></view>
+  <text class="notice">“当前未要求再次同意”不能证明后台已声明位置信息。请将当前 AppID 与开通接口的后台账号核对。</text>
+  <button class="primary" bindtap="copy" disabled="{{loading}}">{{copied ? '已复制诊断信息' : '复制诊断信息'}}</button>
+  <button class="secondary" bindtap="refresh" loading="{{loading}}">刷新授权状态</button>
+  <button class="text-button" bindtap="back">返回附近</button>
+</view>
+<privacy-gate />

@@ -1,20 +1,27 @@
-page { background: #f7f5ef; color: #203b33; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
-view, text, button, input, textarea { box-sizing: border-box; }
-.page { padding: 34rpx 32rpx 64rpx; }
-.eyebrow { color: #6b7d71; font-size: 22rpx; letter-spacing: 4rpx; }
-.title { display: block; font-size: 56rpx; font-weight: 700; line-height: 1.3; margin: 18rpx 0; }
-.subtitle { color: #6b7d71; font-size: 27rpx; line-height: 1.8; }
-.notice { padding: 20rpx 24rpx; background: #eee8d8; border-radius: 18rpx; color: #75623f; font-size: 23rpx; line-height: 1.7; margin: 24rpx 0; }
-.card { background: #fffef9; border: 1rpx solid #e2e5d8; border-radius: 26rpx; padding: 28rpx; margin-top: 22rpx; }
-.card-title { font-size: 32rpx; font-weight: 600; }
-.muted { color: #7c887c; font-size: 24rpx; line-height: 1.7; }
-.body { display: block; color: #334d42; font-size: 30rpx; line-height: 1.9; margin: 22rpx 0; }
-.row { display: flex; align-items: center; justify-content: space-between; gap: 16rpx; }
-.badge { display: inline-block; padding: 8rpx 16rpx; background: #eaf0df; color: #506343; border-radius: 20rpx; font-size: 21rpx; }
-button { border-radius: 20rpx; font-size: 28rpx; font-weight: 500; line-height: 92rpx; margin-top: 24rpx; background: #204e3b; color: #fff; }
+/* 留答：黑底、冷白主操作、灰阶信息层级，规范见 docs/brand-ui.md。 */
+page { background: #08090b; color: #f3f4f6; font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; font-size: 28rpx; line-height: 1.6; }
+view, text, button, input, textarea, scroll-view { box-sizing: border-box; }
+button { margin: 24rpx 0 0; padding: 0 28rpx; border-radius: 24rpx; font-size: 28rpx; font-weight: 500; line-height: 88rpx; background: #f0f1f3; color: #121316; }
 button::after { border: 0; }
-button.secondary { background: #e7ecdf; color: #294f3d; }
-button[disabled] { background: #e0e2d8 !important; color: #909789 !important; }
-textarea { width: 100%; min-height: 240rpx; padding: 24rpx; border-radius: 20rpx; background: #fffef9; font-size: 30rpx; line-height: 1.8; margin: 24rpx 0 12rpx; }
-.section-label { display: block; font-size: 27rpx; font-weight: 600; margin-top: 36rpx; }
-.footer { display: block; margin-top: 30rpx; color: #84907f; font-size: 23rpx; line-height: 1.8; text-align: center; }
+button.primary { background: #f0f1f3; color: #121316; }
+button.secondary { background: #22242a; color: #e2e4e9; border: 1rpx solid #34363d; }
+button[disabled] { background: #202228 !important; color: #777b86 !important; }
+.page { padding: 34rpx 32rpx calc(40rpx + env(safe-area-inset-bottom)); }
+.title { display: block; font-size: 46rpx; font-weight: 600; margin: 8rpx 0 24rpx; line-height: 1.4; letter-spacing: 1rpx; }
+.muted { color: #a0a4ae; font-size: 24rpx; }
+.body { display: block; font-size: 32rpx; line-height: 1.9; overflow-wrap: anywhere; white-space: pre-wrap; }
+.row { display: flex; justify-content: space-between; align-items: center; gap: 16rpx; }
+.card { background: #15171c; border: 1rpx solid #2c2f36; border-radius: 30rpx; padding: 28rpx; margin-top: 22rpx; }
+.card-title { font-size: 30rpx; font-weight: 500; }
+.badge { display: inline-block; font-size: 21rpx; color: #cdd0d7; background: #22242b; padding: 5rpx 14rpx; border-radius: 18rpx; border: 1rpx solid #34363e; }
+.notice { color: #a0a4ae; font-size: 23rpx; padding: 16rpx 0; line-height: 1.8; }
+.section-label { display: block; font-size: 26rpx; color: #a0a4ae; margin: 32rpx 0 14rpx; }
+textarea { width: 100%; min-height: 220rpx; padding: 24rpx; background: #15171c; color: #f3f4f6; border: 1rpx solid #30333b; border-radius: 24rpx; font-size: 32rpx; line-height: 1.8; }
+input { width: 100%; height: 90rpx; padding: 0 22rpx; background: #15171c; color: #f3f4f6; border: 1rpx solid #30333b; border-radius: 22rpx; font-size: 28rpx; }
+.field-placeholder { color: #858a96; }
+.empty { display: flex; flex-direction: column; align-items: center; gap: 18rpx; padding: 90rpx 20rpx; text-align: center; }
+.photo { display: block; width: 100%; border-radius: 22rpx; margin-top: 20rpx; }
+.text-button { color: #cdd0d7; background: transparent; padding: 0; margin: 0; font-size: 25rpx; min-height: 80rpx; line-height: 80rpx; }
+.brand-avatar { display: block; width: 64rpx; height: 64rpx; border-radius: 20rpx; background: #000; flex-shrink: 0; }
+.brand-row { display: flex; align-items: center; gap: 16rpx; }
+.empty-mascot { display: block; width: 160rpx; height: 160rpx; border-radius: 50%; background: #000; margin: 0 auto 20rpx; }

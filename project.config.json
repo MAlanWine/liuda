@@ -1,8 +1,9 @@
 {
-  "description": "溜达：附近留话、现场接话与真实定位的本机体验版",
+  "description": "留答：匿名地点留话、现场接话与真实定位",
   "miniprogramRoot": "miniprogram/",
+  "cloudfunctionRoot": "cloudfunctions/",
   "compileType": "miniprogram",
-  "appid": "wx0c2791c19ddcab06",
+  "appid": "wx755951e5f06c6cea",
   "projectname": "liuda-miniprogram",
   "setting": {
     "es6": true,
@@ -10,6 +11,7 @@
     "minified": true,
     "postcss": true,
     "urlCheck": true,
+    "coverView": true,
     "compileWorklet": false,
     "uglifyFileName": false,
     "uploadWithSourceMap": true,
@@ -32,5 +34,6 @@
     "ignore": [],
     "include": []
   },
-  "editorSetting": {}
+  "editorSetting": {},
+  "isGameTourist": false
 }

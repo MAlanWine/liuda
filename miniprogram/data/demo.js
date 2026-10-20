@@ -12,7 +12,16 @@ const scenes = [
     text: '这扇门请拉，别问我怎么知道的。', teaser: '第一次来的人，基本都会……', likes: 6, comments: [] }
 ]
 const posts = scenes.map(item => Object.assign({}, item, offset(origin, item.east, item.north), {
-  mode: 'demo', demo: true, owned: false, photoPath: '', createdAt: 0, liked: false
+  sceneId: 'demo-' + item.id, mode: 'demo', demo: true, owned: false, photoPath: '', createdAt: 0, liked: false
 }))
+// Additional local-only examples make grouping and all three heat sizes visible.
+const demoNow = Date.now()
+posts.push(Object.assign({},posts[0],{ id:'stairs-tip',text:'下雨的时候走右边，有扶手。',
+  teaser:'下雨的时候，右边更好走……',likes:2,comments:[],createdAt:demoNow-3*86400000 }))
+posts.push(Object.assign({},posts[0],{ id:'stairs-question',text:'这个门周末也开吗？路过的同学接一句。',
+  teaser:'周末从这里进，门开吗？',likes:0,comments:[],createdAt:demoNow-2*3600000 }))
+posts.push({ id:'quiet-corner',sceneId:'demo-quiet-corner',name:'路口 · 小树旁',
+  ...offset(origin,-9,68),text:'这里的风刚刚好，发会儿呆。',teaser:'这里适合停一下……',
+  likes:0,comments:[],mode:'demo',demo:true,owned:false,photoPath:'',liked:false,createdAt:demoNow-3600000 })
 function position(walk) { return Object.assign(offset(origin, 0, walk), { source: 'demo', timestamp: Date.now(), accuracy: 1 }) }
 module.exports = { posts, origin, position }

@@ -1,0 +1,13 @@
+<cover-view class="tabbar" style="padding-bottom:{{safeBottom}}px">
+  <cover-view class="tab-items">
+    <cover-view class="tab-item {{selected === 0 ? 'tab-active' : ''}}" data-index="0" bindtap="switchPage" aria-role="button" aria-label="附近">
+      <cover-view class="compass-icon"><cover-view class="compass-needle">↗</cover-view></cover-view><cover-view class="tab-label">附近</cover-view>
+    </cover-view>
+    <cover-view class="tab-item {{selected === 1 ? 'tab-active' : ''}}" data-index="1" bindtap="switchPage" aria-role="button" aria-label="留下一句话">
+      <cover-view class="plus-icon">＋</cover-view><cover-view class="tab-label">留下</cover-view>
+    </cover-view>
+    <cover-view class="tab-item {{selected === 2 ? 'tab-active' : ''}}" data-index="2" bindtap="switchPage" aria-role="button" aria-label="消息">
+      <cover-view class="chat-icon">···</cover-view><cover-view class="tab-label">消息</cover-view>
+    </cover-view>
+  </cover-view>
+</cover-view>

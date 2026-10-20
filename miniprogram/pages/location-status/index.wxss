@@ -1,0 +1,7 @@
+.notice { display:block; }
+.detail-label { display:block; color:#a0a4ae; font-size:24rpx; }
+.error-copy { display:block; margin-top:16rpx; font-size:26rpx; line-height:1.8; overflow-wrap:anywhere; white-space:pre-wrap; }
+.status-row { padding:18rpx 0; border-bottom:1rpx solid #2c2f36; }
+.status-row:last-child { border:0; }
+.status-value { display:block; margin-top:8rpx; font-size:27rpx; overflow-wrap:anywhere; }
+.section-label { margin-top:0; }

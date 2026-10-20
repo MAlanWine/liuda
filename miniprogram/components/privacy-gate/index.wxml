@@ -1,0 +1,12 @@
+<view wx:if="{{visible}}" class="privacy-mask" catchtouchmove="blockTouch">
+  <view class="privacy-card" role="dialog" aria-label="隐私保护提示">
+    <text class="privacy-title">先了解，再出发</text>
+    <text class="privacy-copy">定位用于发现附近留话、跟随步行和判断是否到场；拍摄用于你主动发布现场图片。</text>
+    <button class="privacy-link" bindtap="openContract">阅读{{contractName}}</button>
+    <text wx:if="{{notice}}" class="privacy-notice">{{notice}}</text>
+    <view class="privacy-actions">
+      <button class="privacy-decline" bindtap="decline">暂不同意</button>
+      <button id="liuda-privacy-agree" class="privacy-agree" open-type="agreePrivacyAuthorization" bindagreeprivacyauthorization="agree" disabled="{{!ready}}">同意并继续</button>
+    </view>
+  </view>
+</view>

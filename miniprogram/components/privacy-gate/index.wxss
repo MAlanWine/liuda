@@ -1,0 +1,14 @@
+:host { font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif; }
+.privacy-mask { position:fixed; top:0; right:0; bottom:0; left:0; z-index:9999; background:rgba(0,0,0,.72); display:flex; align-items:center; justify-content:center; padding:40rpx; box-sizing:border-box; }
+.privacy-card { width:100%; max-width:650rpx; padding:40rpx; border-radius:32rpx; background:#15171c; border:1rpx solid #34363d; color:#f3f4f6; box-sizing:border-box; }
+.privacy-title { display:block; font-size:36rpx; font-weight:600; margin-bottom:20rpx; }
+.privacy-copy,.privacy-notice { display:block; color:#a0a4ae; font-size:26rpx; line-height:1.8; }
+button { border:0; font-size:26rpx; border-radius:20rpx; padding:0 14rpx; margin:0; }
+button::after { border:0; }
+.privacy-link { background:transparent; color:#f3f4f6; text-align:left; font-size:25rpx; line-height:1.6; padding:24rpx 0; }
+.privacy-notice { padding-bottom:24rpx; }
+.privacy-actions { display:flex; gap:16rpx; margin-top:12rpx; }
+.privacy-actions button { flex:1; line-height:84rpx; }
+.privacy-decline { background:#252830; color:#cdd0d7; }
+.privacy-agree { background:#f0f1f3; color:#121316; }
+.privacy-agree[disabled] { background:#252830; color:#777b86; }

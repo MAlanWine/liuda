@@ -1,13 +1,26 @@
-<view class="page">
-  <text class="eyebrow">留给下一个路过的人</text>
-  <text class="title">此刻，想说什么？</text>
-  <view class="notice">发布流程预览。定位接口权限和服务端到场校验尚未接通，真实发布已关闭。</view>
-  <text class="section-label">留一句</text>
-  <textarea maxlength="300" value="{{text}}" bindinput="onTextInput" placeholder="一个吐槽、提醒、问题，或者一句玩笑……" />
-  <view class="row"><text class="muted">公开内容不展示个人身份</text><text class="muted">{{text.length}} / 300</text></view>
-  <text class="section-label">现场照片</text>
-  <button class="secondary" bindtap="capturePhoto">{{photoPath ? '重新拍摄' : '打开相机'}}</button>
-  <image wx:if="{{photoPath}}" class="photo" src="{{photoPath}}" mode="widthFix" />
-  <text class="muted">照片仅作本机临时预览，不上传服务器。</text>
-  <button disabled>等待接通现场验证后发布</button>
+<view wx:if="{{published}}" class="page compose-page publish-success">
+  <image class="success-mascot" src="/assets/brand/liuda-comma.png" mode="aspectFit" />
+  <text class="badge">{{published.mode === 'demo' ? '已留在本机演示区' : '已提交成功'}}</text>
+  <text class="title">留在这里了。</text>
+  <text class="muted">{{published.name}}</text>
+  <text class="notice">{{published.mode === 'demo' ? '可以打开看看，接一句，或模拟走远再走近。' : '打开这条留话，看看你在现场留下的内容。'}}</text>
+  <button class="primary" bindtap="viewPublished">查看我留下的</button>
+  <button class="secondary" bindtap="publishedMap">回到地图看看</button>
+  <button class="text-button" bindtap="writeAgain">再留一句</button>
 </view>
+<view wx:else class="page compose-page">
+  <view class="row"><view class="brand-row"><image class="brand-avatar" src="/assets/brand/liuda-comma.png" mode="aspectFit" aria-label="留答" /><text class="badge">{{mode === 'demo' ? '演示模式' : '现场留话'}}</text></view><button wx:if="{{hasDraft}}" class="text-button" bindtap="discard" disabled="{{busy || cameraBusy}}">清空</button></view>
+  <text class="title">想在这里留句什么？</text>
+  <button class="place-picker" bindtap="choosePlace" loading="{{placeBusy}}" disabled="{{busy || cameraBusy || placeBusy}}"><text>⌖</text><text>{{selectedPlace ? selectedPlace.name : '当前位置 · 新建地点'}}</text><text>⌄</text></button>
+  <block wx:for="{{nameEditor}}" wx:key="id"><input maxlength="40" placeholder="写清具体位置，例如：西门第一张长椅" placeholder-class="field-placeholder" value="{{item.value}}" data-editor="{{item.id}}" bindinput="onNameInput" bindblur="onNameInput" disabled="{{busy || cameraBusy}}" cursor-spacing="100" /></block>
+  <view class="position-row"><text class="position-note {{!ready ? 'position-weak' : ''}}">{{positionLabel}}</text><button class="text-button position-retry" bindtap="refreshPosition" loading="{{positionBusy}}" disabled="{{busy || positionBusy}}">{{ready ? '刷新' : '重新定位'}}</button></view>
+  <button wx:if="{{!ready && mode === 'live'}}" class="text-button diagnostic-link" bindtap="locationDetails">查看定位原因 →</button>
+  <block wx:for="{{textEditor}}" wx:key="id"><textarea maxlength="300" placeholder="一个吐槽、提醒、问题，或者一句玩笑……" placeholder-class="field-placeholder" value="{{item.value}}" data-editor="{{item.id}}" bindinput="onTextInput" bindblur="onTextInput" disabled="{{busy || cameraBusy}}" cursor-spacing="100" /></block>
+  <view class="row compose-meta"><text class="muted">匿名留下</text><text class="muted">{{textLength}} / 300</text></view>
+  <view class="photo-actions"><button class="secondary" bindtap="capturePhoto" loading="{{cameraBusy}}" disabled="{{busy || cameraBusy || !ready}}">{{photoPath ? '重新拍现场' : '＋ 拍张现场'}}</button><button wx:if="{{photoPath}}" class="text-button" bindtap="clearPhoto" disabled="{{busy || cameraBusy}}">移除照片</button></view>
+  <image wx:if="{{photoPath}}" class="photo" src="{{photoPath}}" mode="widthFix" bindtap="previewPhoto" />
+  <view wx:if="{{publishError}}" class="publish-error"><text>{{publishError}}</text><text class="notice">草稿还在，可以处理后重试。</text></view>
+  <button class="primary publish" bindtap="publish" loading="{{busy}}" disabled="{{busy || cameraBusy || !canPublish}}">{{busy ? publishStage : mode === 'demo' ? '在演示地点留下' : '在当前位置留下'}}</button>
+  <text class="notice">{{mode === 'demo' ? '仅保存在本机演示区。草稿在本次打开期间保留。' : '现场提交，审核后展示。切换页面保留草稿，关闭小程序后可能清除。'}}</text>
+</view>
+<privacy-gate />

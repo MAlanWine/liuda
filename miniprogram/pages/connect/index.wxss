@@ -1,0 +1,6 @@
+.invite-input { margin-top: 40rpx; }
+.notice { display: block; }
+
+.connect-page { padding-top: 44rpx; }
+.connect-mascot { display: block; width: 280rpx; height: 280rpx; margin: 0 auto 36rpx; border-radius: 70rpx; background: #000; }
+.connect-page > .title, .connect-page > .muted { display: block; text-align: center; }

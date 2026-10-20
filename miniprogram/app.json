@@ -3,19 +3,24 @@
     "pages/explore/index",
     "pages/compose/index",
     "pages/thread/index",
-    "pages/messages/index"
+    "pages/messages/index",
+    "pages/connect/index",
+    "pages/location-status/index"
   ],
+  "usingComponents": { "privacy-gate": "/components/privacy-gate/index" },
   "window": {
-    "navigationBarTitleText": "溜达",
-    "navigationBarBackgroundColor": "#fffef9",
-    "navigationBarTextStyle": "black",
-    "backgroundColor": "#fffef9"
+    "navigationBarTitleText": "留答",
+    "navigationBarBackgroundColor": "#08090b",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#08090b",
+    "backgroundTextStyle": "light"
   },
   "tabBar": {
-    "color": "#7c887c",
-    "selectedColor": "#365a3c",
-    "backgroundColor": "#fffef9",
-    "borderStyle": "white",
+    "custom": true,
+    "color": "#989da8",
+    "selectedColor": "#f3f4f6",
+    "backgroundColor": "#08090b",
+    "borderStyle": "black",
     "list": [
       { "pagePath": "pages/explore/index", "text": "附近" },
       { "pagePath": "pages/compose/index", "text": "＋ 留下" },

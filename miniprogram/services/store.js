@@ -29,6 +29,7 @@ function create(mode, position, input) {
   if (bucket.length >= 50) throw new Error('本机体验版最多保存 50 条留话，请先删除一些。')
   const place = input.place || position
   const post = { id: id(), name: String(input.name || '').trim().slice(0, 40) || '路过的这个地方',
+    sceneId: input.place ? (input.place.sceneId || input.place.id) : 'place-' + id(),
     latitude: place.latitude, longitude: place.longitude, coordinateSystem: 'gcj02',
     text, teaser: text.slice(0, 14) + '……', photoPath: input.photoPath || '',
     likes: 0, liked: false, comments: [], owned: true, demo: mode === 'demo', mode,

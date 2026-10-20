@@ -1,13 +1,107 @@
-.scene-map { height: 430rpx; position: relative; overflow: hidden; border-radius: 30rpx; background: #e9eddf; border: 1rpx solid #d8dfcc; margin-top: 28rpx; }
-.path { position: absolute; background: #faf9f2; }
-.path-one { width: 110%; height: 75rpx; left: -20rpx; top: 190rpx; transform: rotate(-19deg); }
-.path-two { width: 58rpx; height: 120%; left: 390rpx; top: -20rpx; transform: rotate(24deg); }
-.building { position: absolute; background: #d5d9ca; color: #6d7968; text-align: center; border-radius: 12rpx; font-size: 23rpx; }
-.building-one { left: 50rpx; top: 50rpx; width: 200rpx; height: 112rpx; line-height: 112rpx; transform: rotate(-9deg); }
-.building-two { right: 34rpx; bottom: 77rpx; width: 150rpx; height: 100rpx; line-height: 100rpx; transform: rotate(9deg); }
-.green { position: absolute; right: 55rpx; top: 40rpx; width: 150rpx; height: 135rpx; background: #cddbb9; color: #687c50; border-radius: 80rpx; text-align: center; line-height: 135rpx; font-size: 23rpx; }
-.map-pin { position: absolute; width: 64rpx; height: 64rpx; border-radius: 50% 50% 50% 8rpx; background: #315b43; color: #fff; text-align: center; line-height: 64rpx; box-shadow: 0 8rpx 18rpx #315b4326; }
-.pin-one { left: 225rpx; top: 140rpx; }
-.pin-two { right: 130rpx; top: 120rpx; }
-.you { position: absolute; left: 180rpx; top: 320rpx; width: 24rpx; height: 24rpx; border: 6rpx solid #fff; border-radius: 50%; background: #609bc5; box-shadow: 0 0 0 18rpx #609bc522; }
-.map-caption { position: absolute; bottom: 16rpx; left: 20rpx; color: #7b8772; font-size: 19rpx; }
+.explore { position: relative; width: 100%; overflow: hidden; background-color: #08090b; }
+.scene { position: relative; width: 100%; overflow: hidden; }
+.world { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
+.render-canvas { position: fixed; left: -10000px; top: 0; pointer-events: none; }
+.top-controls { position: absolute; top: 15px; left: 14px; right: 14px; height: 42px; display: flex; justify-content: space-between; align-items: center; }
+.top-controls, .location-status, .pin, .look-hint, .recenter { z-index: 10; }
+.bottom-area { z-index: 20; }
+.location-pill, .view-toggle { height: 40px; padding: 0 12px; line-height: 40px; border-radius: 22px; background-color: #15171c; color: #e2e4e9; font-size: 13px; display: flex; align-items: center; box-sizing: border-box; }
+.location-dot { width: 9px; height: 9px; border: 2px solid #e2e4e9; border-radius: 50%; box-sizing: border-box; }
+.location-name { margin-left: 6px; line-height: 40px; }
+.pill-detail { color: #a0a4ae; font-size: 10px; line-height: 40px; margin-left: 7px; }
+.down { color: #a0a4ae; line-height: 40px; margin-left: 6px; }
+.location-status { position: absolute; top: 64px; left: 15px; font-size: 11px; line-height: 18px; height: 22px; color: #aeb3be; padding: 2px 7px; background-color: #15171c; border-radius: 6px; box-sizing: border-box; }
+.pin { position: absolute; transform: translate(-50%, -100%); display: flex; align-items: center; height: 40px; max-width: 138px; border-radius: 13px; padding: 0 10px; background-color: #15171c; color: #e2e4e9; font-size: 12px; line-height: 40px; box-sizing: border-box; }
+.pin-active { background-color: #e2e4e9; color: #15171c; }
+.pin-symbol { font-size: 17px; line-height: 40px; margin-right: 5px; }
+.pin-name { overflow: hidden; text-overflow: ellipsis; max-width: 65px; line-height: 40px; }
+.pin-distance { font-size: 10px; line-height: 40px; margin-left: 5px; }
+.look-hint { position: absolute; top: 94px; left: 50%; transform: translateX(-50%); height: 22px; line-height: 18px; font-size: 11px; color: #a0a4ae; padding: 2px 8px; border-radius: 11px; background-color: #15171c; box-sizing: border-box; }
+.bottom-area { position: absolute; left: 10px; right: 10px; bottom: 10px; }
+.scene-caption { color: #a0a4ae; font-size: 10px; line-height: 18px; height: 18px; margin: 0 8px 8px; }
+.content-card { background-color: #15171c; border-radius: 23px; padding: 0 18px 15px; box-sizing: border-box; }
+.card-top { position: relative; height: 40px; }
+.handle { height: 40px; margin: 0 44px; display: flex; align-items: center; justify-content: center; }
+.handle-line { height: 3px; width: 27px; border-radius: 4px; background-color: #3a3d46; }
+.close-card { position: absolute; top: 0; right: -10px; width: 44px; height: 40px; line-height: 38px; text-align: center; color: #a0a4ae; font-size: 25px; }
+.card-meta { display: flex; align-items: center; justify-content: space-between; height: 20px; color: #a0a4ae; font-size: 11px; line-height: 20px; }
+.place-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; line-height: 20px; }
+.status { color: #e2e4e9; line-height: 20px; margin-left: 8px; }
+.card-scroll { max-height: 240px; overflow-y: scroll; }
+.card-copy { font-size: 20px; font-weight: 500; line-height: 33px; white-space: pre-wrap; margin: 13px 0 16px; word-break: break-all; }
+.card-photo { width: 100%; height: 110px; border-radius: 10px; margin-bottom: 10px; }
+.card-actions { display: flex; align-items: center; height: 44px; }
+.reaction { height: 44px; line-height: 44px; color: #a0a4ae; font-size: 13px; }
+.reply-count { margin-left: 18px; }
+.liked { color: #e2e4e9; }
+.actions-space { flex: 1; }
+.expand { color: #a0a4ae; font-size: 11px; line-height: 44px; height: 44px; margin-left: 6px; }
+.reply-button { height: 42px; margin-left: 16px; padding: 0 17px; line-height: 42px; text-align: center; background-color: #e2e4e9; color: #15171c; border-radius: 12px; font-size: 13px; box-sizing: border-box; }
+.mini-reply { padding: 10px 0; }
+.reply-author { color: #a0a4ae; font-size: 11px; line-height: 18px; }
+.reply-copy { font-size: 13px; line-height: 21px; white-space: normal; }
+.text-action { color: #e2e4e9; font-size: 12px; line-height: 40px; height: 40px; }
+.walk-control { position: absolute; bottom: 0; left: 0; right: 0; height: 42px; padding: 0 18px; display: flex; align-items: center; background: #15171c; font-size: 11px; color: #a0a4ae; box-sizing: border-box; }
+.walk-slider { flex: 1; margin: 0 12px; }
+.walk-value { width: 34px; text-align: right; }
+.recenter { position: absolute; top: 98px; right: 14px; width: 44px; height: 44px; line-height: 42px; text-align: center; border-radius: 50%; color: #e2e4e9; background-color: #15171c; font-size: 27px; }
+.empty-prompt { padding: 13px; background-color: #15171c; border-radius: 15px; font-size: 13px; line-height: 22px; text-align: center; color: #e2e4e9; white-space: normal; }
+.waiting { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; background: #08090b; }
+.waiting > text { margin-bottom: 12px; }
+.waiting-title { font-size: 20px; }
+.waiting button { padding: 0 20px; }
+
+/* 原生覆盖组件使用明确的色值，保证地图和街景上的前景可读。 */
+.brand-mark { width: 26px; height: 26px; border-radius: 9px; background-color: #000000; }
+.location-pill { padding-left: 7px; }
+.location-pill, .view-toggle, .pin, .recenter { border: 1px solid #454951; }
+.pin-active { background-color: #eceef2; color: #111216; border-color: #eceef2; }
+.content-card { color: #f3f4f6; background-color: #15171c; border: 1px solid #3b3e46; }
+.reply-button { background-color: #eceef2; color: #111216; }
+.reaction.liked { color: #ffffff; }
+.scene-caption { color: #cdd0d7; background-color: #15171c; border-radius: 5px; padding: 0 6px; }
+.location-status { border: 1px solid #3b3e46; }
+.walk-control { background: #08090b; border-top: 1px solid #272a31; }
+.empty-prompt { border: 1px solid #3b3e46; }
+.nearby-launcher { position:absolute; left:14px; top:98px; height:34px; padding:0 12px; line-height:32px; border:1px solid #454951; border-radius:17px; background:#15171c; color:#e2e4e9; font-size:11px; z-index:12; }
+.map-tools { position:absolute; right:14px; top:98px; width:46px; z-index:12; }
+.map-tool { height:50px; margin-bottom:8px; border:1px solid #454951; border-radius:16px; background:#15171c; color:#e2e4e9; text-align:center; box-sizing:border-box; }
+.tool-symbol { height:29px; line-height:30px; font-size:24px; text-align:center; }
+.tool-label { height:15px; line-height:15px; font-size:9px; text-align:center; }
+.zoom-tools { overflow:hidden; background:#15171c; border:1px solid #454951; border-radius:15px; }
+.zoom-button { height:36px; line-height:36px; color:#e2e4e9; font-size:21px; text-align:center; }
+.zoom-button + .zoom-button { border-top:1px solid #34363e; }
+.card-footer { display:flex; align-items:center; height:32px; margin-top:6px; border-top:1px solid #30333b; }
+.card-link { height:32px; line-height:32px; color:#aeb3be; font-size:11px; }
+.waiting { box-sizing:border-box; }
+.comma-pin { position:absolute; transform:translate(-50%,-50%); z-index:10; }
+.comma-image { display:block; }
+.heat-help { position:absolute; left:16px; top:138px; height:28px; line-height:28px; padding:0 9px; border-radius:14px; color:#505661; background-color:#fffefa; font-size:10px; z-index:12; }
+.heat-legend { position:absolute; left:15px; top:171px; width:200px; padding:10px; border-radius:14px; background-color:#15171c; border:1px solid #454951; z-index:14; }
+.legend-icons { height:54px; display:flex; align-items:center; justify-content:space-around; }
+.legend-small { width:40px; height:40px; }
+.legend-medium { width:47px; height:47px; }
+.legend-large { width:54px; height:54px; }
+.legend-copy { height:24px; line-height:24px; color:#bfc3ce; text-align:center; font-size:10px; }
+.point-sheet { padding:0 16px 8px; border:1px solid #3b3e46; border-radius:23px; color:#f3f4f6; background-color:#15171c; }
+.sheet-header { display:flex; align-items:center; height:48px; }
+.sheet-heading { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; height:28px; line-height:28px; font-size:17px; font-weight:600; }
+.sheet-close { width:36px; height:44px; line-height:42px; text-align:right; font-size:26px; color:#b4b8c2; }
+.sheet-toolbar { display:flex; align-items:center; height:32px; margin-bottom:6px; }
+.sheet-subtitle { flex:1; color:#a0a4ae; font-size:10px; height:28px; line-height:28px; }
+.sheet-sort { height:28px; line-height:28px; padding:0 10px; border-radius:14px; font-size:11px; color:#999fac; }
+.sheet-sort-active { background-color:#eceef2; color:#15171c; }
+.sheet-scroll { overflow-y:scroll; }
+.sheet-row { padding:13px 0; border-top:1px solid #30333b; }
+.sheet-row-top { display:flex; align-items:center; height:20px; }
+.sheet-place { flex:1; font-size:11px; color:#b8bdc8; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; height:20px; line-height:20px; }
+.sheet-distance { margin-left:12px; color:#a0a4ae; font-size:10px; height:20px; line-height:20px; }
+.sheet-copy { margin:7px 0 10px; font-size:16px; line-height:24px; max-height:48px; overflow:hidden; white-space:normal; }
+.sheet-row-bottom { height:22px; display:flex; align-items:center; }
+.sheet-tag { padding:0 7px; height:20px; line-height:20px; border-radius:6px; font-size:9px; color:#d2d6df; background-color:#343842; }
+.tag-3 { background-color:#eceef2; color:#15171c; }
+.sheet-counts { margin-left:9px; font-size:10px; color:#969da9; height:20px; line-height:20px; }
+.sheet-access { height:22px; line-height:22px; color:#dfe2e9; font-size:10px; }
+.sheet-empty { padding:24px 0; font-size:12px; color:#a0a4ae; white-space:normal; }
+.card-heat { position:absolute; left:0; top:12px; font-size:10px; color:#a0a4ae; height:18px; line-height:18px; }
+.group-link { margin-right:14px; }

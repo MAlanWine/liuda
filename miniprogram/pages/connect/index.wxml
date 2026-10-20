@@ -1,0 +1,9 @@
+<view class="page connect-page">
+  <image class="connect-mascot" src="/assets/brand/liuda-comma.png" mode="aspectFit" aria-label="留答逗号形象" />
+  <text class="title">留答</text>
+  <text class="muted">加入同一轮试用，看看彼此在现场留下的话。</text>
+  <block wx:if="{{configured}}"><input class="invite-input" password="{{true}}" maxlength="80" placeholder="输入发起人给你的邀请码" placeholder-class="field-placeholder" value="{{inviteCode}}" bindinput="input" disabled="{{busy}}" /><button class="primary" bindtap="join" loading="{{busy}}" disabled="{{busy || !inviteCode.length}}">加入试用</button></block>
+  <view wx:else class="card"><text class="card-title">联机试用还未开放</text><text class="notice">发起人完成联机服务配置后，就可以输入邀请码加入。</text></view>
+  <text wx:if="{{message}}" class="notice">{{message}}</text>
+  <button class="text-button" bindtap="back">返回附近</button>
+</view>

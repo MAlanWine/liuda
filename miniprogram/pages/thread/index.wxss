@@ -1,1 +1,11 @@
-.photo-placeholder { background: #edf0e6; padding: 48rpx 30rpx; border-radius: 18rpx; color: #7c8870; font-size: 25rpx; line-height: 1.8; text-align: center; }
+.post-card { margin-top: 30rpx; }
+.post-actions { margin-top: 18rpx; border-top: 1rpx solid #30333b; }
+.comment { padding: 24rpx 8rpx; border-bottom: 1rpx solid #30333b; }
+.comment .body { margin-top: 8rpx; font-size: 29rpx; }
+.reply-box { margin-top: 34rpx; }
+.reply-box textarea { min-height: 170rpx; font-size: 29rpx; }
+.reply-box .row { margin-top: 12rpx; }
+.reply-box button { padding: 0 30rpx; margin: 0; }
+.delete-button { background: transparent; color: #dfa5a5; font-size: 24rpx; }
+.thread-refresh { min-height:56rpx; line-height:56rpx; font-size:24rpx; }
+.thread-time { display:block; margin-top:8rpx; font-size:22rpx; }
