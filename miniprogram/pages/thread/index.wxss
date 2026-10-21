@@ -9,3 +9,6 @@
 .delete-button { background: transparent; color: #dfa5a5; font-size: 24rpx; }
 .thread-refresh { min-height:56rpx; line-height:56rpx; font-size:24rpx; }
 .thread-time { display:block; margin-top:8rpx; font-size:22rpx; }
+.continuation-note { margin-top:24rpx; padding:20rpx 24rpx; background:#1c2521; color:#bcd0c2; border-radius:18rpx; font-size:24rpx; line-height:1.7; }
+.continuation-tag { margin-left:16rpx; padding:3rpx 12rpx; border-radius:8rpx; color:#bcd0c2; background:#1c2521; font-size:20rpx; }
+.like-onsite { font-size:21rpx; margin-right:18rpx; }

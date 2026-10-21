@@ -42,13 +42,16 @@ function gate(position, target, mode) {
 }
 function decorate(post, position, mode) {
   const d = distance(position, post)
-  const full = d <= FULL_RADIUS && (mode === 'demo' || gate(position, post, mode).ok)
+  const participated = mode === 'demo' && !!(post.owned || post.participated || post.comments.some(item => item.mine))
+  const onsite = gate(position,post,mode).ok
+  const full = participated || d <= FULL_RADIUS && (mode === 'demo' || onsite)
   const level = full ? 'full' : d <= PREVIEW_RADIUS ? 'preview' : 'dot'
   return Object.assign({}, post, {
     distance: Number.isFinite(d) ? Math.round(d) : null,
     distanceLabel: Number.isFinite(d) ? (d >= 1000 ? (d / 1000).toFixed(1) + 'km' : Math.round(d) + 'm') : '待定位',
     level, displayText: full ? post.text : level === 'preview' ? post.teaser : '这里有人留过话，走近看看。',
-    canInteract: gate(position, post, mode).ok, commentCount: post.comments.length,
+    participated,accessMode:participated ? 'participant' : onsite ? 'onsite' : 'nearby',
+    canInteract:onsite,canReply:participated || onsite,canLike:onsite,commentCount:post.comments.length,
     previewComments: post.comments.slice(-2)
   })
 }

@@ -1,16 +1,18 @@
 <view class="page" wx:if="{{post}}">
-  <view class="row"><text class="badge">{{post.owned ? '我留下的' : mode === 'demo' ? '演示模式' : '现场留话'}}</text><text class="muted">{{post.distanceLabel}}</text><button class="text-button thread-refresh" bindtap="retry" loading="{{retrying}}" disabled="{{busy || retrying}}">刷新</button></view>
+  <view class="row"><text class="badge">{{post.owned ? '我留下的' : post.participated ? '我参与的' : mode === 'demo' ? '演示模式' : '现场留话'}}</text><text class="muted">{{post.distanceLabel}}</text><button class="text-button thread-refresh" bindtap="retry" loading="{{retrying}}" disabled="{{busy || retrying}}">刷新</button></view>
   <text class="title">{{post.name}}</text>
   <text class="muted">{{status}}</text>
   <text wx:if="{{timeLabel}}" class="muted thread-time">{{timeLabel}}</text>
-  <view class="card post-card"><text class="body">{{post.displayText}}</text><image wx:if="{{post.level === 'full' && post.photoPath}}" class="photo" src="{{post.photoPath}}" mode="widthFix" bindtap="photo" /><view class="row post-actions"><button class="text-button" bindtap="like" disabled="{{busy}}">{{post.liked ? '♥' : '♡'}} {{post.likes}}</button><button wx:if="{{post.level === 'full'}}" class="text-button" bindtap="chat">和作者聊聊 ↗</button></view></view>
+  <view wx:if="{{post.participated}}" class="continuation-note">你曾在现场留下或接过话。这一条对话，可以带走继续。</view>
+  <view class="card post-card"><text class="body">{{post.displayText}}</text><image wx:if="{{post.level === 'full' && post.photoPath}}" class="photo" src="{{post.photoPath}}" mode="widthFix" bindtap="photo" /><view class="row post-actions"><button class="text-button" bindtap="like" disabled="{{busy || !post.canLike}}">{{post.liked ? '♥' : '♡'}} {{post.likes}}</button><text wx:if="{{!post.canLike}}" class="muted like-onsite">点赞需到场</text><button wx:if="{{post.canInteract}}" class="text-button" bindtap="chat">和作者聊聊 ↗</button></view></view>
   <block wx:if="{{post.level === 'full'}}">
     <text class="section-label">路过的人接上了 {{post.commentCount}} 句</text>
-    <view wx:for="{{post.comments}}" wx:key="id" class="comment"><text class="muted">{{item.name}}</text><text class="body">{{item.text}}</text></view>
+    <view wx:for="{{post.comments}}" wx:key="id" class="comment"><view class="row"><text class="muted">{{item.name}}</text><text wx:if="{{item.entry === 'continuation'}}" class="continuation-tag">续聊</text></view><text class="body">{{item.text}}</text></view>
     <view wx:if="{{!post.comments.length}}" class="notice">这里还没有回复，接上第一句。</view>
-    <view class="reply-box"><block wx:for="{{replyEditor}}" wx:key="id"><textarea maxlength="300" value="{{item.value}}" data-editor="{{item.id}}" bindinput="onReplyInput" bindblur="onReplyInput" placeholder="你也在这里，接一句……" placeholder-class="field-placeholder" disabled="{{busy}}" cursor-spacing="100" /></block><view class="row"><text class="muted">{{replyLength}} / 300</text><button class="primary" bindtap="sendReply" loading="{{busy}}" disabled="{{busy || !replyLength || !post.canInteract}}">现场接一句</button></view></view>
+    <view class="reply-box"><block wx:for="{{replyEditor}}" wx:key="id"><textarea maxlength="300" value="{{item.value}}" data-editor="{{item.id}}" bindinput="onReplyInput" bindblur="onReplyInput" placeholder="{{post.participated ? '这段对话，接着聊……' : '你也在这里，接一句……'}}" placeholder-class="field-placeholder" disabled="{{busy}}" cursor-spacing="100" /></block><view class="row"><text class="muted">{{replyLength}} / 300</text><button class="primary" bindtap="sendReply" loading="{{busy}}" disabled="{{busy || !replyLength || !post.canReply}}">{{post.participated ? '继续接话' : '现场接一句'}}</button></view></view>
   </block>
-  <view wx:else class="notice">走近后，可以查看完整内容、现场图片和回复。</view>
+  <view wx:else class="notice">{{post.participated ? '对话暂未同步，刷新后继续。' : '走近后可查看完整内容，在现场接一句，之后可以离场继续。'}}</view>
+  <button wx:if="{{mode === 'live' && !post.canInteract}}" class="text-button" bindtap="locateHere" loading="{{locating}}" disabled="{{locating || busy}}">我在现场，更新位置</button>
   <button class="secondary" bindtap="nearby">回到附近地图</button>
   <button wx:if="{{post.owned}}" class="delete-button" bindtap="remove" disabled="{{busy}}">删除我的留话</button>
 </view>

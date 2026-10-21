@@ -6,18 +6,17 @@ const location = require('../../services/location')
 const time = require('../../utils/time')
 
 Page({
-  data:{ post:null, mode:'demo', reply:'',replyEditor:[{ id:0,value:'' }],replyLength:0, busy:false, status:'', missing:false, loading:true, needsJoin:false,retrying:false,timeLabel:'' },
+  data:{ post:null, mode:'demo', reply:'',replyEditor:[{ id:0,value:'' }],replyLength:0, busy:false, status:'', missing:false, loading:true, needsJoin:false,retrying:false,timeLabel:'',locating:false },
   onLoad(options) { this._id = options.id || ''; this.setData({ mode:options.mode === 'demo' ? 'demo' : 'live' }) },
   onShow() {
     this._visible = true
     this._generation = (this._generation || 0) + 1
     this._syncBusy = false
-    if (this.data.mode === 'demo') { this.sync(true); return }
-    this.refresh()
-    this._unsubscribe = location.subscribe(() => { this.refresh(); this.sync() })
-    location.start().then(() => { if (this._visible) this.sync(true) }).catch(error => {
-      if (!error.cancelled && this._visible) this.setData({ loading:false, status:location.explain(error) })
-    })
+    this._syncAgain = false
+    if (this.data.mode === 'live') this._unsubscribe = location.subscribe(() => { if (this._visible) { this.refresh(); this.sync() } })
+    // Ask the server about participation first. Continuing an existing thread
+    // must work even when GPS is unavailable or location permission is denied.
+    this.sync(true)
     this._timer = setInterval(() => { this.refresh(); this.sync() },3000)
   },
   onHide() { this.leave() }, onUnload() { this.leave() },
@@ -25,7 +24,8 @@ Page({
   leave() {
     this._visible = false; this._generation = (this._generation || 0) + 1
     clearInterval(this._timer); if (this._unsubscribe) this._unsubscribe(); this._unsubscribe = null
-    location.stop(); api.clearPhoto(this._id); this._photoPath = ''; this._snapshot = null; this._syncBusy = false
+    location.stop(); api.clearPhoto(this._id); this._photoPath = ''; this._snapshot = null; this._syncBusy = false; this._syncAgain = false
+    this.setData({ locating:false })
     if (this.data.mode === 'live') this.setData({ post:null, loading:true })
   },
   currentPosition() { return this.data.mode === 'demo' ? demo.position(getApp().globalData.demoWalk) : location.peek() },
@@ -42,31 +42,40 @@ Page({
     }
     const check = geo.gate(position,post,this.data.mode)
     this.setData({ post, missing:false, loading:false,timeLabel:time.label(post.createdAt),
-      status:this.data.mode === 'demo' ? '演示对话 · 仅保存在本机' : check.ok ? '已到场 · 联机对话' : check.reason })
+      status:post.participated ? (this.data.mode === 'demo' ? '演示对话 · 已参与，可离场继续' : '已参与这条对话 · 离场也可继续') :
+        this.data.mode === 'demo' ? '演示对话 · 首次接话需要到场' : check.ok ? '已到场 · 接一句后可离场继续' : check.reason })
   },
   async sync(force = false) {
-    if (!this._visible || this._syncBusy || (!force && Date.now() - (this._lastSync || 0) < 6000)) return
-    if (this.data.mode === 'live' && !geo.valid(this.currentPosition())) return
+    if (!this._visible) return
+    if (this._syncBusy) { if (force) this._syncAgain = true; return }
+    if (!force && Date.now() - (this._lastSync || 0) < 8000) return
     this._syncBusy = true; this._lastSync = Date.now()
     const generation = this._generation
     try {
-      const position = this.data.mode === 'demo' ? this.currentPosition() : await location.fresh()
+      const position = this.currentPosition()
       const post = await repository.thread(this.data.mode,this._id,position)
       if (!this._visible || generation !== this._generation) return
       this._snapshot = post
       this.setData({ needsJoin:false }); this.refresh()
+      if (this.data.mode === 'live' && !post.participated && !location.isTracking()) this.locate(false)
       if (this.data.mode === 'live' && post.level === 'full' && post.photoPresent && !this._photoPath) await this.loadPhoto(generation)
     } catch (error) {
       if (this._visible && generation === this._generation) {
         if (error.code === 'POST_MISSING') { this._snapshot = null; api.clearPhoto(this._id); this.setData({ post:null, missing:true }) }
-        this.setData({ loading:false, needsJoin:api.needsJoin(error), status:error.message || '暂未同步，请稍后重试。' })
+        if (api.needsJoin(error)) { this._snapshot = null; api.clearPhoto(this._id); this.setData({ post:null }) }
+        this.setData({ loading:false, needsJoin:api.needsJoin(error), status:error.code ? error.message : location.explain(error) })
       }
-    } finally { if (generation === this._generation) this._syncBusy = false }
+    } finally {
+      if (generation === this._generation) {
+        this._syncBusy = false
+        if (this._syncAgain && this._visible) { this._syncAgain = false; this.sync(true) }
+      }
+    }
   },
   async loadPhoto(generation) {
     try {
-      const path = await api.readPhoto(this._id,await location.fresh())
-      if (!this._visible || generation !== this._generation || !this._snapshot || !api.visible(this._snapshot,this.currentPosition()).canInteract) { api.clearPhoto(this._id); return }
+      const path = await api.readPhoto(this._id,this.currentPosition())
+      if (!this._visible || generation !== this._generation || !this._snapshot || api.visible(this._snapshot,this.currentPosition()).level !== 'full') { api.clearPhoto(this._id); return }
       this._photoPath = path; this.refresh()
     } catch (error) { if (this._visible && generation === this._generation) this.setData({ status:'文字已同步，图片暂不可用。' }) }
   },
@@ -83,19 +92,19 @@ Page({
   },
   async position() { return this.data.mode === 'demo' ? this.currentPosition() : location.fresh() },
   async sendReply() {
-    if (this.data.busy || !this.data.reply.trim()) return
-    const text = this.data.reply
+    if (this.data.busy || !this.data.reply.trim() || !this.data.post || !this.data.post.canReply) return
+    const text = this.data.reply,continuation = this.data.post.participated === true
     if (!this._replyAttempt || this._replyAttempt.text !== text) this._replyAttempt = { text,id:api.requestId() }
     this.setData({ busy:true })
     try {
-      await repository.comment(this.data.mode,this._id,await this.position(),text,this._replyAttempt.id)
+      await repository.comment(this.data.mode,this._id,continuation ? null : await this.position(),text,this._replyAttempt.id,continuation)
       this._replyAttempt = null; this.clearReply(); await this.sync(true)
-      wx.showToast({ title:this.data.mode === 'demo' ? '已在演示区接上' : '已在现场接上',icon:'success' })
+      wx.showToast({ title:continuation ? '已接上这段对话' : '已在现场接上',icon:'success' })
     } catch (error) { this.error(error) }
     finally { this.setData({ busy:false }) }
   },
   async like() {
-    if (this.data.busy || !this.data.post) return
+    if (this.data.busy || !this.data.post || !this.data.post.canLike) return
     this.setData({ busy:true })
     try { await repository.like(this.data.mode,this._id,await this.position(),!this.data.post.liked); await this.sync(true) }
     catch (error) { this.error(error) }
@@ -128,12 +137,23 @@ Page({
     if (this.data.retrying) return
     this.setData({ retrying:true })
     try {
-      if (this.data.mode === 'live') await location.start()
       if (!this._visible) return
       this._lastSync = 0; await this.sync(true)
     } catch (error) { if (this._visible && !error.cancelled) this.setData({ loading:false,status:location.explain(error) }) }
     finally { this.setData({ retrying:false }) }
   },
+  async locate(resync = true) {
+    if (this.data.locating || this.data.mode !== 'live') return
+    const generation = this._generation
+    this.setData({ locating:true })
+    try {
+      await location.start()
+      if (this._visible && generation === this._generation && resync) await this.sync(true)
+    } catch (error) {
+      if (this._visible && generation === this._generation && !error.cancelled && !(this.data.post && this.data.post.participated)) this.setData({ status:location.explain(error) })
+    } finally { if (generation === this._generation) this.setData({ locating:false }) }
+  },
+  locateHere() { this.locate(true) },
   nearby() {
     if (this.data.post && geo.distance(this.currentPosition(),this.data.post)<=350) getApp().globalData.openPostId = this._id
     wx.switchTab({ url:'/pages/explore/index' })

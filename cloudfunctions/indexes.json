@@ -4,6 +4,9 @@
     { "collection": "liuda_posts", "name": "my_active", "keys": { "owner": 1, "state": 1, "createdAt": -1 } },
     { "collection": "liuda_comments", "name": "thread_active", "keys": { "postId": 1, "state": 1, "createdAt": 1 } },
     { "collection": "liuda_likes", "name": "member_likes", "keys": { "owner": 1, "active": 1, "postId": 1 } },
-    { "collection": "liuda_events", "name": "member_events", "keys": { "owner": 1, "createdAt": -1 } }
+    { "collection": "liuda_events", "name": "member_events", "keys": { "owner": 1, "createdAt": -1 } },
+    { "collection": "liuda_threads", "name": "member_threads", "keys": { "owner": 1, "state": 1, "joinedAt": -1 } },
+    { "collection": "liuda_comments", "name": "member_comments", "keys": { "owner": 1, "state": 1, "createdAt": -1 } },
+    { "collection": "liuda_comments", "name": "thread_member", "keys": { "postId": 1, "owner": 1, "state": 1 } }
   ]
 }

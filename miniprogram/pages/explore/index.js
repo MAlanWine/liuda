@@ -303,7 +303,7 @@ Page({
       return { id:post.id,name:post.name,distanceLabel:post.distanceLabel,copy:post.displayText,
         likes:post.likes || 0,commentCount:post.commentCount || 0,owned:post.owned,
         tier:heat.tier,tag:heat.fresh && heat.tier === 1 ? '新留话' : heat.label,
-        access:post.canInteract ? '可接话' : '走近看看' }
+        access:post.participated || post.owned ? '继续聊' : post.canReply ? '可接话' : '走近看看' }
     })
     return { sheetRows:rows,
       sheetTitle:this._sheetIds && scenes.size === 1 && members.length ? members[0].name : '附近的留话',
@@ -373,7 +373,7 @@ Page({
     if (!this.data.selected || this.data.selected.level !== 'full') return
     if (this.data.mode === 'live' && !this.data.expanded) {
       try {
-        const id = this._selectedId, post = await repository.thread('live', id, await location.fresh())
+        const id = this._selectedId, post = await repository.thread('live',id,location.peek())
         if (!this._visible || this._selectedId !== id || this.data.mode !== 'live') return
         this._cloudPosts = this._cloudPosts.map(p => p.id === id ? post : p)
         this.refresh()

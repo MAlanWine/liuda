@@ -1,5 +1,7 @@
 # 留答：从本机原型接到两部手机
 
+> **2026-10-21 升级说明：** 新版核心规则支持“到场开启交流，离场继续”。在原九个集合、五个索引之上，还需增加 `liuda_threads` 私有集合与三个非唯一索引，再部署协议 2 云函数。已有环境按 [离场续聊升级顺序](thread-continuation.md) 操作；下方旧部署进度为历史记录。
+
 ## 当前状态
 
 联机客户端、云函数和部署配置已经写入项目。2026-10-19 用户提供云环境 `cloud1-d3gkowfe36d11fc12`，客户端已启用该环境；当前 AppID 为 `wx755951e5f06c6cea`。**环境已准备不等于云函数、集合与权限配置已完成，双手机现场使用仍未确认。** 云端提交失败不会悄悄改成本机保存。
@@ -18,7 +20,7 @@ Env ID 是环境标识，可以发给协作开发者。AppSecret、腾讯云 Sec
 ## 代码结构
 
 - `cloudfunctions/liudaApi/`：联机接口，依赖固定为 `wx-server-sdk@4.0.2`。
-- `cloudfunctions/database.rules.json`：九个集合的客户端权限目标。
+- `cloudfunctions/database.rules.json`：十个集合的客户端权限目标。
 - `cloudfunctions/storage.rules.json`：私有图片存储权限目标。
 - `cloudfunctions/indexes.json`：需要在云数据库创建的索引清单。
 - `miniprogram/config/cloud.js`：客户端环境配置。
@@ -47,6 +49,7 @@ liuda_ops
 liuda_likes
 liuda_photos
 liuda_events
+liuda_threads
 ```
 
 每个集合都在控制台的安全规则中设为：
@@ -68,8 +71,11 @@ liuda_events
 | liuda_comments | postId：升序；state：升序；createdAt：升序 |
 | liuda_likes | owner：升序；active：升序；postId：升序 |
 | liuda_events | owner：升序；createdAt：降序 |
+| liuda_threads | owner：升序；state：升序；joinedAt：降序 |
+| liuda_comments | owner：升序；state：升序；createdAt：降序 |
+| liuda_comments | postId：升序；owner：升序；state：升序 |
 
-附近查询使用地理索引，范围 350 米，最多返回最近 50 条。200 米之外只返回地点概要和数量；50—200 米返回开头；满足到场条件才返回全文。私密字段不会包含在公开响应里。
+附近查询使用地理索引，范围 350 米，最多返回最近 50 条。未参与者在 200 米之外只收到概要，50—200 米收到开头，满足到场条件才收到全文。已参与者可单独通过对话接口离场读取自己参与的具体对话，资格不扩展到其他留话。内部身份和成员列表不包含在公开响应里。
 
 ### 4. 将云存储设为仅管理员可读写
 
@@ -79,7 +85,7 @@ liuda_events
 { "read": false, "write": false }
 ```
 
-云函数拥有服务端访问能力，客户端不能直接获取云文件。图片上传和读取走云函数，读取时重新检查地点与位置，不向客户端下发可绕过距离限制的文件 ID 或长期公开链接。
+云函数拥有服务端访问能力，客户端不能直接获取云文件。图片上传仍需现场，读取通过云函数检查该对话成员资格或当前到场条件，不下发云文件 ID 或长期公开链接。
 
 当前图片会压缩到最长边 1024 像素，最多 512KB，只接受 JPEG/PNG。需要账号具备 `security.imgSecCheck` 的实际可调用权限；接口不可用时会明确拒绝图片，不会绕过审核。可以先用纯文字完成联机闭环，再处理图片审核的账号准入或迁移到适用的审核服务。
 

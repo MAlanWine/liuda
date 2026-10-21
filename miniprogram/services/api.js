@@ -1,6 +1,6 @@
 const config = require('../config/cloud')
 const location = require('./location')
-let initialized = false, joined = false, joining = null, clockOffset = 0
+let initialized = false, joined = false, joining = null, clockOffset = 0,protocol = 0
 function error(code, message) { return Object.assign(new Error(message), { code }) }
 function configured() { return !!(config.enabled && config.envId && wx.cloud) }
 function init() {
@@ -25,7 +25,7 @@ async function call(action, payload = {}) {
 }
 async function ensure() {
   if (joined) return
-  if (!joining) joining = call('status').then(() => { joined = true }).finally(() => { joining = null })
+  if (!joining) joining = call('status').then(result => { joined = true; protocol = result.protocol || 1 }).finally(() => { joining = null })
   return joining
 }
 function serialize(position) {
@@ -52,17 +52,27 @@ async function write(action, purpose, payload, id) {
 function normalize(post) {
   // 服务端已决定层次。客户端只能收紧权限，不能从本地缓存补回全文。
   return Object.assign({ comments:[], previewComments:[], photoPath:'', liked:false }, post,
-    { readExpiresAt:post.readExpiresAt ? post.readExpiresAt - clockOffset : 0 })
+    { canReply:typeof post.canReply === 'boolean' ? post.canReply : !!post.canInteract,
+      canLike:typeof post.canLike === 'boolean' ? post.canLike : !!post.canInteract,
+      participated:post.participated === true,
+      readExpiresAt:post.readExpiresAt ? post.readExpiresAt - clockOffset : 0 })
 }
 function visible(post, position) {
   if (!post) return null
   const geo = require('../utils/geo')
   const distance = geo.distance(position, post), dot = distance > 200
   const value = Object.assign({}, post, { distance:Number.isFinite(distance) ? Math.round(distance) : null, distanceLabel:Number.isFinite(distance) ? Math.round(distance) + 'm' : '等待定位' })
+  if (post.participated && post.accessMode === 'participant') {
+    if (Date.now() >= post.readExpiresAt) return Object.assign(value,{ level:'dot',text:'',displayText:'对话信息已过期，刷新后继续。',
+      comments:[],previewComments:[],photoPath:'',photoPresent:false,canInteract:false,canReply:false,canLike:false })
+    const onsite = !!post.canInteract && geo.gate(position,post,'live').ok
+    return Object.assign(value,{ canReply:true,canInteract:onsite,canLike:onsite,
+      distanceLabel:Number.isFinite(distance) ? value.distanceLabel : '可离场继续' })
+  }
   if ((post.level === 'full' && (Date.now() >= post.readExpiresAt || !geo.gate(position, post, 'live').ok)) || (post.level === 'preview' && dot)) {
     return Object.assign(value, { level:dot ? 'dot' : 'preview', teaser:dot ? '' : post.teaser,
       text:'', displayText:dot ? '这里有人留过话，走近看看。' : post.teaser || '再走近一点。',
-      comments:[], previewComments:[], photoPath:'', photoPresent:false, canInteract:false })
+      comments:[], previewComments:[], photoPath:'', photoPresent:false, canInteract:false,canReply:false,canLike:false })
   }
   return value
 }
@@ -70,13 +80,33 @@ async function nearby(position) {
   const result = await read('nearby', {}, position)
   return { posts:result.posts.map(normalize), limited:result.limited }
 }
-async function thread(id, position) { return normalize(await read('thread', { postId:id }, position)) }
+function requireContinuationProtocol() {
+  if (protocol < 2) throw error('SERVER_UPDATE_REQUIRED','云函数尚未更新，请先部署支持离场续聊的新版 liudaApi。')
+}
+async function readConversation(action,id,position) {
+  await ensure(); requireContinuationProtocol()
+  const payload = { postId:id }
+  // A participant can read without requesting or transmitting a new GPS fix.
+  if (position && position.source === 'gps' && Date.now()-position.timestamp < 15000) payload.position = serialize(position)
+  try { return await call(action,payload) }
+  catch (cause) {
+    if (cause.code !== 'LOCATION_REQUIRED') throw cause
+    return call(action,{ postId:id,position:serialize(await location.fresh()) })
+  }
+}
+async function thread(id, position) { return normalize(await readConversation('thread',id,position)) }
 async function create(input, id) { return write('post', 'post', { name:input.name, text:input.text, sceneId:input.sceneId || '', photoId:input.photoId || '' }, id) }
-async function addComment(postId, text, id) { return write('comment', 'comment', { postId, text }, id) }
+async function addComment(postId,text,id,continuation = false) {
+  if (!continuation) return write('comment','comment',{ postId,text },id)
+  await ensure(); requireContinuationProtocol()
+  return call('continueComment',{ postId,text,requestId:id || requestId() })
+}
 async function setLike(postId, desired, id) { return write('like', 'like', { postId, desired }, id) }
 async function remove(postId, id) { await ensure(); return call('delete',{ postId,requestId:id || requestId() }) }
-async function join(inviteCode) { const result = await call('join', { inviteCode }); joined = true; return result }
+async function join(inviteCode) { const result = await call('join', { inviteCode }); joined = true; protocol = result.protocol || 1; return result }
 async function mine() { await ensure(); return (await call('mine')).posts }
+async function conversations() { await ensure(); requireContinuationProtocol(); return (await call('conversations')).threads }
+async function inbox() { await ensure(); requireContinuationProtocol(); return call('inbox') }
 async function activity() { await ensure(); return (await call('activity')).events }
 async function preparePhoto(path) {
   const info = await new Promise((resolve, reject) => wx.getImageInfo({ src:path, success:resolve, fail:reject }))
@@ -90,7 +120,7 @@ async function preparePhoto(path) {
 async function uploadPhoto(base64, id) { return write('uploadPhoto', 'photo', { base64 }, id) }
 const photoPaths = new Map()
 async function readPhoto(postId, position) {
-  const result = await read('photo', { postId }, position)
+  const result = await readConversation('photo',postId,position)
   if (!result.base64) return ''
   const path = wx.env.USER_DATA_PATH + '/liuda-view-' + postId + (result.contentType === 'image/png' ? '.png' : '.jpg')
   await new Promise((resolve, reject) => wx.getFileSystemManager().writeFile({ filePath:path, data:result.base64, encoding:'base64', success:resolve, fail:reject }))
@@ -109,4 +139,4 @@ function openConnect() {
   wx.navigateTo({ url:'/pages/connect/index' })
 }
 module.exports = { configured, init, ensure, join, nearby, thread, create, addComment, setLike, remove,
-  mine, activity, preparePhoto, uploadPhoto, readPhoto, clearPhoto, clearPhotos, visible, requestId, needsJoin, openConnect }
+  mine,conversations,inbox,activity,preparePhoto,uploadPhoto,readPhoto,clearPhoto,clearPhotos,visible,requestId,needsJoin,openConnect }

@@ -32,7 +32,7 @@ function create(mode, position, input) {
     sceneId: input.place ? (input.place.sceneId || input.place.id) : 'place-' + id(),
     latitude: place.latitude, longitude: place.longitude, coordinateSystem: 'gcj02',
     text, teaser: text.slice(0, 14) + '……', photoPath: input.photoPath || '',
-    likes: 0, liked: false, comments: [], owned: true, demo: mode === 'demo', mode,
+    likes: 0, liked: false, comments: [], owned: true,participated:true, demo: mode === 'demo', mode,
     createdAt: Date.now(), accuracy: geo.accuracy(position) }
   bucket.unshift(post)
   commit(db)
@@ -57,11 +57,20 @@ function interact(mode, postId, position, fn) {
   return change(mode, post, fn)
 }
 function comment(mode, postId, position, text) {
-  const value = String(text || '').trim()
-  if (!value || value.length > 300) throw new Error('回复请写 1—300 字。')
-  return interact(mode, postId, position, post => {
+  const content = String(text || '').trim()
+  if (!content || content.length > 300) throw new Error('回复请写 1—300 字。')
+  const post = get(mode,postId)
+  if (!post) throw new Error('没有找到这条留话。')
+  const participated = !!(post.owned || post.participated || post.comments.some(item => item.mine))
+  if (!participated) {
+    const check = geo.gate(position,post,mode)
+    if (!check.ok) throw new Error(check.reason)
+  }
+  return change(mode,post,post => {
     if (post.comments.length >= 100) throw new Error('这条留话在本机已达到 100 条回复。')
-    post.comments.push({ id: id(), name: '你 · 匿名', text: value, createdAt: Date.now(), mine: true })
+    post.comments.push({ id:id(),name:'你 · 匿名',text:content,createdAt:Date.now(),mine:true,entry:participated ? 'continuation' : 'onsite' })
+    post.participated = true
+    post.updatedAt = Date.now()
     return post
   })
 }
@@ -76,4 +85,10 @@ function remove(mode, postId) {
   commit(db)
   if (post.photoPath) wx.removeSavedFile({ filePath: post.photoPath })
 }
-module.exports = { all, get, nearby, create, comment, like, remove }
+function conversations(mode) {
+  return all(mode).filter(post => post.owned || post.participated || post.comments.some(item => item.mine))
+    .map(post => ({ id:post.id,name:post.name,owned:post.owned,participated:true,commentCount:post.comments.length,
+      createdAt:post.createdAt,updatedAt:post.updatedAt || post.createdAt }))
+    .sort((a,b) => (b.updatedAt || 0)-(a.updatedAt || 0))
+}
+module.exports = { all,get,nearby,create,comment,like,remove,conversations }

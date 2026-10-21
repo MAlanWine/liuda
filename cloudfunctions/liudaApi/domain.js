@@ -35,19 +35,23 @@ function requireOnsite(position, target) {
   if (!onsite(position, target)) fail('NOT_ONSITE', '已经离开现场，请走近后再操作。')
 }
 function level(position, target) { return onsite(position, target) ? 'full' : distance(position, target) <= 200 ? 'preview' : 'dot' }
-function summary(post, position, uid) {
-  const tier = level(position, post), full = tier === 'full', d = Math.round(distance(position, post))
+function summary(post, position, uid, participated = false) {
+  const onsiteNow = !!position && onsite(position,post)
+  const tier = participated ? 'full' : position ? level(position,post) : 'dot'
+  const full = tier === 'full', d = position ? Math.round(distance(position,post)) : null
   const displayText = full ? post.text : tier === 'preview' ? post.teaser : '这里有人留过话，走近看看。'
   return { id: post._id, sceneId: post.sceneId, name: post.name,
     latitude: post.latitude, longitude: post.longitude, coordinateSystem: 'gcj02',
     level: tier, displayText, text: full ? post.text : '', teaser: tier === 'dot' ? '' : post.teaser,
-    distance: d, distanceLabel: d >= 1000 ? (d / 1000).toFixed(1) + 'km' : d + 'm',
-    canInteract: full, commentCount: post.commentCount, likes: post.likeCount, liked: false,
+    distance:d, distanceLabel:d === null ? '已参与' : d >= 1000 ? (d / 1000).toFixed(1) + 'km' : d + 'm',
+    participated,accessMode:participated ? 'participant' : onsiteNow ? 'onsite' : 'nearby',
+    canInteract:onsiteNow,canReply:participated || onsiteNow,canLike:onsiteNow,
+    commentCount: post.commentCount, likes: post.likeCount, liked: false,
     replyParticipantCount: Array.isArray(post.replyParticipantIds) ? post.replyParticipantIds.length : 0,
     lastEngagedAt: post.lastEngagedAt || post.createdAt,
     photoPresent: full && !!post.photoId, photoPath: '', comments: [], previewComments: [],
     owned: post.owner === uid, demo: false, mode: 'live', createdAt: post.createdAt,
-    readExpiresAt: Math.min(Date.now() + 12000, position.timestamp + 15000) }
+    readExpiresAt:participated ? Date.now()+60000 : position ? Math.min(Date.now()+12000,position.timestamp+15000) : 0 }
 }
 function mime(buffer) {
   if (buffer.length > 524288 || buffer.length < 12) fail('PHOTO_SIZE', '图片应小于 512KB，请重新拍摄。')

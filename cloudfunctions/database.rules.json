@@ -7,5 +7,6 @@
   "liuda_ops": { "read": false, "write": false },
   "liuda_likes": { "read": false, "write": false },
   "liuda_photos": { "read": false, "write": false },
-  "liuda_events": { "read": false, "write": false }
+  "liuda_events": { "read": false, "write": false },
+  "liuda_threads": { "read": false, "write": false }
 }
