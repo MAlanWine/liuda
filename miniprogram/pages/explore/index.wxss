@@ -2,23 +2,26 @@
 .scene { position: relative; width: 100%; overflow: hidden; }
 .world { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
 .render-canvas { position: fixed; left: -10000px; top: 0; pointer-events: none; }
-.top-controls { position: absolute; top: 15px; left: 14px; right: 14px; height: 42px; display: flex; justify-content: space-between; align-items: center; }
-.top-controls, .location-status, .pin, .look-hint, .recenter { z-index: 10; }
+.top-controls { position: absolute; top: 15px; left: 14px; right: 14px; height: 44px; display: flex; justify-content: space-between; align-items: center; z-index: 12; }
 .bottom-area { z-index: 20; }
-.location-pill, .view-toggle { height: 40px; padding: 0 12px; line-height: 40px; border-radius: 22px; background-color: #15171c; color: #e2e4e9; font-size: 13px; display: flex; align-items: center; box-sizing: border-box; }
-.location-dot { width: 9px; height: 9px; border: 2px solid #e2e4e9; border-radius: 50%; box-sizing: border-box; }
-.location-name { margin-left: 6px; line-height: 40px; }
-.pill-detail { color: #a0a4ae; font-size: 10px; line-height: 40px; margin-left: 7px; }
-.down { color: #a0a4ae; line-height: 40px; margin-left: 6px; }
-.location-status { position: absolute; top: 64px; left: 15px; font-size: 11px; line-height: 18px; height: 22px; color: #aeb3be; padding: 2px 7px; background-color: #15171c; border-radius: 6px; box-sizing: border-box; }
-.pin { position: absolute; transform: translate(-50%, -100%); display: flex; align-items: center; height: 40px; max-width: 138px; border-radius: 13px; padding: 0 10px; background-color: #15171c; color: #e2e4e9; font-size: 12px; line-height: 40px; box-sizing: border-box; }
-.pin-active { background-color: #e2e4e9; color: #15171c; }
-.pin-symbol { font-size: 17px; line-height: 40px; margin-right: 5px; }
-.pin-name { overflow: hidden; text-overflow: ellipsis; max-width: 65px; line-height: 40px; }
-.pin-distance { font-size: 10px; line-height: 40px; margin-left: 5px; }
-.look-hint { position: absolute; top: 94px; left: 50%; transform: translateX(-50%); height: 22px; line-height: 18px; font-size: 11px; color: #a0a4ae; padding: 2px 8px; border-radius: 11px; background-color: #15171c; box-sizing: border-box; }
-.bottom-area { position: absolute; left: 10px; right: 10px; bottom: 10px; }
-.scene-caption { color: #a0a4ae; font-size: 10px; line-height: 18px; height: 18px; margin: 0 8px 8px; }
+.nearby-launcher { height: 44px; padding: 0 13px 0 8px; display: flex; align-items: center; border: 1px solid #353840; border-radius: 24px; background-color: #15171c; color: #f3f4f6; box-sizing: border-box; }
+.brand-mark { width: 27px; height: 27px; border-radius: 9px; background-color: #000000; }
+.nearby-title { margin-left: 8px; height: 42px; line-height: 42px; font-size: 13px; }
+.nearby-chevron { margin-left: 9px; height: 42px; line-height: 38px; color: #a0a4ae; font-size: 13px; }
+.more-control { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: 1px solid #e1e2df; border-radius: 50%; background-color: #fffefa; box-shadow: 0 2px 8px #17191e12; box-sizing: border-box; }
+.menu-dot { width: 3px; height: 3px; margin: 0 2px; border-radius: 50%; background-color: #15171c; }
+.scene-context { position: absolute; left: 15px; top: 67px; height: 22px; line-height: 22px; padding: 0 8px; border-radius: 7px; background-color: #fffefa; color: #626873; font-size: 10px; z-index: 11; }
+.map-notice { position: absolute; top: 68px; left: 14px; right: 14px; min-height: 34px; padding: 7px 11px; line-height: 19px; white-space: normal; border: 1px solid #e7dcc7; border-radius: 11px; background-color: #fff9ec; color: #76562b; font-size: 11px; box-sizing: border-box; z-index: 13; }
+.notice-below-context { top: 98px; }
+.look-hint { position: absolute; top: 105px; left: 50%; transform: translateX(-50%); height: 24px; line-height: 24px; font-size: 11px; color: #c9cdd5; padding: 0 10px; border-radius: 12px; background-color: #15171c; box-sizing: border-box; z-index: 10; }
+/* Bottom overlays leave room for the map provider's native attribution. */
+.bottom-area { position: absolute; left: 10px; right: 10px; bottom: 30px; }
+.recenter-control { position: absolute; right: 15px; bottom: 44px; width: 46px; height: 46px; display: flex; align-items: center; justify-content: center; border: 1px solid #e1e2df; border-radius: 50%; background-color: #fffefa; box-shadow: 0 2px 8px #17191e12; box-sizing: border-box; z-index: 12; }
+.recenter-raised { bottom: 104px; }
+.locator-ring { width: 19px; height: 19px; display: flex; align-items: center; justify-content: center; border: 1.5px solid #878d98; border-radius: 50%; box-sizing: border-box; }
+.locator-dot { width: 5px; height: 5px; border-radius: 50%; background-color: #878d98; }
+.recenter-following .locator-ring { border-color: #15171c; }
+.recenter-following .locator-dot { background-color: #15171c; }
 .content-card { background-color: #15171c; border-radius: 23px; padding: 0 18px 15px; box-sizing: border-box; }
 .card-top { position: relative; height: 40px; }
 .handle { height: 40px; margin: 0 44px; display: flex; align-items: center; justify-content: center; }
@@ -44,7 +47,6 @@
 .walk-control { position: absolute; bottom: 0; left: 0; right: 0; height: 42px; padding: 0 18px; display: flex; align-items: center; background: #15171c; font-size: 11px; color: #a0a4ae; box-sizing: border-box; }
 .walk-slider { flex: 1; margin: 0 12px; }
 .walk-value { width: 34px; text-align: right; }
-.recenter { position: absolute; top: 98px; right: 14px; width: 44px; height: 44px; line-height: 42px; text-align: center; border-radius: 50%; color: #e2e4e9; background-color: #15171c; font-size: 27px; }
 .empty-prompt { padding: 13px; background-color: #15171c; border-radius: 15px; font-size: 13px; line-height: 22px; text-align: center; color: #e2e4e9; white-space: normal; }
 .waiting { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; background: #08090b; }
 .waiting > text { margin-bottom: 12px; }
@@ -52,37 +54,16 @@
 .waiting button { padding: 0 20px; }
 
 /* 原生覆盖组件使用明确的色值，保证地图和街景上的前景可读。 */
-.brand-mark { width: 26px; height: 26px; border-radius: 9px; background-color: #000000; }
-.location-pill { padding-left: 7px; }
-.location-pill, .view-toggle, .pin, .recenter { border: 1px solid #454951; }
-.pin-active { background-color: #eceef2; color: #111216; border-color: #eceef2; }
 .content-card { color: #f3f4f6; background-color: #15171c; border: 1px solid #3b3e46; }
 .reply-button { background-color: #eceef2; color: #111216; }
 .reaction.liked { color: #ffffff; }
-.scene-caption { color: #cdd0d7; background-color: #15171c; border-radius: 5px; padding: 0 6px; }
-.location-status { border: 1px solid #3b3e46; }
 .walk-control { background: #08090b; border-top: 1px solid #272a31; }
 .empty-prompt { border: 1px solid #3b3e46; }
-.nearby-launcher { position:absolute; left:14px; top:98px; height:34px; padding:0 12px; line-height:32px; border:1px solid #454951; border-radius:17px; background:#15171c; color:#e2e4e9; font-size:11px; z-index:12; }
-.map-tools { position:absolute; right:14px; top:98px; width:46px; z-index:12; }
-.map-tool { height:50px; margin-bottom:8px; border:1px solid #454951; border-radius:16px; background:#15171c; color:#e2e4e9; text-align:center; box-sizing:border-box; }
-.tool-symbol { height:29px; line-height:30px; font-size:24px; text-align:center; }
-.tool-label { height:15px; line-height:15px; font-size:9px; text-align:center; }
-.zoom-tools { overflow:hidden; background:#15171c; border:1px solid #454951; border-radius:15px; }
-.zoom-button { height:36px; line-height:36px; color:#e2e4e9; font-size:21px; text-align:center; }
-.zoom-button + .zoom-button { border-top:1px solid #34363e; }
 .card-footer { display:flex; align-items:center; height:32px; margin-top:6px; border-top:1px solid #30333b; }
 .card-link { height:32px; line-height:32px; color:#aeb3be; font-size:11px; }
 .waiting { box-sizing:border-box; }
 .comma-pin { position:absolute; transform:translate(-50%,-50%); z-index:10; }
 .comma-image { display:block; }
-.heat-help { position:absolute; left:16px; top:138px; height:28px; line-height:28px; padding:0 9px; border-radius:14px; color:#505661; background-color:#fffefa; font-size:10px; z-index:12; }
-.heat-legend { position:absolute; left:15px; top:171px; width:200px; padding:10px; border-radius:14px; background-color:#15171c; border:1px solid #454951; z-index:14; }
-.legend-icons { height:54px; display:flex; align-items:center; justify-content:space-around; }
-.legend-small { width:40px; height:40px; }
-.legend-medium { width:47px; height:47px; }
-.legend-large { width:54px; height:54px; }
-.legend-copy { height:24px; line-height:24px; color:#bfc3ce; text-align:center; font-size:10px; }
 .point-sheet { padding:0 16px 8px; border:1px solid #3b3e46; border-radius:23px; color:#f3f4f6; background-color:#15171c; }
 .sheet-header { display:flex; align-items:center; height:48px; }
 .sheet-heading { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; height:28px; line-height:28px; font-size:17px; font-weight:600; }
