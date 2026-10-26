@@ -111,7 +111,10 @@ Page({
     const age = position ? Date.now() - position.timestamp : Infinity
     const gpsStatus = !good ? '等待定位' : age > geo.MAX_AGE ? '定位已过期' : error > 30 ? '定位较弱' : '精度约 ' + Math.ceil(error) + 'm'
     const nearby = posts.filter(post => geo.distance(position, post) <= 350)
-    const groups = mapPoints.mapGroups(nearby,this.data.mapScale,this._selectedId,this.data.cardVisible)
+    const grouped = mapPoints.mapGroups(nearby,this.data.mapScale,this._selectedId,this.data.cardVisible)
+    const layout = mapPoints.layoutMapGroups(grouped,position,this.data.mapScale,this._mapPlacements)
+    const groups = layout.groups
+    this._mapPlacements = layout.placements
     this._mapGroups = groups
     if (!this._markerKeys) { this._markerKeys = new Map(); this._nextMarkerId = 0 }
     this._markerGroups = new Map()
@@ -120,7 +123,7 @@ Page({
       const id = this._markerKeys.get(group.id)
       this._markerGroups.set(id,group)
       return { id,latitude:group.latitude,longitude:group.longitude,iconPath:group.iconPath,
-        width:group.width,height:group.height,anchor:{ x:.5,y:.5 },zIndex:group.active ? 100 : group.tier,
+        width:group.width,height:group.height,anchor:group.anchor,zIndex:group.active ? 100 : group.tier,
         'aria-label':group.count + '条留话，' + group.heatLabel }
     })
     const selectedGroup = (this.data.view === 'street' ? this._streetGroups || [] : groups).find(group => group.postIds.includes(this._selectedId))
@@ -140,7 +143,7 @@ Page({
       emptyLabel,nearbyCount:count,selectedIndex:index + 1,nearbyLabel:count ? '附近 ' + count + ' 条' : '附近留话',
       selectedGroupCount:selectedGroup ? selectedGroup.count : 0,selectedHeatLabel:selected ? mapPoints.heat(selected).label : '',
       circles: mode === 'live' && good && error < 1000 ? [{ latitude: position.latitude, longitude: position.longitude,
-        radius: error, color: '#858b9980', fillColor: '#858b991a', strokeWidth: 1 }] : [] }
+        radius: error, color: '#348fdb55', fillColor: '#348fdb14', strokeWidth: 1 }] : [] }
     if (good && this.data.following) { patch.latitude = position.latitude; patch.longitude = position.longitude }
     if (this.data.sheetVisible) Object.assign(patch,this.sheetPatch(posts))
     // Do not re-send the entire native marker array when only GPS labels change.
@@ -193,7 +196,7 @@ Page({
       this._lastSync = 0
       this._cloudPosts = []
       this._sheetIds = null; this._streetGroups = []; this._mapGroups = []
-      this._markerKeys = new Map(); this._nextMarkerId = 0; this._markerSignature = ''
+      this._markerKeys = new Map(); this._nextMarkerId = 0; this._markerSignature = ''; this._mapPlacements = new Map()
       this._pendingOpenId = ''
       const global = getApp().globalData
       global.mode = mode; global.view = mode === 'demo' ? 'street' : 'map'
@@ -264,7 +267,7 @@ Page({
     } })
   },
   showHeatInfo() {
-    wx.showModal({ title:'地图上的逗号',content:'逗号越大、颜色越深，表示互动更热闹。数字表示聚合的留话数量。\n想看新内容，可在附近列表切换“最新”。',showCancel:false })
+    wx.showModal({ title:'地图上的逗号',content:'蓝点是你，逗号是留话。重叠时逗号会让开，细线指向留话位置。\n逗号越深、略大，互动越热闹；数字是留话数量。附近列表可切换“最新”。',showCancel:false })
   },
   showMapStatus() {
     if (this.data.mode === 'demo') {

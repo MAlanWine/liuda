@@ -1,7 +1,7 @@
 const geo = require('./geo')
+const markerStyle = require('./map-marker-style')
 const DAY = 86400000
-const COLORS = ['#555962','#292c33','#090b0f']
-const SIZES = [32,39,46]
+const { COLORS,SIZES,appearance } = markerStyle
 const safeCount = value => Number.isFinite(value) ? Math.max(0,Math.floor(value)) : 0
 
 function heat(post,now = Date.now()) {
@@ -17,11 +17,6 @@ function heat(post,now = Date.now()) {
   const tier = score >= 20 ? 3 : score >= 5 ? 2 : 1
   return { score,tier,color:COLORS[tier-1],size:SIZES[tier-1],
     label:['普通','有回应','热门'][tier-1],fresh:post.createdAt > 0 && now - post.createdAt >= 0 && now - post.createdAt < DAY }
-}
-function appearance(tier,count,active) {
-  const size = SIZES[tier-1],badge = count > 9 ? '9plus' : String(count)
-  return { width:size + (count > 1 ? 19 : 0) + 8,height:size + 8,
-    iconPath:'/assets/map-pins/h' + tier + '-n' + badge + (active ? '-selected' : '') + '.png' }
 }
 function pixel(point,scale) {
   const lat = Math.max(-85,Math.min(85,point.latitude)) * Math.PI / 180
@@ -59,6 +54,45 @@ function groups(posts,project,selectedId,cardVisible) {
   })
 }
 function mapGroups(posts,scale,selectedId,cardVisible) { return groups(posts,post => pixel(post,scale),selectedId,cardVisible) }
+function layoutMapGroups(groups,position,scale,previous = new Map()) {
+  if (!geo.valid(position)) return { groups,placements:new Map() }
+  const user = pixel(position,scale),placements = new Map(),placed = []
+  const bounds = (group,direction) => {
+    const art = markerStyle.geometry(group.tier,group.count,direction)
+    return { x:group.x+art.offsetX,y:group.y+art.offsetY,w:art.bubbleWidth,h:art.size }
+  }
+  const overlaps = (a,b,padding = 0) => Math.abs(a.x-b.x) < (a.w+b.w)/2+padding && Math.abs(a.y-b.y) < (a.h+b.h)/2+padding
+  // Protect the native location dot/direction cue, not the entire accuracy circle.
+  const guard = { x:user.x,y:user.y,w:40,h:40 }
+  const ordered = groups.slice().sort((a,b) => Math.hypot(a.x-user.x,a.y-user.y)-Math.hypot(b.x-user.x,b.y-user.y) || a.id.localeCompare(b.id))
+  const layouts = new Map()
+  ordered.forEach(group => {
+    const old = previous.get(group.id),center = bounds(group,'center')
+    const needsOffset = overlaps(center,guard,old ? 12 : 4)
+    const protectUser = Math.hypot(group.x-user.x,group.y-user.y) <= 26
+    let direction = 'center'
+    if (needsOffset) {
+      const preference = old ? [old,'north','east','south','west'] : ['north','east','south','west']
+      const other = placed.concat(ordered.filter(item => item.id !== group.id && !layouts.has(item.id)).map(item => bounds(item,'center')))
+      const candidates = Array.from(new Set(preference)).map((candidate,index) => {
+        const box = bounds(group,candidate)
+        const art = markerStyle.geometry(group.tier,group.count,candidate,protectUser)
+        const ux = art.offsetX/52,uy = art.offsetY/52,gap = art.stemGap
+        const along = Math.max(gap,Math.min(52,(user.x-group.x)*ux+(user.y-group.y)*uy))
+        const lineOverUser = Math.hypot(group.x+along*ux-user.x,group.y+along*uy-user.y) < 17
+        const collisions = other.filter(item => overlaps(box,item,6)).length
+        return { direction:candidate,score:(overlaps(box,guard,4) || lineOverUser ? 10000 : 0)+collisions*100+index }
+      })
+      candidates.sort((a,b) => a.score-b.score)
+      direction = candidates[0].direction
+      placements.set(group.id,direction)
+    }
+    placed.push(bounds(group,direction))
+    // Leave the blue dot untouched when the post's ground point is within its halo.
+    layouts.set(group.id,Object.assign({},group,appearance(group.tier,group.count,group.active,direction,protectUser)))
+  })
+  return { groups:groups.map(group => layouts.get(group.id)),placements }
+}
 function streetGroups(pins,posts,selectedId,cardVisible) {
   const visible = new Map(pins.filter(pin => pin.visible).map(pin => [pin.id,pin]))
   return groups(posts.filter(post => visible.has(post.id)),post => visible.get(post.id),selectedId,cardVisible)
@@ -77,4 +111,4 @@ function ranked(posts,sort) {
   }
   return result
 }
-module.exports = { heat,appearance,mapGroups,streetGroups,ranked }
+module.exports = { heat,appearance,mapGroups,layoutMapGroups,streetGroups,ranked }
