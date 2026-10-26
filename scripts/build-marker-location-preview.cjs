@@ -1,29 +1,31 @@
-// Static design illustration, not a simulator run or a functional test.
+// Static zoom illustration using real generated PNG assets. Does not run the app.
 const fs = require('fs')
 const path = require('path')
-const { svg } = require('./map-marker-svg.cjs')
+const style = require('../miniprogram/utils/map-marker-style')
 const root = path.resolve(__dirname,'..')
 let sharp
 try { sharp = require('sharp') }
 catch (_) { sharp = require(path.join(process.env.LIUDA_PREVIEW_NODE_MODULES,'sharp')) }
-const out = []
-const add = value => out.push(value)
-const rect = (x,y,w,h,r,fill,stroke='none') => add(`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="${fill}" stroke="${stroke}"/>`)
-const circle = (x,y,r,fill,stroke='none',sw=1) => add(`<circle cx="${x}" cy="${y}" r="${r}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/>`)
-const text = (copy,x,y,size=13,color='#17191e',weight=400,anchor='start') => add(`<text x="${x}" y="${y}" font-size="${size}" fill="${color}" font-weight="${weight}" text-anchor="${anchor}">${copy}</text>`)
-const marker = (x,y,tier,count,selected=false,direction='center',clear=false) => {
-  const art = svg(tier,count,selected,direction,clear)
-  const style = require('../miniprogram/utils/map-marker-style')
-  const filename = path.basename(style.appearance(tier,count,selected,direction,clear).iconPath)
-  const image = fs.readFileSync(path.join(root,'miniprogram/assets/map-pins',filename)).toString('base64')
-  add(`<image x="${x-art.groundX}" y="${y-art.groundY}" width="${art.width}" height="${art.height}" href="data:image/png;base64,${image}"/>`)
+const out=[]
+const add=s=>out.push(s)
+const rect=(x,y,w,h,r,fill,stroke='none')=>add(`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="${fill}" stroke="${stroke}"/>`)
+const circle=(x,y,r,fill,stroke='none',sw=1)=>add(`<circle cx="${x}" cy="${y}" r="${r}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/>`)
+const text=(copy,x,y,size=13,color='#17191e',weight=400,anchor='start')=>add(`<text x="${x}" y="${y}" font-size="${size}" fill="${color}" font-weight="${weight}" text-anchor="${anchor}">${copy}</text>`)
+function image(filename,x,y,w,h) {
+  const data=fs.readFileSync(path.join(root,filename)).toString('base64')
+  add(`<image x="${x}" y="${y}" width="${w}" height="${h}" href="data:image/png;base64,${data}"/>`)
+}
+function marker(x,y,tier,count) {
+  const art=style.geometry(tier,count,true)
+  const filename=style.appearance(tier,count,false,true).iconPath.slice(1)
+  image('miniprogram/'+filename,x-art.groundX,y-art.groundY,art.width,art.height)
 }
 add('<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="1050" viewBox="0 0 1040 1050"><g font-family="PingFang SC,Heiti SC,Arial,sans-serif">')
 rect(0,0,1040,1050,0,'#f7f7f3')
-text('留答 · 先看清自己在哪',44,50,27,'#17191e',600)
-text('静态设计示意 · 虚构地图与内容 · 非真机截图',44,78,13,'#777d87')
-function phone(x,after) {
-  const top=210,bottom=800
+text('留答 · 缩放地图，落点不漂移',44,50,27,'#17191e',600)
+text('静态设计示意 · 虚构地图与内容 · 非真机缩放验证',44,78,13,'#777d87')
+function phone(x,zoom) {
+  const top=210,bottom=800,cx=x+175,cy=top+354
   rect(x,120,390,780,32,'#08090b')
   add(`<clipPath id="phone${x}"><rect x="${x+4}" y="124" width="382" height="772" rx="29"/></clipPath><g clip-path="url(#phone${x})">`)
   text('9:41',x+22,149,12,'#f5f5f2',600)
@@ -31,30 +33,28 @@ function phone(x,after) {
   text('留答',x+195,186,16,'#f5f5f2',600,'middle')
   rect(x+305,163,64,25,13,'#08090b','#25282e')
   text('•••  ◉',x+337,180,12,'#f5f5f2',400,'middle')
+  add(`<clipPath id="map${x}"><rect x="${x+4}" y="${top}" width="382" height="590"/></clipPath><g clip-path="url(#map${x})">`)
   rect(x+4,top,382,bottom-top,0,'#eceee9')
-  const blocks=[[18,28,110,94],[193,29,158,88],[27,191,110,98],[204,184,143,105],[22,349,119,95],[211,345,136,104],[22,497,111,77],[212,499,140,70]]
-  blocks.forEach(([bx,by,w,h]) => rect(x+bx,top+by,w,h,7,'#faf9f2','#e1e3dd'))
-  add(`<path d="M${x+162} ${top}V${bottom} M${x+4} ${top+151}H${x+386} M${x+4} ${top+317}H${x+386} M${x+4} ${top+473}H${x+386}" fill="none" stroke="#fff" stroke-width="17"/>`)
-  text('图书馆',x+224,top+77,11,'#8a918c')
-  text('教学楼',x+41,top+241,11,'#8a918c')
-  text('校园路',x+277,top+313,10,'#8a918c')
-  const px=x+172,py=top+359
-  circle(px,py,26,'#348fdb14','#348fdb55')
-  circle(px,py,8,'#278ee2','#fff',2.5)
-  add(`<path d="M${px+11} ${py-5}L${px+19} ${py}L${px+11} ${py+5}Z" fill="#278ee2"/>`)
-  if (after) {
-    marker(px,py,1,2,false,'north',true)
-  } else {
-    rect(px-29,py-17,58,34,18,'#555962','#c6c8cb')
-    add(`<path transform="translate(${px-29} ${py-17})" d="M17 7C11.5 7 8 10.6 8 15c0 4.3 3 7.4 7 7.5-1.5 3-4 4.9-7.5 6.1-.9.3-1.3 1.3-.6 2.1.5.7 1.3 1 2.3.7C20.3 28.3 25 22.7 25 15c0-4.5-3-8-8-8Z" fill="#f5f5f2"/>`)
-    text('2',px+16,py+5,12,'#fff',600,'middle')
+  add(`<g transform="translate(${cx} ${cy}) scale(${zoom})">`)
+  for (let row=-3;row<=2;row++) for (let col=-2;col<=2;col++) {
+    const bx=col*180+16,by=row*160+12
+    rect(bx,by,140,116,7,'#faf9f2','#dfe2db')
   }
-  marker(x+297,top+223,2,1)
-  marker(x+79,top+515,3,1)
+  add('<path d="M0 -800V800 M-700 0H700" fill="none" stroke="#fff" stroke-width="17"/>')
+  text('教学楼',30,-72,12,'#8a918c')
+  text('图书馆',207,-210,12,'#8a918c')
+  circle(0,0,2.5,'#555962')
+  add('</g>')
+  // Pixel-sized art with geographic ground anchors, independent of the background zoom.
+  circle(cx,cy,26*zoom,'#348fdb14','#348fdb55')
+  marker(cx,cy,1,2)
+  marker(cx+180*zoom,cy-150*zoom,2,1)
+  // Draw the position asset last, reflecting the client's high marker zIndex.
+  image('miniprogram/assets/map-pins/user-location.png',cx-12,cy-12,24,24)
+  text('同一个地点',cx+19,cy+25,11,'#278ee2',500)
   rect(x+18,top+15,133,44,23,'#15171c','#353840')
-  const brand = fs.readFileSync(path.join(root,'miniprogram/assets/brand/liuda-comma.png')).toString('base64')
-  add(`<image x="${x+26}" y="${top+23}" width="27" height="27" href="data:image/png;base64,${brand}"/>`)
-  text('附近 4 条',x+59,top+43,13,'#f5f5f2',500)
+  image('miniprogram/assets/brand/liuda-comma.png',x+26,top+23,27,27)
+  text('附近 3 条',x+59,top+43,13,'#f5f5f2',500)
   text('⌄',x+134,top+41,13,'#a0a4ae')
   circle(x+350,top+37,22,'#fffefa','#e1e2df')
   for(let i=-1;i<=1;i++) circle(x+350+i*7,top+37,1.7,'#15171c')
@@ -62,6 +62,7 @@ function phone(x,after) {
   circle(x+349,bottom-65,9,'none','#15171c',1.7)
   circle(x+349,bottom-65,2.5,'#15171c')
   text('地图版权区',x+372,bottom-9,9,'#909690',400,'end')
+  add('</g>')
   rect(x+4,bottom,382,96,0,'#08090b')
   text('↗',x+70,bottom+32,24,'#f5f5f2',400,'middle')
   rect(x+172,bottom+12,46,30,12,'#f0f1f3')
@@ -72,18 +73,16 @@ function phone(x,after) {
   text('消息',x+321,bottom+59,11,'#a0a4ae',400,'middle')
   add('</g>')
 }
-text('调整前 · 留话盖住蓝点',72,109,15,'#6b717b',500)
-text('调整后 · 图示让开，位置保留',578,109,15,'#17191e',600)
-phone(66,false);phone(574,true)
-text('蓝点 = 我的位置',578,931,14,'#278ee2',600)
-text('细线 = 留话位置的指引',578,955,13,'#6b717b')
-text('小图示，保留点击空间',72,931,14,'#17191e',600)
-marker(90,969,1,1);text('22',110,974,12,'#6b717b')
-marker(180,969,2,1);text('26',201,974,12,'#6b717b')
-marker(270,969,3,1);text('30px',293,974,12,'#6b717b')
-text('只调整显示与锚点；不改变经纬度、距离计算或到场条件。',44,1022,13,'#777d87')
+text('放大看 · 留话与蓝点同处一个地点',72,109,15,'#17191e',600)
+text('缩小看 · 地图收缩，针脚仍在原地点',578,109,15,'#17191e',600)
+phone(66,1);phone(574,.5)
+text('针脚末端 = 留话真实位置',72,937,15,'#17191e',600)
+text('取消四向偏移，不根据蓝点远近挪动逗号',72,963,13,'#777d87')
+text('蓝点置顶，保持可见',578,937,15,'#278ee2',600)
+text('来自实际 GPS，不使用画面中心代替当前位置',578,963,13,'#777d87')
+text('缩小后相近留言可聚合；聚合是数量入口，点开可查看原来的具体地点。',44,1022,13,'#777d87')
 add('</g></svg>')
 const source=out.join(''),dir=path.join(root,'docs/previews')
 fs.mkdirSync(dir,{ recursive:true })
-fs.writeFileSync(path.join(dir,'marker-location-clarity.svg'),source)
-sharp(Buffer.from(source)).resize(1560).png().toFile(path.join(dir,'marker-location-clarity.png')).then(() => console.log('Generated static marker-location-clarity preview.')).catch(error => { console.error(error.message);process.exitCode=1 })
+fs.writeFileSync(path.join(dir,'marker-zoom-anchors.svg'),source)
+sharp(Buffer.from(source)).resize(1560).png().toFile(path.join(dir,'marker-zoom-anchors.png')).then(()=>console.log('Generated static zoom/anchor preview.')).catch(error=>{console.error(error.message);process.exitCode=1})

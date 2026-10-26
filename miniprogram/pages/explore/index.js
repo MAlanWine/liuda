@@ -111,10 +111,7 @@ Page({
     const age = position ? Date.now() - position.timestamp : Infinity
     const gpsStatus = !good ? '等待定位' : age > geo.MAX_AGE ? '定位已过期' : error > 30 ? '定位较弱' : '精度约 ' + Math.ceil(error) + 'm'
     const nearby = posts.filter(post => geo.distance(position, post) <= 350)
-    const grouped = mapPoints.mapGroups(nearby,this.data.mapScale,this._selectedId,this.data.cardVisible)
-    const layout = mapPoints.layoutMapGroups(grouped,position,this.data.mapScale,this._mapPlacements)
-    const groups = layout.groups
-    this._mapPlacements = layout.placements
+    const groups = mapPoints.mapGroups(nearby,this.data.mapScale,this._selectedId,this.data.cardVisible)
     this._mapGroups = groups
     if (!this._markerKeys) { this._markerKeys = new Map(); this._nextMarkerId = 0 }
     this._markerGroups = new Map()
@@ -126,6 +123,10 @@ Page({
         width:group.width,height:group.height,anchor:group.anchor,zIndex:group.active ? 100 : group.tier,
         'aria-label':group.count + '条留话，' + group.heatLabel }
     })
+    // Both use native markers so their order is explicit. Never displace a post to reveal the user.
+    if (mode === 'live' && good) markers.push({ id:0,latitude:position.latitude,longitude:position.longitude,
+      iconPath:'/assets/map-pins/user-location.png',width:24,height:24,anchor:{ x:.5,y:.5 },
+      zIndex:10000,alpha:age > geo.MAX_AGE ? .45 : 1,'aria-label':'我的当前位置' })
     const selectedGroup = (this.data.view === 'street' ? this._streetGroups || [] : groups).find(group => group.postIds.includes(this._selectedId))
     const count = nearby.length,index = nearby.findIndex(post => post.id === this._selectedId)
     let mapNotice = '',mapNoticeAction = ''
@@ -196,7 +197,7 @@ Page({
       this._lastSync = 0
       this._cloudPosts = []
       this._sheetIds = null; this._streetGroups = []; this._mapGroups = []
-      this._markerKeys = new Map(); this._nextMarkerId = 0; this._markerSignature = ''; this._mapPlacements = new Map()
+      this._markerKeys = new Map(); this._nextMarkerId = 0; this._markerSignature = ''
       this._pendingOpenId = ''
       const global = getApp().globalData
       global.mode = mode; global.view = mode === 'demo' ? 'street' : 'map'
@@ -267,7 +268,7 @@ Page({
     } })
   },
   showHeatInfo() {
-    wx.showModal({ title:'地图上的逗号',content:'蓝点是你，逗号是留话。重叠时逗号会让开，细线指向留话位置。\n逗号越深、略大，互动越热闹；数字是留话数量。附近列表可切换“最新”。',showCancel:false })
+    wx.showModal({ title:'地图上的逗号',content:'蓝点是你，逗号是留话。针脚末端是留话位置，缩放时固定在原坐标；蓝点始终置顶。\n逗号越深、略大，互动越热闹；数字是留话数量。附近列表可切换“最新”。',showCancel:false })
   },
   showMapStatus() {
     if (this.data.mode === 'demo') {
