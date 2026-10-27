@@ -1,0 +1,21 @@
+{
+  "retrieved_at": "2026-10-27",
+  "generated_at_utc": "2026-10-27T01:49:58.766831+00:00",
+  "source_url": "https://api.openstreetmap.org/api/0.6/map?bbox=116.4181,39.9758,116.4248,39.9821",
+  "raw_sha256": "ea6a7c25a53d79685aa546e370a898141082dc0168b454854b4b345435d50a66",
+  "coordinates": "WGS84 longitude, latitude (GeoJSON / RFC 7946)",
+  "attribution": "© OpenStreetMap contributors",
+  "license": "https://opendatacommons.org/licenses/odbl/1-0/",
+  "counts": {
+    "building": 24,
+    "campus": 1,
+    "road": 38,
+    "sport": 4
+  },
+  "features_with_height_or_levels": 0,
+  "incomplete_way_ids_skipped": [],
+  "selection": "Campus way plus tagged ways whose vertex mean is inside it; not spatially clipped. Relations and standalone nodes excluded.",
+  "accuracy_m": null,
+  "field_verified": false,
+  "app_integrated": false
+}

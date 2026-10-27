@@ -1,0 +1,3116 @@
+{
+  "type": "FeatureCollection",
+  "name": "uibe-preliminary-osm-wgs84",
+  "attribution": "© OpenStreetMap contributors",
+  "license": "https://opendatacommons.org/licenses/odbl/1-0/",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "way/632711504",
+      "properties": {
+        "layer": "building",
+        "osm_type": "way",
+        "osm_id": 632711504,
+        "osm_version": 3,
+        "osm_edited_at": "2022-12-04T03:28:56Z",
+        "source_url": "https://www.openstreetmap.org/way/632711504",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "building": "university",
+          "name": "行政楼"
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.4239801,
+              39.9782195
+            ],
+            [
+              116.4239839,
+              39.9780654
+            ],
+            [
+              116.424238,
+              39.9780625
+            ],
+            [
+              116.4242456,
+              39.9778736
+            ],
+            [
+              116.4239991,
+              39.9778649
+            ],
+            [
+              116.4239953,
+              39.9776817
+            ],
+            [
+              116.4242532,
+              39.9776817
+            ],
+            [
+              116.4242532,
+              39.9775219
+            ],
+            [
+              116.4240105,
+              39.9775248
+            ],
+            [
+              116.4240105,
+              39.9773824
+            ],
+            [
+              116.4244429,
+              39.9773824
+            ],
+            [
+              116.4244277,
+              39.9782166
+            ],
+            [
+              116.4239801,
+              39.9782195
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/779016646",
+      "properties": {
+        "layer": "building",
+        "osm_type": "way",
+        "osm_id": 779016646,
+        "osm_version": 2,
+        "osm_edited_at": "2022-12-04T03:36:12Z",
+        "source_url": "https://www.openstreetmap.org/way/779016646",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "building": "university",
+          "name": "国际教育大厦"
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.4184817,
+              39.9810228
+            ],
+            [
+              116.4190468,
+              39.9810228
+            ],
+            [
+              116.4190468,
+              39.9815524
+            ],
+            [
+              116.4198721,
+              39.9815524
+            ],
+            [
+              116.4198599,
+              39.9818047
+            ],
+            [
+              116.4184817,
+              39.9818016
+            ],
+            [
+              116.4184817,
+              39.9810228
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/779016647",
+      "properties": {
+        "layer": "building",
+        "osm_type": "way",
+        "osm_id": 779016647,
+        "osm_version": 2,
+        "osm_edited_at": "2022-12-04T03:36:12Z",
+        "source_url": "https://www.openstreetmap.org/way/779016647",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "building": "dormitory",
+          "name": "汇康公寓"
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.420143,
+              39.9792927
+            ],
+            [
+              116.4201418,
+              39.9794173
+            ],
+            [
+              116.4211663,
+              39.9794226
+            ],
+            [
+              116.4211674,
+              39.9792981
+            ],
+            [
+              116.420143,
+              39.9792927
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/779016648",
+      "properties": {
+        "layer": "building",
+        "osm_type": "way",
+        "osm_id": 779016648,
+        "osm_version": 1,
+        "osm_edited_at": "2020-03-07T06:23:19Z",
+        "source_url": "https://www.openstreetmap.org/way/779016648",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "building": "university"
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.4238318,
+              39.9805337
+            ],
+            [
+              116.4238318,
+              39.9802502
+            ],
+            [
+              116.4244782,
+              39.9802595
+            ],
+            [
+              116.4244823,
+              39.9805399
+            ],
+            [
+              116.4238318,
+              39.9805337
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/779016649",
+      "properties": {
+        "layer": "building",
+        "osm_type": "way",
+        "osm_id": 779016649,
+        "osm_version": 1,
+        "osm_edited_at": "2020-03-07T06:23:19Z",
+        "source_url": "https://www.openstreetmap.org/way/779016649",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "building": "dormitory"
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.4201378,
+              39.9796811
+            ],
+            [
+              116.4211357,
+              39.9796838
+            ],
+            [
+              116.4211351,
+              39.9798037
+            ],
+            [
+              116.4201373,
+              39.979801
+            ],
+            [
+              116.4201378,
+              39.9796811
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/779016650",
+      "properties": {
+        "layer": "building",
+        "osm_type": "way",
+        "osm_id": 779016650,
+        "osm_version": 1,
+        "osm_edited_at": "2020-03-07T06:23:19Z",
+        "source_url": "https://www.openstreetmap.org/way/779016650",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "building": "dormitory"
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.4201408,
+              39.9800418
+            ],
+            [
+              116.4211469,
+              39.9800552
+            ],
+            [
+              116.4211439,
+              39.9801875
+            ],
+            [
+              116.4201378,
+              39.9801743
+            ],
+            [
+              116.4201408,
+              39.9800418
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/779016651",
+      "properties": {
+        "layer": "building",
+        "osm_type": "way",
+        "osm_id": 779016651,
+        "osm_version": 1,
+        "osm_edited_at": "2020-03-07T06:23:19Z",
+        "source_url": "https://www.openstreetmap.org/way/779016651",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "building": "dormitory"
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.4201712,
+              39.9804197
+            ],
+            [
+              116.4211566,
+              39.9804341
+            ],
+            [
+              116.4211529,
+              39.9805838
+            ],
+            [
+              116.4201674,
+              39.9805696
+            ],
+            [
+              116.4201712,
+              39.9804197
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/779016652",
+      "properties": {
+        "layer": "building",
+        "osm_type": "way",
+        "osm_id": 779016652,
+        "osm_version": 1,
+        "osm_edited_at": "2020-03-07T06:23:19Z",
+        "source_url": "https://www.openstreetmap.org/way/779016652",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "amenity": "library",
+          "building": "yes",
+          "name": "对外经济贸易大学图书馆"
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.4200251,
+              39.9763085
+            ],
+            [
+              116.4205871,
+              39.9763209
+            ],
+            [
+              116.4205545,
+              39.9771889
+            ],
+            [
+              116.4199924,
+              39.9771765
+            ],
+            [
+              116.4200251,
+              39.9763085
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/779016653",
+      "properties": {
+        "layer": "building",
+        "osm_type": "way",
+        "osm_id": 779016653,
+        "osm_version": 2,
+        "osm_edited_at": "2022-12-04T03:28:56Z",
+        "source_url": "https://www.openstreetmap.org/way/779016653",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "building": "university",
+          "name": "逸夫科研楼"
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.4239063,
+              39.9784605
+            ],
+            [
+              116.423902,
+              39.979076
+            ],
+            [
+              116.4244011,
+              39.9790781
+            ],
+            [
+              116.4244056,
+              39.9784626
+            ],
+            [
+              116.4239063,
+              39.9784605
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/779016654",
+      "properties": {
+        "layer": "building",
+        "osm_type": "way",
+        "osm_id": 779016654,
+        "osm_version": 2,
+        "osm_edited_at": "2022-12-04T03:28:56Z",
+        "source_url": "https://www.openstreetmap.org/way/779016654",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "building": "university",
+          "name": "宁远楼"
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.4236695,
+              39.9769414
+            ],
+            [
+              116.4236973,
+              39.9764904
+            ],
+            [
+              116.4233948,
+              39.9764795
+            ],
+            [
+              116.4234074,
+              39.9762744
+            ],
+            [
+              116.4242941,
+              39.9763064
+            ],
+            [
+              116.4242538,
+              39.9769625
+            ],
+            [
+              116.4236695,
+              39.9769414
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/779016655",
+      "properties": {
+        "layer": "building",
+        "osm_type": "way",
+        "osm_id": 779016655,
+        "osm_version": 2,
+        "osm_edited_at": "2022-12-04T03:28:56Z",
+        "source_url": "https://www.openstreetmap.org/way/779016655",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "building": "university",
+          "name": "诚信楼"
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.4224486,
+              39.9779106
+            ],
+            [
+              116.4224486,
+              39.9782595
+            ],
+            [
+              116.4237089,
+              39.9782658
+            ],
+            [
+              116.4237414,
+              39.9778919
+            ],
+            [
+              116.4224486,
+              39.9779106
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/779016656",
+      "properties": {
+        "layer": "building",
+        "osm_type": "way",
+        "osm_id": 779016656,
+        "osm_version": 3,
+        "osm_edited_at": "2022-12-04T03:28:56Z",
+        "source_url": "https://www.openstreetmap.org/way/779016656",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "amenity": "restaurant",
+          "building": "yes",
+          "name": "一食堂"
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.4214975,
+              39.9784968
+            ],
+            [
+              116.4214731,
+              39.9790108
+            ],
+            [
+              116.422087,
+              39.9790201
+            ],
+            [
+              116.422087,
+              39.978503
+            ],
+            [
+              116.4214975,
+              39.9784968
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/779016657",
+      "properties": {
+        "layer": "building",
+        "osm_type": "way",
+        "osm_id": 779016657,
+        "osm_version": 1,
+        "osm_edited_at": "2020-03-07T06:23:19Z",
+        "source_url": "https://www.openstreetmap.org/way/779016657",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "building": "dormitory"
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.4200096,
+              39.9809516
+            ],
+            [
+              116.4200136,
+              39.9808114
+            ],
+            [
+              116.4211479,
+              39.9808301
+            ],
+            [
+              116.4211316,
+              39.9809703
+            ],
+            [
+              116.4200096,
+              39.9809516
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/779016658",
+      "properties": {
+        "layer": "building",
+        "osm_type": "way",
+        "osm_id": 779016658,
+        "osm_version": 2,
+        "osm_edited_at": "2022-12-04T03:36:12Z",
+        "source_url": "https://www.openstreetmap.org/way/779016658",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "building": "university",
+          "name": "博学楼"
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.4185119,
+              39.9803967
+            ],
+            [
+              116.4185073,
+              39.9805823
+            ],
+            [
+              116.4192345,
+              39.9805928
+            ],
+            [
+              116.4192391,
+              39.9804072
+            ],
+            [
+              116.4185119,
+              39.9803967
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/779016659",
+      "properties": {
+        "layer": "building",
+        "osm_type": "way",
+        "osm_id": 779016659,
+        "osm_version": 2,
+        "osm_edited_at": "2022-12-04T03:36:12Z",
+        "source_url": "https://www.openstreetmap.org/way/779016659",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "amenity": "restaurant",
+          "building": "yes",
+          "name": "金融食堂"
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.4194367,
+              39.9802902
+            ],
+            [
+              116.4194475,
+              39.9800346
+            ],
+            [
+              116.4192579,
+              39.9800299
+            ],
+            [
+              116.4192674,
+              39.9798063
+            ],
+            [
+              116.4198774,
+              39.9798215
+            ],
+            [
+              116.4198601,
+              39.9802315
+            ],
+            [
+              116.4196395,
+              39.980226
+            ],
+            [
+              116.4196366,
+              39.9802952
+            ],
+            [
+              116.4194367,
+              39.9802902
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/779016660",
+      "properties": {
+        "layer": "building",
+        "osm_type": "way",
+        "osm_id": 779016660,
+        "osm_version": 2,
+        "osm_edited_at": "2022-12-04T03:36:12Z",
+        "source_url": "https://www.openstreetmap.org/way/779016660",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "building": "university",
+          "name": "知行楼"
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.418608,
+              39.9794782
+            ],
+            [
+              116.4186118,
+              39.9793497
+            ],
+            [
+              116.4199573,
+              39.9793726
+            ],
+            [
+              116.4199516,
+              39.9795707
+            ],
+            [
+              116.4197466,
+              39.9795672
+            ],
+            [
+              116.4197422,
+              39.9797206
+            ],
+            [
+              116.4195291,
+              39.9797169
+            ],
+            [
+              116.4195356,
+              39.979494
+            ],
+            [
+              116.418608,
+              39.9794782
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/779016661",
+      "properties": {
+        "layer": "building",
+        "osm_type": "way",
+        "osm_id": 779016661,
+        "osm_version": 1,
+        "osm_edited_at": "2020-03-07T06:23:19Z",
+        "source_url": "https://www.openstreetmap.org/way/779016661",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "building": "dormitory"
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.4200014,
+              39.9790508
+            ],
+            [
+              116.4200005,
+              39.9789261
+            ],
+            [
+              116.4212078,
+              39.9789206
+            ],
+            [
+              116.4212088,
+              39.9790453
+            ],
+            [
+              116.4200014,
+              39.9790508
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/779016662",
+      "properties": {
+        "layer": "building",
+        "osm_type": "way",
+        "osm_id": 779016662,
+        "osm_version": 1,
+        "osm_edited_at": "2020-03-07T06:23:19Z",
+        "source_url": "https://www.openstreetmap.org/way/779016662",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "building": "dormitory"
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.420005,
+              39.9786524
+            ],
+            [
+              116.4200172,
+              39.9785184
+            ],
+            [
+              116.4211555,
+              39.9785184
+            ],
+            [
+              116.4211596,
+              39.9786617
+            ],
+            [
+              116.420005,
+              39.9786524
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/779016664",
+      "properties": {
+        "layer": "building",
+        "osm_type": "way",
+        "osm_id": 779016664,
+        "osm_version": 3,
+        "osm_edited_at": "2026-09-25T17:23:50Z",
+        "source_url": "https://www.openstreetmap.org/way/779016664",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "building": "university",
+          "name": "求索楼"
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.4208641,
+              39.9775961
+            ],
+            [
+              116.4208624,
+              39.9769777
+            ],
+            [
+              116.4217493,
+              39.9769762
+            ],
+            [
+              116.4224536,
+              39.976975
+            ],
+            [
+              116.4224554,
+              39.9775936
+            ],
+            [
+              116.4208641,
+              39.9775961
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/779016666",
+      "properties": {
+        "layer": "building",
+        "osm_type": "way",
+        "osm_id": 779016666,
+        "osm_version": 1,
+        "osm_edited_at": "2020-03-07T06:23:19Z",
+        "source_url": "https://www.openstreetmap.org/way/779016666",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "building": "university"
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.4201689,
+              39.9781093
+            ],
+            [
+              116.4204234,
+              39.9781112
+            ],
+            [
+              116.420424,
+              39.9780665
+            ],
+            [
+              116.421167,
+              39.9780718
+            ],
+            [
+              116.4211656,
+              39.9781907
+            ],
+            [
+              116.4203973,
+              39.9781852
+            ],
+            [
+              116.4203967,
+              39.9782391
+            ],
+            [
+              116.4201673,
+              39.9782375
+            ],
+            [
+              116.4201689,
+              39.9781093
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/779016667",
+      "properties": {
+        "layer": "building",
+        "osm_type": "way",
+        "osm_id": 779016667,
+        "osm_version": 1,
+        "osm_edited_at": "2020-03-07T06:23:19Z",
+        "source_url": "https://www.openstreetmap.org/way/779016667",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "building": "apartments"
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.4213393,
+              39.981832
+            ],
+            [
+              116.4213507,
+              39.9816031
+            ],
+            [
+              116.4214038,
+              39.9816046
+            ],
+            [
+              116.4214109,
+              39.9814637
+            ],
+            [
+              116.4216833,
+              39.9814717
+            ],
+            [
+              116.4216648,
+              39.9818416
+            ],
+            [
+              116.4213393,
+              39.981832
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1217500010",
+      "properties": {
+        "layer": "building",
+        "osm_type": "way",
+        "osm_id": 1217500010,
+        "osm_version": 1,
+        "osm_edited_at": "2023-10-22T09:20:21Z",
+        "source_url": "https://www.openstreetmap.org/way/1217500010",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "building": "school"
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.4204882,
+              39.9775676
+            ],
+            [
+              116.4206794,
+              39.9775694
+            ],
+            [
+              116.4206846,
+              39.9772518
+            ],
+            [
+              116.4204934,
+              39.97725
+            ],
+            [
+              116.4204882,
+              39.9775676
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1217500011",
+      "properties": {
+        "layer": "building",
+        "osm_type": "way",
+        "osm_id": 1217500011,
+        "osm_version": 1,
+        "osm_edited_at": "2023-10-22T09:20:21Z",
+        "source_url": "https://www.openstreetmap.org/way/1217500011",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "building": "school"
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.4236568,
+              39.9799189
+            ],
+            [
+              116.4236552,
+              39.9796053
+            ],
+            [
+              116.4244421,
+              39.9796031
+            ],
+            [
+              116.4244448,
+              39.9801513
+            ],
+            [
+              116.4242816,
+              39.9801518
+            ],
+            [
+              116.4242804,
+              39.979917
+            ],
+            [
+              116.4236568,
+              39.9799189
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1217500012",
+      "properties": {
+        "layer": "building",
+        "osm_type": "way",
+        "osm_id": 1217500012,
+        "osm_version": 1,
+        "osm_edited_at": "2023-10-22T09:20:21Z",
+        "source_url": "https://www.openstreetmap.org/way/1217500012",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "building": "school"
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.4193837,
+              39.9812152
+            ],
+            [
+              116.4198616,
+              39.9812185
+            ],
+            [
+              116.4198599,
+              39.9813618
+            ],
+            [
+              116.419382,
+              39.9813584
+            ],
+            [
+              116.4193837,
+              39.9812152
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/412468627",
+      "properties": {
+        "layer": "campus",
+        "osm_type": "way",
+        "osm_id": 412468627,
+        "osm_version": 8,
+        "osm_edited_at": "2023-11-15T20:20:20Z",
+        "source_url": "https://www.openstreetmap.org/way/412468627",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "amenity": "university",
+          "name": "对外经济贸易大学",
+          "name:en": "University of International Business and Economics"
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.4182889,
+              39.9818905
+            ],
+            [
+              116.418525,
+              39.9759773
+            ],
+            [
+              116.4246109,
+              39.9760205
+            ],
+            [
+              116.4245653,
+              39.9791754
+            ],
+            [
+              116.4244768,
+              39.9818925
+            ],
+            [
+              116.4211938,
+              39.9818925
+            ],
+            [
+              116.4182889,
+              39.9818905
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/412476329",
+      "properties": {
+        "layer": "road",
+        "osm_type": "way",
+        "osm_id": 412476329,
+        "osm_version": 5,
+        "osm_edited_at": "2021-08-11T08:37:19Z",
+        "source_url": "https://www.openstreetmap.org/way/412476329",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "highway": "service"
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4211913,
+            39.9820262
+          ],
+          [
+            116.4211935,
+            39.9818504
+          ],
+          [
+            116.4211997,
+            39.9813555
+          ],
+          [
+            116.4211886,
+            39.9810131
+          ],
+          [
+            116.4212112,
+            39.9792782
+          ],
+          [
+            116.4212152,
+            39.979196
+          ],
+          [
+            116.4212367,
+            39.9791621
+          ],
+          [
+            116.4212635,
+            39.9791395
+          ],
+          [
+            116.4213058,
+            39.9791266
+          ],
+          [
+            116.42135,
+            39.979102
+          ],
+          [
+            116.4213648,
+            39.9790655
+          ],
+          [
+            116.4213721,
+            39.9790213
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/412476330",
+      "properties": {
+        "layer": "road",
+        "osm_type": "way",
+        "osm_id": 412476330,
+        "osm_version": 2,
+        "osm_edited_at": "2021-08-11T08:18:53Z",
+        "source_url": "https://www.openstreetmap.org/way/412476330",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "highway": "service"
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4231875,
+            39.9759299
+          ],
+          [
+            116.4231824,
+            39.9761726
+          ],
+          [
+            116.4231683,
+            39.9768421
+          ],
+          [
+            116.4234226,
+            39.9768564
+          ],
+          [
+            116.4235058,
+            39.9768755
+          ],
+          [
+            116.4235702,
+            39.9769125
+          ],
+          [
+            116.4235965,
+            39.9769927
+          ],
+          [
+            116.4235728,
+            39.977622
+          ],
+          [
+            116.4226808,
+            39.9776139
+          ],
+          [
+            116.4227049,
+            39.9768338
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/412476331",
+      "properties": {
+        "layer": "road",
+        "osm_type": "way",
+        "osm_id": 412476331,
+        "osm_version": 2,
+        "osm_edited_at": "2021-08-11T08:18:53Z",
+        "source_url": "https://www.openstreetmap.org/way/412476331",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "highway": "service"
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4226808,
+            39.9776139
+          ],
+          [
+            116.4226609,
+            39.97771
+          ],
+          [
+            116.422618,
+            39.977747
+          ],
+          [
+            116.4225402,
+            39.9777573
+          ],
+          [
+            116.4223835,
+            39.9777719
+          ],
+          [
+            116.4223648,
+            39.9783445
+          ],
+          [
+            116.4213792,
+            39.9783425
+          ],
+          [
+            116.4213687,
+            39.9787862
+          ],
+          [
+            116.4213721,
+            39.9790213
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/412476332",
+      "properties": {
+        "layer": "road",
+        "osm_type": "way",
+        "osm_id": 412476332,
+        "osm_version": 3,
+        "osm_edited_at": "2021-08-11T11:06:09Z",
+        "source_url": "https://www.openstreetmap.org/way/412476332",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "highway": "service"
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4199332,
+            39.9759009
+          ],
+          [
+            116.4199319,
+            39.9761171
+          ],
+          [
+            116.4199255,
+            39.9772218
+          ],
+          [
+            116.4199144,
+            39.9777655
+          ],
+          [
+            116.4199085,
+            39.9783199
+          ],
+          [
+            116.4198977,
+            39.9787663
+          ],
+          [
+            116.4198821,
+            39.9791437
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/412476333",
+      "properties": {
+        "layer": "road",
+        "osm_type": "way",
+        "osm_id": 412476333,
+        "osm_version": 1,
+        "osm_edited_at": "2016-04-21T16:19:52Z",
+        "source_url": "https://www.openstreetmap.org/way/412476333",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "highway": "service"
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4223648,
+            39.9783445
+          ],
+          [
+            116.4238085,
+            39.9783569
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/412476334",
+      "properties": {
+        "layer": "road",
+        "osm_type": "way",
+        "osm_id": 412476334,
+        "osm_version": 3,
+        "osm_edited_at": "2021-08-11T08:18:53Z",
+        "source_url": "https://www.openstreetmap.org/way/412476334",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "highway": "service"
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4235728,
+            39.977622
+          ],
+          [
+            116.4235622,
+            39.9777655
+          ],
+          [
+            116.4238679,
+            39.9777634
+          ],
+          [
+            116.4238626,
+            39.9782536
+          ],
+          [
+            116.4238438,
+            39.9783091
+          ],
+          [
+            116.4238085,
+            39.9783569
+          ],
+          [
+            116.4237995,
+            39.9784376
+          ],
+          [
+            116.4237897,
+            39.9791061
+          ],
+          [
+            116.4237861,
+            39.979158
+          ],
+          [
+            116.4237513,
+            39.979233
+          ],
+          [
+            116.4236386,
+            39.9793923
+          ],
+          [
+            116.423593,
+            39.9794426
+          ],
+          [
+            116.4235729,
+            39.9794837
+          ],
+          [
+            116.4235732,
+            39.979527
+          ],
+          [
+            116.4235575,
+            39.9801702
+          ],
+          [
+            116.4235487,
+            39.9804997
+          ],
+          [
+            116.4235541,
+            39.9805463
+          ],
+          [
+            116.4236104,
+            39.980571
+          ],
+          [
+            116.4243454,
+            39.9805772
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/666131237",
+      "properties": {
+        "layer": "road",
+        "osm_type": "way",
+        "osm_id": 666131237,
+        "osm_version": 8,
+        "osm_edited_at": "2025-11-16T06:45:38Z",
+        "source_url": "https://www.openstreetmap.org/way/666131237",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "highway": "unclassified",
+          "name": "惠中大道",
+          "surface": "asphalt"
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4182074,
+            39.9791318
+          ],
+          [
+            116.4183241,
+            39.9791347
+          ],
+          [
+            116.4183669,
+            39.9791347
+          ],
+          [
+            116.4185671,
+            39.9791346
+          ],
+          [
+            116.4198821,
+            39.9791437
+          ],
+          [
+            116.4200385,
+            39.9791447
+          ],
+          [
+            116.4212635,
+            39.9791395
+          ],
+          [
+            116.4231424,
+            39.9791625
+          ],
+          [
+            116.4237861,
+            39.979158
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/972201434",
+      "properties": {
+        "layer": "road",
+        "osm_type": "way",
+        "osm_id": 972201434,
+        "osm_version": 2,
+        "osm_edited_at": "2021-08-11T08:37:19Z",
+        "source_url": "https://www.openstreetmap.org/way/972201434",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "highway": "service"
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4192787,
+            39.9803007
+          ],
+          [
+            116.4192352,
+            39.9809393
+          ],
+          [
+            116.4192344,
+            39.9809872
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/972201436",
+      "properties": {
+        "layer": "road",
+        "osm_type": "way",
+        "osm_id": 972201436,
+        "osm_version": 1,
+        "osm_edited_at": "2021-08-11T08:18:53Z",
+        "source_url": "https://www.openstreetmap.org/way/972201436",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "highway": "service"
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4186256,
+            39.9800901
+          ],
+          [
+            116.4191739,
+            39.9801045
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/972201437",
+      "properties": {
+        "layer": "road",
+        "osm_type": "way",
+        "osm_id": 972201437,
+        "osm_version": 1,
+        "osm_edited_at": "2021-08-11T08:18:53Z",
+        "source_url": "https://www.openstreetmap.org/way/972201437",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "highway": "service"
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4185495,
+            39.9796265
+          ],
+          [
+            116.419099,
+            39.979643
+          ],
+          [
+            116.4191513,
+            39.9796698
+          ],
+          [
+            116.4191768,
+            39.9797088
+          ],
+          [
+            116.4191739,
+            39.9801045
+          ],
+          [
+            116.4191727,
+            39.9802658
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/972201438",
+      "properties": {
+        "layer": "road",
+        "osm_type": "way",
+        "osm_id": 972201438,
+        "osm_version": 2,
+        "osm_edited_at": "2021-08-11T11:06:09Z",
+        "source_url": "https://www.openstreetmap.org/way/972201438",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "highway": "service"
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4185671,
+            39.9791346
+          ],
+          [
+            116.4185654,
+            39.9791865
+          ],
+          [
+            116.4185495,
+            39.9796265
+          ],
+          [
+            116.418537,
+            39.9799698
+          ],
+          [
+            116.4185438,
+            39.9800099
+          ],
+          [
+            116.4185639,
+            39.9800387
+          ],
+          [
+            116.4186256,
+            39.9800901
+          ],
+          [
+            116.4186993,
+            39.9802
+          ],
+          [
+            116.4187188,
+            39.9802185
+          ],
+          [
+            116.4187422,
+            39.9802288
+          ],
+          [
+            116.4191003,
+            39.9802535
+          ],
+          [
+            116.4191727,
+            39.9802658
+          ],
+          [
+            116.4192787,
+            39.9803007
+          ],
+          [
+            116.419976,
+            39.9803131
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/972201439",
+      "properties": {
+        "layer": "road",
+        "osm_type": "way",
+        "osm_id": 972201439,
+        "osm_version": 2,
+        "osm_edited_at": "2021-08-11T08:37:19Z",
+        "source_url": "https://www.openstreetmap.org/way/972201439",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "highway": "service"
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4219984,
+            39.98136
+          ],
+          [
+            116.4219877,
+            39.9817137
+          ],
+          [
+            116.421981,
+            39.9818617
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/972201440",
+      "properties": {
+        "layer": "road",
+        "osm_type": "way",
+        "osm_id": 972201440,
+        "osm_version": 2,
+        "osm_edited_at": "2021-08-11T11:06:09Z",
+        "source_url": "https://www.openstreetmap.org/way/972201440",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "highway": "service"
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4200385,
+            39.9791447
+          ],
+          [
+            116.419976,
+            39.9803131
+          ],
+          [
+            116.4199424,
+            39.9809739
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/972201441",
+      "properties": {
+        "layer": "road",
+        "osm_type": "way",
+        "osm_id": 972201441,
+        "osm_version": 1,
+        "osm_edited_at": "2021-08-11T08:18:53Z",
+        "source_url": "https://www.openstreetmap.org/way/972201441",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "highway": "service"
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4192063,
+            39.9814763
+          ],
+          [
+            116.4192143,
+            39.981019
+          ],
+          [
+            116.4192344,
+            39.9809872
+          ],
+          [
+            116.4192733,
+            39.9809697
+          ],
+          [
+            116.4199424,
+            39.9809739
+          ],
+          [
+            116.4211886,
+            39.9810131
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/972201442",
+      "properties": {
+        "layer": "road",
+        "osm_type": "way",
+        "osm_id": 972201442,
+        "osm_version": 1,
+        "osm_edited_at": "2021-08-11T08:18:53Z",
+        "source_url": "https://www.openstreetmap.org/way/972201442",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "highway": "service"
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4198977,
+            39.9787663
+          ],
+          [
+            116.4213687,
+            39.9787862
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/972201443",
+      "properties": {
+        "layer": "road",
+        "osm_type": "way",
+        "osm_id": 972201443,
+        "osm_version": 1,
+        "osm_edited_at": "2021-08-11T08:18:53Z",
+        "source_url": "https://www.openstreetmap.org/way/972201443",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "highway": "service"
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4199085,
+            39.9783199
+          ],
+          [
+            116.4213792,
+            39.9783425
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/972201444",
+      "properties": {
+        "layer": "road",
+        "osm_type": "way",
+        "osm_id": 972201444,
+        "osm_version": 1,
+        "osm_edited_at": "2021-08-11T08:18:53Z",
+        "source_url": "https://www.openstreetmap.org/way/972201444",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "highway": "service"
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4213816,
+            39.9777634
+          ],
+          [
+            116.4213792,
+            39.9783425
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/972201446",
+      "properties": {
+        "layer": "road",
+        "osm_type": "way",
+        "osm_id": 972201446,
+        "osm_version": 1,
+        "osm_edited_at": "2021-08-11T08:18:53Z",
+        "source_url": "https://www.openstreetmap.org/way/972201446",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "highway": "service"
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4238787,
+            39.977001
+          ],
+          [
+            116.4238679,
+            39.9777634
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/972201447",
+      "properties": {
+        "layer": "road",
+        "osm_type": "way",
+        "osm_id": 972201447,
+        "osm_version": 1,
+        "osm_edited_at": "2021-08-11T08:18:53Z",
+        "source_url": "https://www.openstreetmap.org/way/972201447",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "highway": "service"
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4235965,
+            39.9769927
+          ],
+          [
+            116.4238787,
+            39.977001
+          ],
+          [
+            116.4244936,
+            39.9770029
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/972201448",
+      "properties": {
+        "layer": "road",
+        "osm_type": "way",
+        "osm_id": 972201448,
+        "osm_version": 1,
+        "osm_edited_at": "2021-08-11T08:18:53Z",
+        "source_url": "https://www.openstreetmap.org/way/972201448",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "highway": "service"
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4238626,
+            39.9782536
+          ],
+          [
+            116.4244896,
+            39.9782691
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/972201449",
+      "properties": {
+        "layer": "road",
+        "osm_type": "way",
+        "osm_id": 972201449,
+        "osm_version": 1,
+        "osm_edited_at": "2021-08-11T08:18:53Z",
+        "source_url": "https://www.openstreetmap.org/way/972201449",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "highway": "service"
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4235732,
+            39.979527
+          ],
+          [
+            116.4244712,
+            39.9795271
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/972201450",
+      "properties": {
+        "layer": "road",
+        "osm_type": "way",
+        "osm_id": 972201450,
+        "osm_version": 2,
+        "osm_edited_at": "2021-08-11T11:06:09Z",
+        "source_url": "https://www.openstreetmap.org/way/972201450",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "highway": "service"
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4231824,
+            39.9761726
+          ],
+          [
+            116.4243346,
+            39.9761849
+          ],
+          [
+            116.4244232,
+            39.976189
+          ],
+          [
+            116.4244607,
+            39.9762137
+          ],
+          [
+            116.4244768,
+            39.9762548
+          ],
+          [
+            116.4244929,
+            39.9769002
+          ],
+          [
+            116.4244936,
+            39.9770029
+          ],
+          [
+            116.4244983,
+            39.977636
+          ],
+          [
+            116.4244896,
+            39.9782691
+          ],
+          [
+            116.4244745,
+            39.9791631
+          ],
+          [
+            116.4244741,
+            39.9794015
+          ],
+          [
+            116.4244712,
+            39.9795271
+          ],
+          [
+            116.4244567,
+            39.9801435
+          ],
+          [
+            116.4244393,
+            39.980164
+          ],
+          [
+            116.424403,
+            39.9801723
+          ],
+          [
+            116.4235575,
+            39.9801702
+          ],
+          [
+            116.4231256,
+            39.980164
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/972201451",
+      "properties": {
+        "layer": "road",
+        "osm_type": "way",
+        "osm_id": 972201451,
+        "osm_version": 1,
+        "osm_edited_at": "2021-08-11T08:18:53Z",
+        "source_url": "https://www.openstreetmap.org/way/972201451",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "highway": "service"
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4199255,
+            39.9772218
+          ],
+          [
+            116.4207946,
+            39.9772289
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/972201452",
+      "properties": {
+        "layer": "road",
+        "osm_type": "way",
+        "osm_id": 972201452,
+        "osm_version": 1,
+        "osm_edited_at": "2021-08-11T08:18:53Z",
+        "source_url": "https://www.openstreetmap.org/way/972201452",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "highway": "service"
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.422618,
+            39.977747
+          ],
+          [
+            116.4235622,
+            39.9777655
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/972201453",
+      "properties": {
+        "layer": "road",
+        "osm_type": "way",
+        "osm_id": 972201453,
+        "osm_version": 1,
+        "osm_edited_at": "2021-08-11T08:18:53Z",
+        "source_url": "https://www.openstreetmap.org/way/972201453",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "highway": "service"
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4199144,
+            39.9777655
+          ],
+          [
+            116.420802,
+            39.9777585
+          ],
+          [
+            116.4213816,
+            39.9777634
+          ],
+          [
+            116.4223835,
+            39.9777719
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/972201454",
+      "properties": {
+        "layer": "road",
+        "osm_type": "way",
+        "osm_id": 972201454,
+        "osm_version": 2,
+        "osm_edited_at": "2026-09-25T17:23:50Z",
+        "source_url": "https://www.openstreetmap.org/way/972201454",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "highway": "service"
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4207888,
+            39.9768118
+          ],
+          [
+            116.4217533,
+            39.9768229
+          ],
+          [
+            116.4227049,
+            39.9768338
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/972201455",
+      "properties": {
+        "layer": "road",
+        "osm_type": "way",
+        "osm_id": 972201455,
+        "osm_version": 1,
+        "osm_edited_at": "2021-08-11T08:18:53Z",
+        "source_url": "https://www.openstreetmap.org/way/972201455",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "highway": "service"
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4227049,
+            39.9768338
+          ],
+          [
+            116.4231683,
+            39.9768421
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/972201456",
+      "properties": {
+        "layer": "road",
+        "osm_type": "way",
+        "osm_id": 972201456,
+        "osm_version": 1,
+        "osm_edited_at": "2021-08-11T08:18:53Z",
+        "source_url": "https://www.openstreetmap.org/way/972201456",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "highway": "service"
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4187597,
+            39.9763678
+          ],
+          [
+            116.4193109,
+            39.9763678
+          ],
+          [
+            116.4193659,
+            39.9763545
+          ],
+          [
+            116.4193886,
+            39.9763236
+          ],
+          [
+            116.4194133,
+            39.9760844
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/972201457",
+      "properties": {
+        "layer": "road",
+        "osm_type": "way",
+        "osm_id": 972201457,
+        "osm_version": 1,
+        "osm_edited_at": "2021-08-11T08:18:53Z",
+        "source_url": "https://www.openstreetmap.org/way/972201457",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "highway": "service"
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4183398,
+            39.9760988
+          ],
+          [
+            116.4184767,
+            39.9761007
+          ],
+          [
+            116.4186497,
+            39.9761037
+          ],
+          [
+            116.4190695,
+            39.9760862
+          ],
+          [
+            116.4193162,
+            39.9760832
+          ],
+          [
+            116.4194133,
+            39.9760844
+          ],
+          [
+            116.4196193,
+            39.9760903
+          ],
+          [
+            116.4199319,
+            39.9761171
+          ],
+          [
+            116.4201531,
+            39.9761273
+          ],
+          [
+            116.4206359,
+            39.9761315
+          ],
+          [
+            116.420719,
+            39.97615
+          ],
+          [
+            116.4207754,
+            39.9762034
+          ],
+          [
+            116.4207834,
+            39.9762774
+          ],
+          [
+            116.4207888,
+            39.9768118
+          ],
+          [
+            116.4207946,
+            39.9772289
+          ],
+          [
+            116.420802,
+            39.9777585
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/972205883",
+      "properties": {
+        "layer": "road",
+        "osm_type": "way",
+        "osm_id": 972205883,
+        "osm_version": 1,
+        "osm_edited_at": "2021-08-11T08:37:19Z",
+        "source_url": "https://www.openstreetmap.org/way/972205883",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "highway": "service"
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4181295,
+            39.980939
+          ],
+          [
+            116.4182333,
+            39.9809399
+          ],
+          [
+            116.4192352,
+            39.9809393
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/972205884",
+      "properties": {
+        "layer": "road",
+        "osm_type": "way",
+        "osm_id": 972205884,
+        "osm_version": 2,
+        "osm_edited_at": "2021-08-11T11:06:09Z",
+        "source_url": "https://www.openstreetmap.org/way/972205884",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "highway": "service"
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.421981,
+            39.9818617
+          ],
+          [
+            116.4230016,
+            39.9818555
+          ],
+          [
+            116.4230579,
+            39.9818329
+          ],
+          [
+            116.4230821,
+            39.9817733
+          ],
+          [
+            116.4231005,
+            39.9813782
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/972205885",
+      "properties": {
+        "layer": "road",
+        "osm_type": "way",
+        "osm_id": 972205885,
+        "osm_version": 1,
+        "osm_edited_at": "2021-08-11T08:37:19Z",
+        "source_url": "https://www.openstreetmap.org/way/972205885",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "highway": "service"
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4211935,
+            39.9818504
+          ],
+          [
+            116.421981,
+            39.9818617
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/972205886",
+      "properties": {
+        "layer": "road",
+        "osm_type": "way",
+        "osm_id": 972205886,
+        "osm_version": 1,
+        "osm_edited_at": "2021-08-11T08:37:19Z",
+        "source_url": "https://www.openstreetmap.org/way/972205886",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "highway": "service"
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4214016,
+            39.9812626
+          ],
+          [
+            116.4228454,
+            39.9812883
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/972205887",
+      "properties": {
+        "layer": "road",
+        "osm_type": "way",
+        "osm_id": 972205887,
+        "osm_version": 1,
+        "osm_edited_at": "2021-08-11T08:37:19Z",
+        "source_url": "https://www.openstreetmap.org/way/972205887",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "highway": "service"
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4214016,
+            39.9813566
+          ],
+          [
+            116.4214016,
+            39.9812626
+          ],
+          [
+            116.4214016,
+            39.9811948
+          ],
+          [
+            116.4214231,
+            39.9811526
+          ],
+          [
+            116.4214526,
+            39.9811321
+          ],
+          [
+            116.4227763,
+            39.9811506
+          ],
+          [
+            116.4228179,
+            39.9811783
+          ],
+          [
+            116.422842,
+            39.9812174
+          ],
+          [
+            116.4228454,
+            39.9812883
+          ],
+          [
+            116.4228433,
+            39.9813722
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/972244039",
+      "properties": {
+        "layer": "road",
+        "osm_type": "way",
+        "osm_id": 972244039,
+        "osm_version": 2,
+        "osm_edited_at": "2022-12-04T03:36:12Z",
+        "source_url": "https://www.openstreetmap.org/way/972244039",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "highway": "unclassified",
+          "name": "惠中大道"
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4237861,
+            39.979158
+          ],
+          [
+            116.4244745,
+            39.9791631
+          ],
+          [
+            116.4248147,
+            39.9791724
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/972244040",
+      "properties": {
+        "layer": "road",
+        "osm_type": "way",
+        "osm_id": 972244040,
+        "osm_version": 1,
+        "osm_edited_at": "2021-08-11T11:06:09Z",
+        "source_url": "https://www.openstreetmap.org/way/972244040",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "highway": "service",
+          "name": "惠中大道"
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4211997,
+            39.9813555
+          ],
+          [
+            116.4214016,
+            39.9813566
+          ],
+          [
+            116.4219984,
+            39.98136
+          ],
+          [
+            116.4228433,
+            39.9813722
+          ],
+          [
+            116.4231005,
+            39.9813782
+          ],
+          [
+            116.4231256,
+            39.980164
+          ],
+          [
+            116.4231424,
+            39.9791625
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/996319884",
+      "properties": {
+        "layer": "road",
+        "osm_type": "way",
+        "osm_id": 996319884,
+        "osm_version": 2,
+        "osm_edited_at": "2026-09-25T17:23:50Z",
+        "source_url": "https://www.openstreetmap.org/way/996319884",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "highway": "pedestrian"
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4215251,
+            39.9767693
+          ],
+          [
+            116.4215423,
+            39.9760952
+          ],
+          [
+            116.4219199,
+            39.9761017
+          ],
+          [
+            116.4219028,
+            39.9767759
+          ],
+          [
+            116.4217546,
+            39.9767733
+          ],
+          [
+            116.4215251,
+            39.9767693
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1562249515",
+      "properties": {
+        "layer": "road",
+        "osm_type": "way",
+        "osm_id": 1562249515,
+        "osm_version": 1,
+        "osm_edited_at": "2026-09-25T17:23:50Z",
+        "source_url": "https://www.openstreetmap.org/way/1562249515",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "highway": "footway"
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.4217493,
+            39.9769762
+          ],
+          [
+            116.4217533,
+            39.9768229
+          ],
+          [
+            116.4217546,
+            39.9767733
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/412476323",
+      "properties": {
+        "layer": "sport",
+        "osm_type": "way",
+        "osm_id": 412476323,
+        "osm_version": 1,
+        "osm_edited_at": "2016-04-21T16:19:52Z",
+        "source_url": "https://www.openstreetmap.org/way/412476323",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "leisure": "pitch",
+          "sport": "soccer"
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.4216068,
+              39.9805216
+            ],
+            [
+              116.4216199,
+              39.9795833
+            ],
+            [
+              116.4224405,
+              39.9795833
+            ],
+            [
+              116.4224275,
+              39.9805316
+            ],
+            [
+              116.4216068,
+              39.9805216
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/779016645",
+      "properties": {
+        "layer": "sport",
+        "osm_type": "way",
+        "osm_id": 779016645,
+        "osm_version": 2,
+        "osm_edited_at": "2022-12-04T03:36:12Z",
+        "source_url": "https://www.openstreetmap.org/way/779016645",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "leisure": "sports_centre",
+          "name": "红天体育馆"
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.4200467,
+              39.981791
+            ],
+            [
+              116.4200397,
+              39.9812106
+            ],
+            [
+              116.4210377,
+              39.9812106
+            ],
+            [
+              116.4210448,
+              39.9817855
+            ],
+            [
+              116.4200467,
+              39.981791
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/779016663",
+      "properties": {
+        "layer": "sport",
+        "osm_type": "way",
+        "osm_id": 779016663,
+        "osm_version": 1,
+        "osm_edited_at": "2020-03-07T06:23:19Z",
+        "source_url": "https://www.openstreetmap.org/way/779016663",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "leisure": "pitch",
+          "sport": "volleyball"
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.4186187,
+              39.9769825
+            ],
+            [
+              116.418954,
+              39.9769903
+            ],
+            [
+              116.4189357,
+              39.9774497
+            ],
+            [
+              116.4186005,
+              39.9774419
+            ],
+            [
+              116.4186187,
+              39.9769825
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/996319885",
+      "properties": {
+        "layer": "sport",
+        "osm_type": "way",
+        "osm_id": 996319885,
+        "osm_version": 1,
+        "osm_edited_at": "2021-10-25T14:59:41Z",
+        "source_url": "https://www.openstreetmap.org/way/996319885",
+        "accuracy_m": null,
+        "field_verified": false,
+        "tags": {
+          "leisure": "stadium"
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.4214307,
+              39.9810707
+            ],
+            [
+              116.4214822,
+              39.9792818
+            ],
+            [
+              116.4230744,
+              39.9792851
+            ],
+            [
+              116.4230529,
+              39.9811135
+            ],
+            [
+              116.4214307,
+              39.9810707
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}
