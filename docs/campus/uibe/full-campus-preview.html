@@ -1,0 +1,166 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>留答 · 整校夜游与定位随动预览</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#101c25;color:#eee8db;font:14px -apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif}button{font:inherit;cursor:pointer;color:inherit;background:#203641;border:1px solid #667675;border-radius:20px;padding:9px 13px}button:focus-visible,input:focus-visible{outline:2px solid #e1c58b;outline-offset:3px}.page{max-width:900px;margin:auto;padding:22px}.header{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:16px}.header strong{font-weight:500;letter-spacing:.15em}.header small{color:#adb8b6;font-size:11px}.map{height:min(720px,calc(100svh - 180px));min-height:480px;background:#243b47;position:relative;overflow:hidden;border-radius:22px;touch-action:none;isolation:isolate}.tile{position:absolute;transform-origin:0 0;pointer-events:none}.label{position:absolute;transform:translate(-50%,-50%);padding:3px 5px;line-height:14px;color:#253c43;background:#e7d6b2;white-space:nowrap;pointer-events:none}.label.draft{color:#d0d4c8;background:#30494e}.marker{position:absolute;pointer-events:none}.user{position:absolute;width:18px;height:18px;background:#66b7eb;border:3px solid #f3f8fc;border-radius:50%;transform:translate(-50%,-50%);z-index:4;pointer-events:none}.ring{position:absolute;border:1px solid #7db3d766;background:#77b7e217;border-radius:50%;pointer-events:none}.top{position:absolute;inset:16px 16px auto;display:flex;justify-content:space-between;gap:12px;align-items:center;z-index:6;pointer-events:none}.place{background:#142a36df;padding:10px 13px;border-radius:18px;line-height:20px}.place small{color:#e1cea4;font-size:10px}.buttons{display:flex;gap:7px;pointer-events:auto}.buttons button{background:#142a36eb}.source{position:absolute;bottom:10px;right:12px;font-size:9px;color:#d1d7c8;text-shadow:0 1px #132e39;z-index:5}.bar{position:absolute;left:14px;bottom:12px;color:#e0d8bf;font-size:9px;pointer-events:none}.bar i{display:block;height:4px;border-bottom:1.5px solid;margin-bottom:3px}.walk{display:flex;align-items:center;gap:14px;margin-top:15px;color:#b7c3c0;font-size:12px}.walk input{flex:1;min-width:70px;accent-color:#e7d6b2}.note{margin-top:10px;color:#a5b2b2;font-size:10px}.gps{color:#e1cea4}@media(max-width:500px){.page{padding:13px}.map{height:calc(100svh - 153px)}.header small{font-size:10px}.top{inset:13px 12px auto}.buttons{gap:5px}.buttons button{padding:8px 11px;font-size:12px}.place{padding:8px 11px}.note{line-height:1.5}}
+</style>
+<div class="page"><header class="header"><strong>留答 · 贸大夜游</strong><small>与小程序共用地图相机</small></header><main class="map" id="map"><img id="tile" class="tile" src="../../../miniprogram/assets/campus/uibe-night.jpg" alt="整校艺术底图"><div id="labels"></div><div id="ring" class="ring" hidden></div><div id="pins"></div><div id="user" class="user" hidden></div><div class="top"><div class="place">整校地图<br><small id="mode">概览 · 尚未现场校准</small></div><div class="buttons"><button id="follow">模拟 GPS</button><button id="overview">整校</button><button id="zoom" aria-label="放大地图">＋</button></div></div><div class="bar"><i id="scale"></i><span id="scale-text"></span></div><div class="source">© OpenStreetMap contributors · ODbL</div></main><div class="walk"><span>模拟步行</span><input id="walk" type="range" min="0" max="100" value="40" aria-label="模拟在惠中大道步行"><span class="gps" id="gps">未跟随</span></div><div class="note">这里使用公开道路上的模拟位置；手机真 GPS 已接入小程序，仍需真机与实地核验。</div></div>
+<script>
+const definitions={},cache={};
+definitions["./geo"]=function(module,exports,require){
+const EARTH = 6371008.8
+const RAD = Math.PI / 180
+const FULL_RADIUS = 50
+const PREVIEW_RADIUS = 200
+const MAX_ACCURACY = 30
+const MAX_AGE = 15000
+
+function valid(point) {
+  return !!point && Number.isFinite(point.latitude) && Number.isFinite(point.longitude) &&
+    Math.abs(point.latitude) <= 90 && Math.abs(point.longitude) <= 180
+}
+function distance(a, b) {
+  if (!valid(a) || !valid(b)) return Infinity
+  const lat = (b.latitude - a.latitude) * RAD
+  const lon = (b.longitude - a.longitude) * RAD
+  const h = Math.sin(lat / 2) ** 2 + Math.cos(a.latitude * RAD) *
+    Math.cos(b.latitude * RAD) * Math.sin(lon / 2) ** 2
+  return EARTH * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(Math.max(0, 1 - h)))
+}
+function offset(origin, east, north) {
+  return { latitude: origin.latitude + north / EARTH / RAD,
+    longitude: origin.longitude + east / (EARTH * Math.cos(origin.latitude * RAD)) / RAD }
+}
+function local(point, origin) {
+  return { x: (point.longitude - origin.longitude) * RAD * EARTH * Math.cos(origin.latitude * RAD),
+    z: -(point.latitude - origin.latitude) * RAD * EARTH }
+}
+function accuracy(point) {
+  if (!point) return Infinity
+  const n = point.horizontalAccuracy > 0 ? point.horizontalAccuracy : point.accuracy
+  return Number.isFinite(n) && n > 0 ? n : Infinity
+}
+function gate(position, target, mode) {
+  const d = distance(position, target)
+  if (mode === 'demo') return { ok: d <= FULL_RADIUS, reason: '走到留话附近再接一句。' }
+  if (!valid(position) || position.source !== 'gps') return { ok: false, reason: '请先开启手机定位。' }
+  if (Date.now() - position.timestamp > MAX_AGE) return { ok: false, reason: '位置已过期，请重新定位。' }
+  const error = accuracy(position)
+  if (error > MAX_ACCURACY) return { ok: false, reason: '定位较弱，请到室外开阔处重新定位。' }
+  if (d + error > FULL_RADIUS) return { ok: false, reason: '请再靠近一些，确认到场后才能操作。' }
+  return { ok: true, reason: '' }
+}
+function decorate(post, position, mode) {
+  const d = distance(position, post)
+  const participated = mode === 'demo' && !!(post.owned || post.participated || post.comments.some(item => item.mine))
+  const onsite = gate(position,post,mode).ok
+  const full = participated || d <= FULL_RADIUS && (mode === 'demo' || onsite)
+  const level = full ? 'full' : d <= PREVIEW_RADIUS ? 'preview' : 'dot'
+  return Object.assign({}, post, {
+    distance: Number.isFinite(d) ? Math.round(d) : null,
+    distanceLabel: Number.isFinite(d) ? (d >= 1000 ? (d / 1000).toFixed(1) + 'km' : Math.round(d) + 'm') : '待定位',
+    level, displayText: full ? post.text : level === 'preview' ? post.teaser : '这里有人留过话，走近看看。',
+    participated,accessMode:participated ? 'participant' : onsite ? 'onsite' : 'nearby',
+    canInteract:onsite,canReply:participated || onsite,canLike:onsite,commentCount:post.comments.length,
+    previewComments: post.comments.slice(-2)
+  })
+}
+module.exports = { distance, offset, local, valid, accuracy, gate, decorate, FULL_RADIUS, PREVIEW_RADIUS, MAX_AGE }
+
+};
+definitions["../data/campus"]=function(module,exports,require){
+module.exports={"version":1,"title":"贸大夜游","origin":{"longitude":116.42769126282428,"latitude":39.98031893523938,"coordinateSystem":"gcj02"},"bounds":{"left":-297.0237010899092,"right":296.95939499742406,"top":-358.5906510995232,"bottom":354.9732667111596},"boundary":[[-269.0237010899092,-330.5906510995232],[-248.99084534654858,326.9732667111596],[268.95939499742406,322.74507842840194],[265.1135258173613,-28.083408808478616],[257.6124214465266,-330.23347287885537],[-21.772227526941432,-330.5646899696656],[-269.0237010899092,-330.5906510995232]],"labels":[{"id":632711504,"name":"行政楼","x":230.04285297735046,"z":125.95196403338639},{"id":779016646,"name":"国际教育大厦","x":-197.30682128225257,"z":-282.5895561996734},{"id":779016647,"name":"汇康公寓","x":-67.68942434559051,"z":-48.74182196137086},{"id":779016652,"name":"图书馆","x":-98.77041851068327,"z":241.34207679006107},{"id":779016653,"name":"逸夫科研楼","x":230.08888697661268,"z":17.030264233686623},{"id":779016654,"name":"宁远楼","x":198.78393634685332,"z":260.9112264461078},{"id":779016655,"name":"诚信楼","x":139.29309156051565,"z":93.35235314551514},{"id":779016656,"name":"一食堂","x":28.606483724033467,"z":18.08257913646781},{"id":779016658,"name":"博学楼","x":-219.30307117081682,"z":-175.336918655762},{"id":779016659,"name":"金融食堂","x":-161.4537170373273,"z":-130.48404944054562},{"id":779016660,"name":"知行楼","x":-169.34315433348246,"z":-68.42389370159668},{"id":779016664,"name":"求索楼","x":19.296090431365364,"z":188.64832304301802},{"id":779016645,"name":"红天体育馆","x":-77.23256917251146,"z":-286.91365764637885}],"draftAreas":[{"left":115,"right":261.95939499742406,"top":-313.5906510995232,"bottom":-30,"label":"东北片区 · 建筑待补绘"}],"image":"/assets/campus/uibe-night.jpg","coordinateSystem":"gcj02","fieldVerified":false,"attribution":"© OpenStreetMap contributors · ODbL","sourceSha256":"8352b855d516ba295d22c11681933644fadb95326e68a48aee83ef5cba86ac01","coordinateConversion":"Approximate WGS84 → GCJ-02; wandergis/coordtransform (MIT); not surveyed","sourceDate":"2026-10-27","missingDetail":"东北片区等部分建筑待补绘；现有轮廓待校准"}
+};
+definitions["./campus-map"]=function(module,exports,require){
+// A cached image transform plus small overlay patches. No native canvas layer or image export.
+const geo = require('./geo')
+const campus = require('../data/campus')
+const RAD = Math.PI / 180
+function point(position) { const p=geo.local(position,campus.origin);return{x:p.x,z:p.z} }
+function contains(position) {
+  if(!geo.valid(position)||position.coordinateSystem!=='gcj02')return false
+  const p=point(position),ring=campus.boundary;let inside=false
+  for(let i=0,j=ring.length-1;i<ring.length;j=i++) {
+    const a=ring[i],b=ring[j]
+    if((a[1]>p.z)!==(b[1]>p.z)&&p.x<(b[0]-a[0])*(p.z-a[1])/(b[1]-a[1])+a[0])inside=!inside
+  }
+  return inside
+}
+function scaleForZoom(zoom){return Math.pow(2,zoom)/(156543.03392*Math.cos(campus.origin.latitude*RAD))}
+function zoomForScale(scale){return Math.log2(scale*156543.03392*Math.cos(campus.origin.latitude*RAD))}
+function create(width,height,callbacks={}) {
+  const bounds=campus.bounds,camera={x:0,z:0,s:1}
+  let disposed=false,frame=null,model={},gesture=null,initialized=false,following=false,acquired=false
+  const round=n=>Math.round(n*100)/100
+  function screen(p){return{x:width/2+(p.x-camera.x)*camera.s,y:height/2+(p.z-camera.z)*camera.s}}
+  function fit(){camera.x=(bounds.left+bounds.right)/2;camera.z=(bounds.top+bounds.bottom)/2;camera.s=Math.min((width-24)/(bounds.right-bounds.left),(height-128)/(bounds.bottom-bounds.top))}
+  function schedule(){if(!disposed&&frame===null)frame=setTimeout(draw,50)}
+  function changed(userGesture){if(callbacks.camera)callbacks.camera({scale:round(Math.max(14,Math.min(20,zoomForScale(camera.s)))),gesture:!!userGesture})}
+  function draw(){
+    frame=null;if(disposed)return
+    const corner=screen({x:bounds.left,z:bounds.top}),labels=[],placed=[]
+    for(const place of campus.labels.slice().sort((a,b)=>(a.id===779016652?-1:b.id===779016652?1:0))) {
+      const p=screen(place),font=camera.s<.7?9:camera.s<1.5?10:12,w=place.name.length*font+12
+      const box={l:p.x-w/2,r:p.x+w/2,t:p.y-10,b:p.y+10}
+      if(p.y<100||p.y>height-22||box.l<5||box.r>width-5||placed.some(a=>a.l<box.r&&a.r>box.l&&a.t<box.b&&a.b>box.t))continue
+      labels.push({id:place.id,name:place.name,x:round(p.x),y:round(p.y),font});placed.push(box)
+    }
+    for(const area of campus.draftAreas){const p=screen({x:(area.left+area.right)/2,z:(area.top+area.bottom)/2});if(p.x>60&&p.x<width-60&&p.y>100&&p.y<height-30)labels.push({id:'draft',name:area.label,x:round(p.x),y:round(p.y),font:9,draft:true})}
+    const pins=(model.groups||[]).map(group=>{
+      const p=screen(point(group)),anchor=group.anchor||{x:.5,y:.5}
+      return{id:group.id,x:round(p.x-group.width*anchor.x),y:round(p.y-group.height*anchor.y),width:group.width,height:group.height,iconPath:group.iconPath,count:group.count}
+    }).filter(p=>p.x>-60&&p.x<width+60&&p.y>-60&&p.y<height+60)
+    let user=null
+    if(geo.valid(model.position)&&model.position.coordinateSystem==='gcj02') {
+      const p=screen(point(model.position)),error=geo.accuracy(model.position)
+      if(p.x>-150&&p.x<width+150&&p.y>-150&&p.y<height+150)user={x:round(p.x),y:round(p.y),fresh:Date.now()-model.position.timestamp<=geo.MAX_AGE,
+        radius:Number.isFinite(error)&&error<150?round(error*camera.s):0}
+    }
+    const meters=camera.s>2?20:camera.s>.8?50:100
+    if(callbacks.frame)callbacks.frame({transform:'translate('+round(corner.x)+'px,'+round(corner.y)+'px) scale('+camera.s.toFixed(6)+')',
+      labels,pins,user,scaleWidth:round(meters*camera.s),scaleText:meters+' m'})
+  }
+  function update(next){
+    model=next;const inside=contains(next.position)
+    if(!initialized){initialized=true;if(inside&&next.following){const p=point(next.position);camera.x=p.x;camera.z=p.z;camera.s=scaleForZoom(next.mapScale||18);acquired=true}changed(false)}
+    else if(next.following&&inside&&!gesture){const p=point(next.position);camera.x=p.x;camera.z=p.z;if(!acquired){acquired=true;camera.s=scaleForZoom(18);changed(false)}else if(!following&&Number.isFinite(next.mapScale))camera.s=scaleForZoom(next.mapScale)}
+    following=!!next.following;schedule()
+  }
+  function touches(event){return(event.touches||[]).map(t=>({x:Number.isFinite(t.x)?t.x:t.clientX,y:Number.isFinite(t.y)?t.y:t.clientY}))}
+  function start(event){const ps=touches(event);if(ps.length)gesture={points:ps,x:camera.x,z:camera.z,s:camera.s,moved:ps.length>1}}
+  function move(event){
+    if(!gesture)return
+    const ps=touches(event);if(!ps.length)return
+    if(ps.length!==gesture.points.length){start(event);gesture.moved=true;return}
+    const a=gesture.points[0],p=ps[0]
+    if(ps.length===1){const dx=p.x-a.x,dy=p.y-a.y;if(Math.hypot(dx,dy)>5)gesture.moved=true;camera.x=gesture.x-dx/gesture.s;camera.z=gesture.z-dy/gesture.s}
+    else{gesture.moved=true;const b=gesture.points[1],q=ps[1],mid={x:(p.x+q.x)/2,y:(p.y+q.y)/2},before={x:(a.x+b.x)/2,y:(a.y+b.y)/2};const ratio=Math.hypot(p.x-q.x,p.y-q.y)/Math.max(1,Math.hypot(a.x-b.x,a.y-b.y));camera.s=Math.max(scaleForZoom(14),Math.min(scaleForZoom(19),gesture.s*ratio));camera.x=gesture.x+(before.x-width/2)/gesture.s-(mid.x-width/2)/camera.s;camera.z=gesture.z+(before.y-height/2)/gesture.s-(mid.y-height/2)/camera.s}
+    if(gesture.moved&&following){following=false;if(callbacks.pan)callbacks.pan()}
+    schedule()
+  }
+  function end(event){if(!gesture)return;const moved=gesture.moved;if(touches(event).length){start(event);gesture.moved=true;return}gesture=null;if(moved)changed(true)}
+  function zoom(step){camera.s=scaleForZoom(Math.max(14,Math.min(19,zoomForScale(camera.s)+step)));changed(false);schedule()}
+  function goTo(position,zoom){const p=point(position);camera.x=p.x;camera.z=p.z;if(Number.isFinite(zoom))camera.s=scaleForZoom(zoom);changed(false);schedule()}
+  function overview(){fit();following=false;if(callbacks.pan)callbacks.pan();changed(false);schedule()}
+  function destroy(){disposed=true;clearTimeout(frame);frame=null;model={};gesture=null}
+  function cancel(){const moved=gesture&&gesture.moved;gesture=null;if(moved)changed(true)}
+  fit();schedule()
+  return{update,touchStart:start,touchMove:move,touchEnd:end,touchCancel:cancel,zoom,goTo,overview,destroy}
+}
+module.exports={create,contains,point,scaleForZoom,zoomForScale,metadata:campus}
+
+};
+function require(id){if(cache[id])return cache[id].exports;const m={exports:{}};cache[id]=m;definitions[id](m,m.exports,require);return m.exports}
+const campus=require('./campus-map'),geo=require('./geo'),meta=campus.metadata,route=[[-275.99123019615416,-23.830714100608766],[-266.0574096615328,-24.144075360506413],[-262.4141856764919,-24.140714425671813],[-245.372868922195,-24.113751838015624],[-133.44285775493958,-25.016628714854004],[-120.13097834418136,-25.114285181633484],[-15.870162162642282,-24.425753269373043],[144.03095408925142,-26.799670897883107],[198.80809804043335,-26.232321501648933]];
+const map=document.getElementById('map'),tile=document.getElementById('tile'),labels=document.getElementById('labels'),user=document.getElementById('user'),ring=document.getElementById('ring');
+tile.style.width=(meta.bounds.right-meta.bounds.left)+'px';tile.style.height=(meta.bounds.bottom-meta.bounds.top)+'px';
+let renderer,following=false,scale=17,position=null,down=false,moved=false;
+function sample(value){const start=route[0],end=route[route.length-1],t=.2+value/100*.6;return Object.assign(geo.offset(meta.origin,start[0]+(end[0]-start[0])*t,-(start[1]+(end[1]-start[1])*t)),{source:'gps',coordinateSystem:'gcj02',accuracy:8,timestamp:Date.now()})}
+function sync(){renderer.update({position,following,mapScale:scale,groups:[]});document.getElementById('mode').textContent=following?'模拟位置随动 · 尚未现场校准':'概览 / 自由浏览 · 尚未现场校准';document.getElementById('gps').textContent=following?'跟随中':'未跟随'}
+function init(){if(renderer)renderer.destroy();renderer=campus.create(map.clientWidth,map.clientHeight,{frame:f=>{tile.style.transform=f.transform;labels.replaceChildren(...f.labels.map(l=>{const el=document.createElement('div');el.className='label'+(l.draft?' draft':'');el.style.cssText='left:'+l.x+'px;top:'+l.y+'px;font-size:'+l.font+'px';el.textContent=l.name;return el}));user.hidden=!f.user;ring.hidden=!f.user||!f.user.radius;if(f.user){user.style.left=f.user.x+'px';user.style.top=f.user.y+'px';ring.style.cssText='left:'+(f.user.x-f.user.radius)+'px;top:'+(f.user.y-f.user.radius)+'px;width:'+f.user.radius*2+'px;height:'+f.user.radius*2+'px'}document.getElementById('scale').style.width=f.scaleWidth+'px';document.getElementById('scale-text').textContent=f.scaleText},pan:()=>{following=false;document.getElementById('gps').textContent='自由浏览'},camera:c=>{scale=c.scale}});sync()}
+new ResizeObserver(init).observe(map);
+document.getElementById('follow').onclick=()=>{position=sample(Number(document.getElementById('walk').value));following=true;scale=18;sync();renderer.goTo(position,18)};
+document.getElementById('overview').onclick=()=>{following=false;sync();renderer.overview()};document.getElementById('zoom').onclick=()=>renderer.zoom(1);
+document.getElementById('walk').oninput=e=>{position=sample(Number(e.target.value));sync()};
+map.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;down=true;moved=false;map.setPointerCapture(e.pointerId);const r=map.getBoundingClientRect();renderer.touchStart({touches:[{x:e.clientX-r.left,y:e.clientY-r.top}]})});
+map.addEventListener('pointermove',e=>{if(!down)return;moved=true;const r=map.getBoundingClientRect();renderer.touchMove({touches:[{x:e.clientX-r.left,y:e.clientY-r.top}]})});
+map.addEventListener('pointerup',()=>{if(down){renderer.touchEnd({touches:[]});down=false;sync()}});map.addEventListener('pointercancel',()=>{renderer.touchCancel({touches:[]});down=false});
+</script></html>

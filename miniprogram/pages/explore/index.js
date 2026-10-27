@@ -8,6 +8,7 @@ const street = require('../../utils/street')
 const preferences = require('../../services/preferences')
 const drafts = require('../../services/drafts')
 const mapPoints = require('../../utils/map-points')
+const campus = require('../../utils/campus-map')
 const { tabLayout, selectTab } = require('../../utils/layout')
 
 Page({
@@ -21,7 +22,9 @@ Page({
     sceneWidth: 390, sceneFrame: '', cloudConnected: false, cloudStatus: '联机未连接', privacyVisible:false,
     mapScale:18,syncState:'idle',syncBusy:false,emptyLabel:'看看附近',nearbyLabel:'附近留话',selectedIndex:0,nearbyCount:0,cardMaxHeight:210,
     sheetVisible:false,sheetTitle:'附近留话',sheetSubtitle:'',sheetRows:[],sheetSort:'heat',sheetMaxHeight:280,
-    selectedGroupCount:0,selectedHeatLabel:''
+    selectedGroupCount:0,selectedHeatLabel:'',campusFrame:{labels:[],pins:[],user:null,transform:''},
+    campusWidth:campus.metadata.bounds.right-campus.metadata.bounds.left,
+    campusHeight:campus.metadata.bounds.bottom-campus.metadata.bounds.top
   },
   onLoad() { this._yaw = 0; this._selectedId = 'stairs'; this._cloudPosts = []; this._position = demo.position(0); this.resizeStage() },
   onShow() {
@@ -42,7 +45,7 @@ Page({
       this.setData({ cardVisible:true,expanded:false })
     }
     this.refresh()
-    if (this._ready) this.initCanvas()
+    if (this._ready || this.data.view==='campus') this.initCanvas()
     if (global.mode === 'live') this.beginLocation()
     this._timer = setInterval(() => {
       if (this.data.mode === 'live') { this.refresh(); if (Date.now() - (this._lastSync || 0) > 8000) this.syncNearby() }
@@ -76,10 +79,30 @@ Page({
     this._renderer = null
   },
   initCanvas() {
-    if (!this._ready || !this._visible || this.data.view !== 'street' || !this.data.hasPosition) return
+    const campusView = this.data.view === 'campus'
+    if (!this._visible || this.data.privacyVisible || (!campusView && (!this._ready || this.data.view !== 'street' || !this.data.hasPosition))) return
     const ticket = this._rendererEpoch = (this._rendererEpoch || 0) + 1
     if (this._renderer) this._renderer.destroy()
     this._renderer = null
+    if(campusView){
+      this._campusFrameSignature=''
+      this._renderer=campus.create(this.data.sceneWidth,this.data.canvasHeight,{
+        frame:frame=>{
+          if(!this._visible||this.data.view!=='campus'||ticket!==this._rendererEpoch)return
+          const signature=JSON.stringify(frame)
+          if(signature!==this._campusFrameSignature){this._campusFrameSignature=signature;this.setData({campusFrame:frame})}
+        },
+        pan:()=>{if(this._visible&&this.data.following)this.setData({following:false})},
+        camera:camera=>{
+          if(!this._visible||this.data.view!=='campus')return
+          if(camera.gesture)this._ignoreCampusTapUntil=Date.now()+500
+          const patch={};if(camera.scale!==this.data.mapScale)patch.mapScale=camera.scale
+          if(camera.gesture&&this.data.following)patch.following=false
+          if(Object.keys(patch).length)this.setData(patch,()=>this.refresh())
+        }
+      })
+      this.paint();return
+    }
     wx.nextTick(() => {
       wx.createSelectorQuery().in(this).select('#street').fields({ node: true, size: true }).exec(result => {
         const item = result && result[0]
@@ -96,6 +119,11 @@ Page({
     })
   },
   paint() {
+    if (this.data.view === 'campus') {
+      if(this._renderer)this._renderer.update({position:this._position,groups:this._mapGroups||[],
+        following:this.data.following,mapScale:this.data.mapScale})
+      return
+    }
     if (this._renderer) this._renderer.update({ mode: this.data.mode, position: this._position,
       posts: this.data.posts, selectedId: this._selectedId, cardVisible: this.data.cardVisible,
       yaw: this._yaw, overview: this.data.overview })
@@ -131,16 +159,18 @@ Page({
     const count = nearby.length,index = nearby.findIndex(post => post.id === this._selectedId)
     let mapNotice = '',mapNoticeAction = ''
     if (mode === 'live') {
-      if (!good || age > geo.MAX_AGE) { mapNotice = '位置已过期 · 点此重新定位'; mapNoticeAction = 'recenter' }
+      if (this.data.view === 'campus' && this._campusError) {mapNotice='校园底图未载入 · 点此使用标准地图';mapNoticeAction='standard'}
+      else if (!good || age > geo.MAX_AGE) { mapNotice = good ? '位置已过期 · 点此重新定位' : '点此定位，看看你在校园哪里'; mapNoticeAction = 'recenter' }
       else if (error > 30) { mapNotice = '定位较弱 · 点此查看原因'; mapNoticeAction = 'location' }
+      else if (this.data.view === 'campus' && !campus.contains(position)) {mapNotice='你在校园外 · 正在浏览整校，点此回到我';mapNoticeAction='recenter'}
       else if (count && this.data.syncState === 'join') { mapNotice = '加入试用，发现附近留话'; mapNoticeAction = 'connect' }
       else if (count && this.data.syncState === 'error') { mapNotice = '附近暂未更新 · 点此重试'; mapNoticeAction = 'refresh' }
     }
-    const emptyLabel = this.data.syncState === 'loading' ? '正在看看附近…' : this.data.syncState === 'join' ? '加入现场留话 →' :
+    const emptyLabel = mode==='live'&&!good ? '开启定位，看看附近留话 →' : this.data.syncState === 'loading' ? '正在看看附近…' : this.data.syncState === 'join' ? '加入现场留话 →' :
       this.data.syncState === 'error' ? '暂未刷新，点此重试 ↻' : '这里还没有留话，留第一句 ＋'
     const patch = { posts, selected, hasPosition: good, markers,
       gpsStatus,mapNotice,mapNoticeAction,
-      sceneContext:mode === 'demo' ? '演示街区 · 虚构场景' : this.data.view === 'street' ? '3D 空间示意 · 非真实建筑' : '',
+      sceneContext:mode === 'demo' ? '演示街区 · 虚构场景' : this.data.view === 'street' ? '3D 空间示意 · 非真实建筑' : this.data.view === 'campus' ? '贸大夜游 · 底图待现场校准' : '',
       emptyLabel,nearbyCount:count,selectedIndex:index + 1,nearbyLabel:count ? '附近 ' + count + ' 条' : '附近留话',
       selectedGroupCount:selectedGroup ? selectedGroup.count : 0,selectedHeatLabel:selected ? mapPoints.heat(selected).label : '',
       circles: mode === 'live' && good && error < 1000 ? [{ latitude: position.latitude, longitude: position.longitude,
@@ -148,7 +178,7 @@ Page({
     if (good && this.data.following) { patch.latitude = position.latitude; patch.longitude = position.longitude }
     if (this.data.sheetVisible) Object.assign(patch,this.sheetPatch(posts))
     // Do not re-send the entire native marker array when only GPS labels change.
-    if (JSON.stringify(markers) === this._markerSignature) delete patch.markers
+    if (this.data.view !== 'map' || JSON.stringify(markers) === this._markerSignature) delete patch.markers
     else this._markerSignature = JSON.stringify(markers)
     this.setData(patch, () => this.paint())
   },
@@ -188,6 +218,10 @@ Page({
       if (result.tapIndex === 2) { api.openConnect(); return }
       const mode = result.tapIndex === 0 ? 'demo' : 'live'
       if (mode === this.data.mode) { if (mode === 'live') this.recenter(); return }
+      this.switchMode(mode,mode === 'demo' ? 'street' : 'map')
+    } })
+  },
+  switchMode(mode,view) {
       location.stop()
       if (this._unsubscribe) this._unsubscribe()
       this._unsubscribe = null
@@ -200,7 +234,7 @@ Page({
       this._markerKeys = new Map(); this._nextMarkerId = 0; this._markerSignature = ''
       this._pendingOpenId = ''
       const global = getApp().globalData
-      global.mode = mode; global.view = mode === 'demo' ? 'street' : 'map'
+      global.mode = mode; global.view = mode === 'demo' ? 'street' : view
       preferences.save(mode,global.view)
       this._position = mode === 'demo' ? demo.position(global.demoWalk) : location.peek()
       this._selectedId = mode === 'demo' ? 'stairs' : null
@@ -212,7 +246,6 @@ Page({
         this.refresh(); this.initCanvas()
         if (mode === 'live') this.beginLocation()
       })
-    } })
   },
   beginLocation() {
     if (this._locating || !this._visible || this.data.mode !== 'live') return
@@ -224,12 +257,12 @@ Page({
       this._position = position
       this.refresh()
       this.syncNearby()
-      if (first) this.initCanvas()
+      if (first && this.data.view!=='campus') this.initCanvas()
     })
     this.setData({ gpsStatus: '正在定位…' })
     location.start().then(position => {
       if (!this._visible || this.data.mode !== 'live') return
-      this._position = position; this.refresh(); this.initCanvas(); this.syncNearby(true)
+      this._position = position; this.refresh(); if(this.data.view!=='campus'||!this._renderer)this.initCanvas(); this.syncNearby(true)
     }).catch(error => {
       if (error.cancelled || !this._visible || this.data.mode !== 'live') return
       this.refresh()
@@ -251,22 +284,46 @@ Page({
     const demoMode = this.data.mode === 'demo'
     const actions = [
       { title:demoMode ? '刷新演示留话' : '刷新附近留话',run:() => this.refreshNearby() },
-      { title:demoMode ? (this.data.overview ? '切换街景视角' : '切换俯视视角') : this.data.view === 'map' ? '查看 3D 空间示意' : '返回二维地图',run:() => this.toggleView() },
+      { title:'地图与场景',run:() => this.showViewPicker() },
       { title:'地图上的逗号',run:() => this.showHeatInfo() },
       { title:demoMode ? '演示说明' : '定位与连接状态',run:() => this.showMapStatus() },
       { title:'切换体验模式',run:() => this.chooseMode() }
     ]
-    if (!demoMode && this.data.view === 'map') actions.splice(2,0,{ title:'地图缩放',run:() => this.showMapZoom() })
+    if (!demoMode && this.data.view !== 'street') actions.splice(2,0,{ title:'地图缩放',run:() => this.showMapZoom() })
     this._menuOpen = true
     wx.showActionSheet({ itemList:actions.map(action => action.title),
       success:result => { const action = actions[result.tapIndex]; if (action) wx.nextTick(() => { if (this._visible) action.run() }) },
       complete:() => { this._menuOpen = false } })
   },
   showMapZoom() {
-    wx.showActionSheet({ itemList:['放大地图','缩小地图'],success:result => {
-      if (this._visible && this.data.view === 'map') this.zoom(result.tapIndex === 0 ? 1 : -1)
+    const campusView=this.data.view==='campus'
+    wx.showActionSheet({ itemList:campusView ? ['放大地图','缩小地图','查看整校'] : ['放大地图','缩小地图'],success:result => {
+      if(!this._visible)return
+      if(campusView && this.data.view==='campus' && this._renderer){
+        if(result.tapIndex===2)this._renderer.overview()
+        else this._renderer.zoom(result.tapIndex===0?1:-1)
+      } else if(this.data.view==='map')this.zoom(result.tapIndex===0?1:-1)
     } })
   },
+  showViewPicker() {
+    const demoMode=this.data.mode==='demo'
+    wx.showActionSheet({itemList:demoMode ? ['贸大夜游地图 · 可开启定位',this.data.overview?'演示街区 · 街景视角':'演示街区 · 俯视视角'] : ['标准地图','贸大夜游地图','3D 空间示意'],success:result=>{
+      if(!this._visible)return
+      if(demoMode){if(result.tapIndex===0)this.openCampus();else this.toggleView()}
+      else this.setView(['map','campus','street'][result.tapIndex])
+    }})
+  },
+  openCampus() {if(this.data.mode==='demo')this.switchMode('live','campus');else this.setView('campus')},
+  campusInfo() {
+    wx.showModal({title:'贸大夜游底图',content:'© OpenStreetMap contributors · ODbL\n底图按开放坐标绘制，尚未现场校准，东北片区等建筑仍待补绘。树木、灯光和屋顶材质是艺术表现。\n蓝点来自手机 GPS；现场留话仍按原有位置与精度校验。可在“地图与场景”中切回标准地图。\n来源：openstreetmap.org/copyright',showCancel:false})
+  },
+  campusImageError() {this._campusError=true;this.refresh()},
+  selectCampusPin(event) {
+    if(Date.now()<(this._ignoreCampusTapUntil||0))return
+    const group=(this._mapGroups||[]).find(item=>item.id===event.currentTarget.dataset.id)
+    if(group)this.openGroup(group)
+  },
+  campusTap() {if(Date.now()>=(this._ignoreCampusTapUntil||0)){this.closeSheet();this.closeCard()}},
   showHeatInfo() {
     wx.showModal({ title:'地图上的逗号',content:'蓝点是你，逗号是留话。针脚末端是留话位置，缩放时固定在原坐标；蓝点始终置顶。\n逗号越深、略大，互动越热闹；数字是留话数量。附近列表可切换“最新”。',showCancel:false })
   },
@@ -284,12 +341,21 @@ Page({
     else if (action === 'location') this.locationDetails()
     else if (action === 'connect') api.openConnect()
     else if (action === 'refresh') this.refreshNearby()
+    else if (action === 'standard') this.setView('map')
   },
   privacyVisibility(event) {
+    if(event.detail.visible){
+      this._rendererEpoch=(this._rendererEpoch||0)+1
+      if(this._renderer)this._renderer.destroy()
+      this._renderer=null
+    }
     this.setData({ privacyVisible:event.detail.visible }, () => { if (!event.detail.visible) this.initCanvas() })
   },
   recenter() {
     if (this.data.mode === 'demo') { this._yaw = 0; this.paint(); return }
+    if(this.data.view==='campus' && geo.valid(this._position) && !campus.contains(this._position)){
+      this.setView('map');this.setData({following:true},()=>this.refresh());this.beginLocation();return
+    }
     this.setData({ following: true })
     this.refresh()
     this.beginLocation()
@@ -297,9 +363,16 @@ Page({
   toggleView() {
     if (this.data.mode === 'demo') { this.setData({ overview: !this.data.overview }); this.paint(); return }
     const view = this.data.view === 'map' ? 'street' : 'map'
+    this.setView(view)
+  },
+  setView(view) {
+    if(!['map','street','campus'].includes(view)||this.data.mode!=='live')return
+    if(view===this.data.view){if(view==='campus'&&this._renderer)this._renderer.overview();return}
     this._rendererEpoch = (this._rendererEpoch || 0) + 1
     if (this._renderer) this._renderer.destroy()
     this._renderer = null
+    this._campusError=false
+    this._markerSignature=''
     getApp().globalData.view = view
     preferences.save(this.data.mode,view)
     this.setData({ view, pins: [] }, () => { this.refresh(); this.initCanvas() })
@@ -327,13 +400,14 @@ Page({
   },
   openGroup(group) {
     if (group.count === 1) { this.selectPost(group.postIds[0]); return }
-    if (this.data.view === 'map' && group.sceneCount > 1 && this.data.mapScale < 20) {
-      const scale = Math.min(20,this.data.mapScale + 2)
+    if (this.data.view !== 'street' && group.sceneCount > 1 && this.data.mapScale < (this.data.view==='campus'?19:20)) {
+      const scale = Math.min(this.data.view==='campus'?19:20,this.data.mapScale + 2)
       const members = this.data.posts.filter(post => group.postIds.includes(post.id))
       const split = mapPoints.mapGroups(members,scale,null,false)
       this.setData({ mapScale:scale,latitude:group.latitude,longitude:group.longitude,following:false,
         cardVisible:false,sheetVisible:false,sheetRows:[] })
       this.refresh()
+      if(this.data.view==='campus' && this._renderer)this._renderer.goTo(group,Math.min(19,scale))
       if (split.length > 1) { wx.showToast({ title:'已放大，点逗号查看',icon:'none' }); return }
     }
     this.showSheet(group.postIds)
@@ -369,7 +443,7 @@ Page({
     this.setData({ cardVisible:true,expanded:false,sheetVisible:false,sheetRows:[] }); this.refresh()
   },
   selectedGroup() {
-    const groups = this.data.view === 'map' ? this._mapGroups : this._streetGroups
+    const groups = this.data.view !== 'street' ? this._mapGroups : this._streetGroups
     const group = (groups || []).find(item => item.postIds.includes(this._selectedId))
     if (group) this.showSheet(group.postIds)
   },
@@ -401,10 +475,12 @@ Page({
     }
   },
   touchStart(event) {
+    if(this.data.view==='campus'){if(this._renderer)this._renderer.touchStart(event);return}
     const p = event.touches[0]
     this._touch = { x: p.clientX, y: p.clientY, yaw: this._yaw, moved: false }
   },
   touchMove(event) {
+    if(this.data.view==='campus'){if(this._renderer)this._renderer.touchMove(event);return}
     if (!this._touch) return
     const p = event.touches[0], dx = p.clientX - this._touch.x, dy = p.clientY - this._touch.y
     if (Math.hypot(dx, dy) > 6) this._touch.moved = true
@@ -414,8 +490,8 @@ Page({
       this.paint()
     }
   },
-  touchEnd() { if (this._touch && !this._touch.moved) this.closeCard(); this._touch = null },
-  touchCancel() { this._touch = null },
+  touchEnd(event) { if(this.data.view==='campus'){if(this._renderer)this._renderer.touchEnd(event);return}if (this._touch && !this._touch.moved) this.closeCard(); this._touch = null },
+  touchCancel(event) { if(this.data.view==='campus'){if(this._renderer)this._renderer.touchCancel(event);return}this._touch = null },
   async expand() {
     if (!this.data.selected || this.data.selected.level !== 'full') return
     if (this.data.mode === 'live' && !this.data.expanded) {
