@@ -4,23 +4,54 @@
   <text class="title">留在这里了。</text>
   <text class="muted">{{published.name}}</text>
   <text class="notice">{{published.mode === 'demo' ? '可以打开看看，接一句，或模拟走远再走近。' : '打开这条留话，看看你在现场留下的内容。'}}</text>
-  <button class="primary" bindtap="viewPublished">查看我留下的</button>
-  <button class="secondary" bindtap="publishedMap">回到地图看看</button>
-  <button class="text-button" bindtap="writeAgain">再留一句</button>
+  <view class="success-actions">
+    <button class="primary" bindtap="viewPublished">查看我留下的</button>
+    <button class="secondary" bindtap="publishedMap">回到地图看看</button>
+    <button class="text-button" bindtap="writeAgain">再留一句</button>
+  </view>
 </view>
 <view wx:else class="page compose-page">
-  <view class="row"><view class="brand-row"><image class="brand-avatar" src="/assets/brand/liuda-comma.png" mode="aspectFit" aria-label="留答" /><text class="badge">{{mode === 'demo' ? '演示模式' : '现场留话'}}</text></view><button wx:if="{{hasDraft}}" class="text-button" bindtap="discard" disabled="{{busy || cameraBusy}}">清空</button></view>
+  <view class="compose-header">
+    <view class="brand-row"><image class="brand-avatar" src="/assets/brand/liuda-comma.png" mode="aspectFit" aria-label="留答" /><text class="compose-eyebrow">{{mode === 'demo' ? '演示模式' : '现场留话'}}</text></view>
+    <button wx:if="{{hasDraft}}" class="text-button discard-button" bindtap="discard" disabled="{{busy || cameraBusy}}">清空草稿</button>
+  </view>
   <text class="title">想在这里留句什么？</text>
-  <button class="place-picker" bindtap="choosePlace" loading="{{placeBusy}}" disabled="{{busy || cameraBusy || placeBusy}}"><text>⌖</text><text>{{selectedPlace ? selectedPlace.name : '当前位置 · 新建地点'}}</text><text>⌄</text></button>
-  <block wx:for="{{nameEditor}}" wx:key="id"><input maxlength="40" placeholder="写清具体位置，例如：西门第一张长椅" placeholder-class="field-placeholder" value="{{item.value}}" data-editor="{{item.id}}" bindinput="onNameInput" bindblur="onNameInput" disabled="{{busy || cameraBusy}}" cursor-spacing="100" /></block>
-  <view class="position-row"><text class="position-note {{!ready ? 'position-weak' : ''}}">{{positionLabel}}</text><button class="text-button position-retry" bindtap="refreshPosition" loading="{{positionBusy}}" disabled="{{busy || positionBusy}}">{{ready ? '刷新' : '重新定位'}}</button></view>
-  <button wx:if="{{!ready && mode === 'live'}}" class="text-button diagnostic-link" bindtap="locationDetails">查看定位原因 →</button>
-  <block wx:for="{{textEditor}}" wx:key="id"><textarea maxlength="300" placeholder="一个吐槽、提醒、问题，或者一句玩笑……" placeholder-class="field-placeholder" value="{{item.value}}" data-editor="{{item.id}}" bindinput="onTextInput" bindblur="onTextInput" disabled="{{busy || cameraBusy}}" cursor-spacing="100" /></block>
-  <view class="row compose-meta"><text class="muted">匿名留下</text><text class="muted">{{textLength}} / 300</text></view>
-  <view class="photo-actions"><button class="secondary" bindtap="capturePhoto" loading="{{cameraBusy}}" disabled="{{busy || cameraBusy || !ready}}">{{photoPath ? '重新拍现场' : '＋ 拍张现场'}}</button><button wx:if="{{photoPath}}" class="text-button" bindtap="clearPhoto" disabled="{{busy || cameraBusy}}">移除照片</button></view>
-  <image wx:if="{{photoPath}}" class="photo" src="{{photoPath}}" mode="widthFix" bindtap="previewPhoto" />
+
+  <view class="place-card">
+    <button class="place-picker" bindtap="choosePlace" loading="{{placeBusy}}" disabled="{{busy || cameraBusy || placeBusy}}" aria-label="选择留话地点">
+      <view class="place-icon"><view class="place-icon-dot" /></view>
+      <text class="place-name">{{selectedPlace ? selectedPlace.name : '当前位置 · 新建地点'}}</text>
+      <view class="picker-chevron" />
+    </button>
+    <view class="place-input-wrap">
+      <text class="field-label">具体位置</text>
+      <block wx:for="{{nameEditor}}" wx:key="id"><input class="place-input" maxlength="40" placeholder="例如：西门第一张长椅" placeholder-class="field-placeholder" value="{{item.value}}" data-editor="{{item.id}}" bindinput="onNameInput" bindblur="onNameInput" disabled="{{busy || cameraBusy}}" cursor-spacing="100" aria-label="具体位置" /></block>
+    </view>
+    <view class="position-row">
+      <view class="position-status"><view class="status-dot {{!ready ? 'status-dot-weak' : ''}}" /><text class="position-note {{!ready ? 'position-weak' : ''}}">{{positionLabel}}</text></view>
+      <button class="text-button position-retry" bindtap="refreshPosition" loading="{{positionBusy}}" disabled="{{busy || positionBusy}}">{{ready ? '刷新' : '重新定位'}}</button>
+    </view>
+    <button wx:if="{{!ready && mode === 'live'}}" class="text-button diagnostic-link" bindtap="locationDetails">查看定位原因 →</button>
+  </view>
+
+  <view class="editor-card">
+    <block wx:for="{{textEditor}}" wx:key="id"><textarea class="compose-textarea" maxlength="300" placeholder="留个吐槽、提醒，或问个问题……" placeholder-class="field-placeholder" value="{{item.value}}" data-editor="{{item.id}}" bindinput="onTextInput" bindblur="onTextInput" disabled="{{busy || cameraBusy}}" cursor-spacing="100" aria-label="留话内容" /></block>
+    <view class="compose-meta"><text>匿名留下</text><text class="text-counter">{{textLength}} / 300</text></view>
+  </view>
+
+  <view class="photo-section">
+    <view class="photo-actions">
+      <button class="secondary photo-button" bindtap="capturePhoto" loading="{{cameraBusy}}" disabled="{{busy || cameraBusy || !ready}}"><view class="camera-icon"><view class="camera-lens" /></view><text>{{photoPath ? '重新拍摄' : '拍张现场'}}</text></button>
+      <button wx:if="{{photoPath}}" class="text-button photo-remove" bindtap="clearPhoto" disabled="{{busy || cameraBusy}}">移除照片</button>
+      <text wx:else class="photo-optional">选填 · 仅现场拍摄</text>
+    </view>
+    <image wx:if="{{photoPath}}" class="photo" src="{{photoPath}}" mode="widthFix" bindtap="previewPhoto" aria-label="预览现场照片" />
+  </view>
   <view wx:if="{{publishError}}" class="publish-error"><text>{{publishError}}</text><text class="notice">草稿还在，可以处理后重试。</text></view>
-  <button class="primary publish" bindtap="publish" loading="{{busy}}" disabled="{{busy || cameraBusy || !canPublish}}">{{busy ? publishStage : mode === 'demo' ? '在演示地点留下' : '在当前位置留下'}}</button>
-  <text class="notice">{{mode === 'demo' ? '仅保存在本机演示区。草稿在本次打开期间保留。' : '现场提交，审核后展示。切换页面保留草稿，关闭小程序后可能清除。'}}</text>
+  <view class="publish-actions">
+    <button class="primary publish" bindtap="publish" loading="{{busy}}" disabled="{{busy || cameraBusy || !canPublish}}">{{busy ? publishStage : mode === 'demo' ? '在演示地点留下' : '在这里留下'}}</button>
+    <text class="notice publish-notice">{{mode === 'demo' ? '仅本机演示 · 草稿在本次打开期间保留' : '现场发布 · 审核后展示'}}</text>
+    <text wx:if="{{mode === 'live'}}" class="draft-notice">切换页面保留草稿，关闭小程序后可能清除。</text>
+  </view>
 </view>
 <privacy-gate />
