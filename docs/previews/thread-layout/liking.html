@@ -1,0 +1,131 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>:root{--rpx:calc(100vw / 750)}body{margin:0}div{box-sizing:border-box}button,input,textarea{font-family:inherit}button{cursor:pointer}span{box-sizing:border-box}/* 留答：黑底、冷白主操作、灰阶信息层级，规范见 docs/brand-ui.md。 */
+body { background: #08090b; color: #f3f4f6; font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; font-size: calc(28 * var(--rpx)); line-height: 1.6; }
+view, text, button, input, textarea, scroll-view { box-sizing: border-box; }
+button { margin: calc(24 * var(--rpx)) 0 0; padding: 0 calc(28 * var(--rpx)); border-radius: calc(24 * var(--rpx)); font-size: calc(28 * var(--rpx)); font-weight: 500; line-height: calc(88 * var(--rpx)); background: #f0f1f3; color: #121316; }
+button::after { border: 0; }
+button.primary { background: #f0f1f3; color: #121316; }
+button.secondary { background: #22242a; color: #e2e4e9; border: calc(1 * var(--rpx)) solid #34363d; }
+button[disabled] { background: #202228 !important; color: #777b86 !important; }
+.page { padding: calc(34 * var(--rpx)) calc(32 * var(--rpx)) calc(calc(40 * var(--rpx)) + env(safe-area-inset-bottom)); }
+.title { display: block; font-size: calc(46 * var(--rpx)); font-weight: 600; margin: calc(8 * var(--rpx)) 0 calc(24 * var(--rpx)); line-height: 1.4; letter-spacing: calc(1 * var(--rpx)); }
+.muted { color: #a0a4ae; font-size: calc(24 * var(--rpx)); }
+.body { display: block; font-size: calc(32 * var(--rpx)); line-height: 1.9; overflow-wrap: anywhere; white-space: pre-wrap; }
+.row { display: flex; justify-content: space-between; align-items: center; gap: calc(16 * var(--rpx)); }
+.card { background: #15171c; border: calc(1 * var(--rpx)) solid #2c2f36; border-radius: calc(30 * var(--rpx)); padding: calc(28 * var(--rpx)); margin-top: calc(22 * var(--rpx)); }
+.card-title { font-size: calc(30 * var(--rpx)); font-weight: 500; }
+.badge { display: inline-block; font-size: calc(21 * var(--rpx)); color: #cdd0d7; background: #22242b; padding: calc(5 * var(--rpx)) calc(14 * var(--rpx)); border-radius: calc(18 * var(--rpx)); border: calc(1 * var(--rpx)) solid #34363e; }
+.notice { color: #a0a4ae; font-size: calc(23 * var(--rpx)); padding: calc(16 * var(--rpx)) 0; line-height: 1.8; }
+.section-label { display: block; font-size: calc(26 * var(--rpx)); color: #a0a4ae; margin: calc(32 * var(--rpx)) 0 calc(14 * var(--rpx)); }
+textarea { width: 100%; min-height: calc(220 * var(--rpx)); padding: calc(24 * var(--rpx)); background: #15171c; color: #f3f4f6; border: calc(1 * var(--rpx)) solid #30333b; border-radius: calc(24 * var(--rpx)); font-size: calc(32 * var(--rpx)); line-height: 1.8; }
+input { width: 100%; height: calc(90 * var(--rpx)); padding: 0 calc(22 * var(--rpx)); background: #15171c; color: #f3f4f6; border: calc(1 * var(--rpx)) solid #30333b; border-radius: calc(22 * var(--rpx)); font-size: calc(28 * var(--rpx)); }
+.field-placeholder { color: #858a96; }
+.empty { display: flex; flex-direction: column; align-items: center; gap: calc(18 * var(--rpx)); padding: calc(90 * var(--rpx)) calc(20 * var(--rpx)); text-align: center; }
+.photo { display: block; width: 100%; border-radius: calc(22 * var(--rpx)); margin-top: calc(20 * var(--rpx)); }
+.text-button { color: #cdd0d7; background: transparent; padding: 0; margin: 0; font-size: calc(25 * var(--rpx)); min-height: calc(80 * var(--rpx)); line-height: calc(80 * var(--rpx)); }
+.brand-avatar { display: block; width: calc(64 * var(--rpx)); height: calc(64 * var(--rpx)); border-radius: calc(20 * var(--rpx)); background: #000; flex-shrink: 0; }
+.brand-row { display: flex; align-items: center; gap: calc(16 * var(--rpx)); }
+.empty-mascot { display: block; width: calc(160 * var(--rpx)); height: calc(160 * var(--rpx)); border-radius: 50%; background: #000; margin: 0 auto calc(20 * var(--rpx)); }
+
+/* Keep native button defaults from sizing/centering individual thread actions. */
+.thread-page { padding: calc(24 * var(--rpx)) calc(32 * var(--rpx)) calc(calc(48 * var(--rpx)) + env(safe-area-inset-bottom)); }
+.thread-page button { display: flex; align-items: center; justify-content: center; width: 100%; min-width: 0; min-height: calc(88 * var(--rpx)); margin: 0; padding: calc(20 * var(--rpx)) calc(24 * var(--rpx)); line-height: 1.5; border-radius: calc(22 * var(--rpx)); }
+.thread-page .text-button { width: auto; min-height: calc(64 * var(--rpx)); padding: calc(10 * var(--rpx)) calc(12 * var(--rpx)); font-size: calc(23 * var(--rpx)); line-height: 1.5; background: transparent; flex-shrink: 0; border-radius: calc(14 * var(--rpx)); }
+.thread-page .text-button[disabled] { background: transparent !important; }
+.thread-header { display: flex; align-items: center; justify-content: space-between; gap: calc(16 * var(--rpx)); min-height: calc(64 * var(--rpx)); }
+.header-actions { display: flex; align-items: center; gap: calc(12 * var(--rpx)); margin-right: calc(-12 * var(--rpx)); flex-shrink: 0; }
+.thread-page .thread-more { min-width: calc(64 * var(--rpx)); font-size: calc(32 * var(--rpx)); letter-spacing: calc(3 * var(--rpx)); }
+.thread-page .title { margin: calc(14 * var(--rpx)) 0 calc(12 * var(--rpx)); font-size: calc(40 * var(--rpx)); line-height: 1.4; letter-spacing: 0; overflow-wrap: anywhere; }
+.thread-meta { display: flex; flex-wrap: wrap; align-items: center; gap: calc(8 * var(--rpx)) calc(24 * var(--rpx)); color: #a0a4ae; font-size: calc(22 * var(--rpx)); line-height: 1.6; }
+.thread-state { display: flex; align-items: flex-start; gap: calc(12 * var(--rpx)); margin-top: calc(20 * var(--rpx)); color: #a0a4ae; font-size: calc(23 * var(--rpx)); line-height: 1.6; }
+.thread-state text { min-width: 0; overflow-wrap: anywhere; }
+.state-dot { width: calc(8 * var(--rpx)); height: calc(8 * var(--rpx)); margin-top: calc(14 * var(--rpx)); border-radius: 50%; background: #a0a4ae; flex-shrink: 0; }
+.thread-state-participant { color: #cdd0d7; }
+.thread-state-participant .state-dot { background: #cdd0d7; }
+
+.thread-page .post-card { margin-top: calc(24 * var(--rpx)); padding: calc(24 * var(--rpx)); border-radius: calc(26 * var(--rpx)); }
+.post-card .body { font-size: calc(32 * var(--rpx)); line-height: 1.8; }
+.post-actions { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: calc(12 * var(--rpx)) calc(16 * var(--rpx)); margin-top: calc(24 * var(--rpx)); padding-top: calc(18 * var(--rpx)); border-top: calc(1 * var(--rpx)) solid #2c2f36; }
+.thread-page .like-button { width: auto; min-width: calc(104 * var(--rpx)); min-height: calc(64 * var(--rpx)); padding: calc(10 * var(--rpx)) calc(18 * var(--rpx)); gap: calc(10 * var(--rpx)); border: calc(1 * var(--rpx)) solid #34363e; border-radius: calc(32 * var(--rpx)); background: #22242a; color: #cdd0d7; font-size: calc(24 * var(--rpx)); font-variant-numeric: tabular-nums; }
+.thread-page .like-button[disabled] { background: transparent !important; color: #858a96 !important; }
+.thread-page .like-button.is-liked { border-color: #a0a4ae; color: #f3f4f6; }
+.like-icon { font-size: calc(29 * var(--rpx)); line-height: 1; }
+.onsite-actions { display: flex; align-items: center; gap: calc(12 * var(--rpx)); margin-left: auto; }
+.like-onsite { color: #a0a4ae; font-size: calc(21 * var(--rpx)); }
+.thread-page .location-update { margin-right: calc(-12 * var(--rpx)); font-size: calc(22 * var(--rpx)); }
+
+.replies-heading { display: flex; align-items: center; gap: calc(12 * var(--rpx)); margin: calc(30 * var(--rpx)) 0 calc(8 * var(--rpx)); font-size: calc(28 * var(--rpx)); font-weight: 600; }
+.reply-count { color: #a0a4ae; font-size: calc(23 * var(--rpx)); font-weight: 400; font-variant-numeric: tabular-nums; }
+.comment { padding: calc(22 * var(--rpx)) 0; border-bottom: calc(1 * var(--rpx)) solid #272a31; }
+.comment:last-child { border-bottom: 0; }
+.comment-meta { display: flex; align-items: center; flex-wrap: wrap; gap: calc(12 * var(--rpx)); }
+.comment-author { color: #a0a4ae; font-size: calc(22 * var(--rpx)); overflow-wrap: anywhere; }
+.continuation-tag { padding: calc(2 * var(--rpx)) calc(10 * var(--rpx)); border-radius: calc(8 * var(--rpx)); color: #a0a4ae; background: #22242a; font-size: calc(19 * var(--rpx)); }
+.comment .body { margin-top: calc(10 * var(--rpx)); font-size: calc(28 * var(--rpx)); line-height: 1.8; }
+.reply-empty { padding: calc(20 * var(--rpx)) 0; color: #858a96; font-size: calc(24 * var(--rpx)); line-height: 1.6; }
+.reply-box { margin-top: calc(18 * var(--rpx)); padding: 0; background: #15171c; border: calc(1 * var(--rpx)) solid #2c2f36; border-radius: calc(26 * var(--rpx)); }
+.thread-page .reply-input { display: block; width: 100%; height: calc(160 * var(--rpx)); min-height: calc(160 * var(--rpx)); padding: calc(22 * var(--rpx)) calc(24 * var(--rpx)); border: 0; border-radius: calc(26 * var(--rpx)) calc(26 * var(--rpx)) 0 0; background: transparent; font-size: calc(29 * var(--rpx)); line-height: 1.7; }
+.reply-toolbar { display: flex; align-items: center; justify-content: space-between; gap: calc(20 * var(--rpx)); padding: 0 calc(16 * var(--rpx)) calc(16 * var(--rpx)) calc(24 * var(--rpx)); }
+.reply-counter { flex-shrink: 0; color: #a0a4ae; font-size: calc(22 * var(--rpx)); font-variant-numeric: tabular-nums; }
+.thread-page .reply-send { width: calc(184 * var(--rpx)); min-width: 104px; min-height: calc(72 * var(--rpx)); max-width: 70%; padding: calc(14 * var(--rpx)) calc(16 * var(--rpx)); border-radius: calc(18 * var(--rpx)); font-size: calc(25 * var(--rpx)); flex-shrink: 0; white-space: nowrap; }
+.reply-rule { display: block; margin: calc(14 * var(--rpx)) 0 0; color: #858a96; font-size: calc(21 * var(--rpx)); line-height: 1.7; }
+.locked-card { margin-top: calc(24 * var(--rpx)); padding: calc(24 * var(--rpx)); background: #15171c; border: calc(1 * var(--rpx)) solid #2c2f36; border-radius: calc(26 * var(--rpx)); color: #a0a4ae; font-size: calc(25 * var(--rpx)); line-height: 1.7; }
+.locked-card text { display: block; }
+.thread-page .locked-card button { margin-top: calc(20 * var(--rpx)); }
+.thread-footer { margin-top: calc(30 * var(--rpx)); padding-top: calc(24 * var(--rpx)); border-top: calc(1 * var(--rpx)) solid #272a31; }
+.thread-page .nearby-button { min-height: calc(80 * var(--rpx)); font-size: calc(25 * var(--rpx)); }
+.thread-empty { display: flex; flex-direction: column; align-items: stretch; gap: calc(20 * var(--rpx)); padding-top: calc(100 * var(--rpx)); text-align: center; }
+.empty-title { display: block; margin-bottom: calc(16 * var(--rpx)); color: #cdd0d7; font-size: calc(28 * var(--rpx)); line-height: 1.7; overflow-wrap: anywhere; }
+.thread-page.thread-empty .text-button { width: 100%; }
+
+@media (max-width: 350px) {
+  .thread-page { padding-left: calc(24 * var(--rpx)); padding-right: calc(24 * var(--rpx)); }
+  .thread-page .title { font-size: calc(38 * var(--rpx)); }
+  .thread-page .post-card { padding: calc(22 * var(--rpx)); }
+  .post-actions { gap: calc(8 * var(--rpx)) calc(12 * var(--rpx)); }
+  .onsite-actions { gap: calc(6 * var(--rpx)); }
+  .thread-meta, .thread-state, .comment-author, .reply-counter, .like-onsite, .reply-rule,
+  .thread-page .text-button, .thread-page .like-button, .thread-page .location-update { font-size: 12px; }
+  .thread-page .badge, .continuation-tag { font-size: 11px; }
+  .thread-page .reply-send, .reply-empty { font-size: 13px; }
+  .state-dot { margin-top: 8px; }
+}
+
+button{border:0}textarea{resize:none}input::placeholder,textarea::placeholder{color:#858a96;opacity:1}.nav{height:44px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;border-bottom:1px solid #15171c}</style><div class="nav">这里的对话</div><div class="page thread-page">
+  <div class="thread-header">
+    <span class="badge">我留下的</span>
+    <div class="header-actions">
+      <button class="text-button thread-refresh" disabled>刷新</button>
+      <button class="text-button thread-more" disabled aria-label="更多留话操作">···</button>
+    </div>
+  </div>
+  <span class="title">图书馆西门第一张长椅</span>
+  <div class="thread-meta"><span>位置待更新</span><span>10月28日</span></div>
+  <div class="thread-state thread-state-participant"><div class="state-dot"></div><span>已参与这条对话 · 离场也可继续</span></div>
+
+  <div class="card post-card">
+    <span class="body">这里下午有树荫，适合歇歇脚。</span>
+    
+    <div class="post-actions">
+      <button class="like-button " disabled aria-label="点赞"><span class="like-icon">♡</span><span>3</span></button>
+      
+    </div>
+  </div>
+
+  
+    <div class="replies-heading"><span>接话</span><span class="reply-count">0</span></div>
+    
+    <div class="reply-empty">还没人接话，留一句吧。</div>
+    <div class="reply-box">
+      <textarea class="reply-input" maxlength="300" placeholder="接着聊聊……" disabled aria-label="接话内容"></textarea>
+      <div class="reply-toolbar"><span class="reply-counter">0 / 300</span><button class="primary reply-send" disabled>发送接话</button></div>
+    </div>
+    
+  
+  
+
+  <div class="thread-footer"><button class="secondary nearby-button">回到附近地图</button></div>
+</div>
+
+
+
+</html>

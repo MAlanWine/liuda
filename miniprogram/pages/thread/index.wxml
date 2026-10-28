@@ -1,21 +1,43 @@
-<view class="page" wx:if="{{post}}">
-  <view class="row"><text class="badge">{{post.owned ? '我留下的' : post.participated ? '我参与的' : mode === 'demo' ? '演示模式' : '现场留话'}}</text><text class="muted">{{post.distanceLabel}}</text><button class="text-button thread-refresh" bindtap="retry" loading="{{retrying}}" disabled="{{busy || retrying}}">刷新</button></view>
+<view class="page thread-page" wx:if="{{post}}">
+  <view class="thread-header">
+    <text class="badge">{{post.owned ? '我留下的' : post.participated ? '我参与的' : mode === 'demo' ? '演示模式' : '现场留话'}}</text>
+    <view class="header-actions">
+      <button class="text-button thread-refresh" bindtap="retry" loading="{{retrying}}" disabled="{{busy || retrying}}">刷新</button>
+      <button wx:if="{{post.owned}}" class="text-button thread-more" bindtap="more" disabled="{{busy}}" aria-label="更多留话操作">···</button>
+    </view>
+  </view>
   <text class="title">{{post.name}}</text>
-  <text class="muted">{{status}}</text>
-  <text wx:if="{{timeLabel}}" class="muted thread-time">{{timeLabel}}</text>
-  <view wx:if="{{post.participated}}" class="continuation-note">你曾在现场留下或接过话。这一条对话，可以带走继续。</view>
-  <view class="card post-card"><text class="body">{{post.displayText}}</text><image wx:if="{{post.level === 'full' && post.photoPath}}" class="photo" src="{{post.photoPath}}" mode="widthFix" bindtap="photo" /><view class="row post-actions"><button class="text-button" bindtap="like" disabled="{{busy || !post.canLike}}">{{post.liked ? '♥' : '♡'}} {{post.likes}}</button><text wx:if="{{!post.canLike}}" class="muted like-onsite">点赞需到场</text><button wx:if="{{post.canInteract}}" class="text-button" bindtap="chat">和作者聊聊 ↗</button></view></view>
+  <view class="thread-meta"><text>{{distanceLabel}}</text><text wx:if="{{timeLabel}}">{{timeLabel}}</text></view>
+  <view class="thread-state {{post.participated ? 'thread-state-participant' : ''}}"><view class="state-dot" /><text>{{status}}</text></view>
+
+  <view class="card post-card">
+    <text class="body">{{post.displayText}}</text>
+    <image wx:if="{{post.level === 'full' && post.photoPath}}" class="photo" src="{{post.photoPath}}" mode="widthFix" bindtap="photo" />
+    <view class="post-actions">
+      <button class="like-button {{post.liked ? 'is-liked' : ''}}" bindtap="like" loading="{{pendingAction === 'like'}}" disabled="{{busy || !post.canLike}}" aria-label="{{post.liked ? '取消点赞' : '点赞'}}"><text class="like-icon">{{post.liked ? '♥' : '♡'}}</text><text>{{post.likes}}</text></button>
+      <view wx:if="{{!post.canLike}}" class="onsite-actions"><text class="like-onsite">点赞需到场</text><button wx:if="{{mode === 'live'}}" class="text-button location-update" bindtap="locateHere" loading="{{locating}}" disabled="{{locating || busy}}">更新位置</button></view>
+    </view>
+  </view>
+
   <block wx:if="{{post.level === 'full'}}">
-    <text class="section-label">路过的人接上了 {{post.commentCount}} 句</text>
-    <view wx:for="{{post.comments}}" wx:key="id" class="comment"><view class="row"><text class="muted">{{item.name}}</text><text wx:if="{{item.entry === 'continuation'}}" class="continuation-tag">续聊</text></view><text class="body">{{item.text}}</text></view>
-    <view wx:if="{{!post.comments.length}}" class="notice">这里还没有回复，接上第一句。</view>
-    <view class="reply-box"><block wx:for="{{replyEditor}}" wx:key="id"><textarea maxlength="300" value="{{item.value}}" data-editor="{{item.id}}" bindinput="onReplyInput" bindblur="onReplyInput" placeholder="{{post.participated ? '这段对话，接着聊……' : '你也在这里，接一句……'}}" placeholder-class="field-placeholder" disabled="{{busy}}" cursor-spacing="100" /></block><view class="row"><text class="muted">{{replyLength}} / 300</text><button class="primary" bindtap="sendReply" loading="{{busy}}" disabled="{{busy || !replyLength || !post.canReply}}">{{post.participated ? '继续接话' : '现场接一句'}}</button></view></view>
+    <view class="replies-heading"><text>接话</text><text class="reply-count">{{post.commentCount}}</text></view>
+    <view class="comments-list" wx:if="{{post.comments.length}}">
+      <view wx:for="{{post.comments}}" wx:key="id" class="comment">
+        <view class="comment-meta"><text class="comment-author">{{item.name}}</text><text wx:if="{{item.entry === 'continuation'}}" class="continuation-tag">续聊</text></view>
+        <text class="body">{{item.text}}</text>
+      </view>
+    </view>
+    <view wx:else class="reply-empty">还没人接话，留一句吧。</view>
+    <view class="reply-box">
+      <block wx:for="{{replyEditor}}" wx:key="id"><textarea class="reply-input" maxlength="300" value="{{item.value}}" data-editor="{{item.id}}" bindinput="onReplyInput" bindblur="onReplyInput" placeholder="{{post.canReply ? post.participated ? '接着聊聊……' : '你也在这里，接一句……' : '到场后可以接一句'}}" placeholder-class="field-placeholder" disabled="{{busy || !post.canReply}}" cursor-spacing="100" aria-label="接话内容" /></block>
+      <view class="reply-toolbar"><text class="reply-counter">{{replyLength}} / 300</text><button class="primary reply-send" bindtap="sendReply" loading="{{pendingAction === 'reply'}}" disabled="{{busy || !hasReplyText || !post.canReply}}">{{pendingAction === 'reply' ? '发送中…' : !post.canReply ? '到场后接话' : post.participated ? '发送接话' : '现场接一句'}}</button></view>
+    </view>
+    <text wx:if="{{!post.participated}}" class="reply-rule">首次在现场接话后，可以离场继续。</text>
   </block>
-  <view wx:else class="notice">{{post.participated ? '对话暂未同步，刷新后继续。' : '走近后可查看完整内容，在现场接一句，之后可以离场继续。'}}</view>
-  <button wx:if="{{mode === 'live' && !post.canInteract}}" class="text-button" bindtap="locateHere" loading="{{locating}}" disabled="{{locating || busy}}">我在现场，更新位置</button>
-  <button class="secondary" bindtap="nearby">回到附近地图</button>
-  <button wx:if="{{post.owned}}" class="delete-button" bindtap="remove" disabled="{{busy}}">删除我的留话</button>
+  <view wx:else class="locked-card"><text>{{post.participated ? '对话暂未同步，刷新后继续。' : '走近查看完整留话，在现场接一句后，就能离场继续。'}}</text><button wx:if="{{post.participated}}" class="secondary" bindtap="retry" loading="{{retrying}}" disabled="{{busy || retrying}}">重新获取对话</button></view>
+
+  <view class="thread-footer"><button class="secondary nearby-button" bindtap="nearby">回到附近地图</button></view>
 </view>
-<view class="page empty" wx:elif="{{missing}}"><text>这条留话已经不在这里了。</text><button class="secondary" bindtap="nearby">返回附近</button></view>
-<view class="page empty" wx:else><text>{{loading ? '正在找这里的留话…' : status || '暂未取得留话'}}</text><button wx:if="{{needsJoin}}" class="secondary" bindtap="connect">加入联机试用</button><button wx:elif="{{!loading}}" class="secondary" bindtap="retry" loading="{{retrying}}" disabled="{{retrying}}">重新获取</button><button wx:if="{{mode === 'live' && !loading}}" class="text-button" bindtap="locationDetails">查看定位原因</button><button class="text-button" bindtap="nearby">返回附近</button></view>
+<view class="page thread-page thread-empty" wx:elif="{{missing}}"><text class="empty-title">这条留话已经不在这里了。</text><button class="secondary" bindtap="nearby">返回附近地图</button></view>
+<view class="page thread-page thread-empty" wx:else><text class="empty-title">{{loading ? '正在找这里的留话…' : status || '暂未取得留话'}}</text><button wx:if="{{needsJoin}}" class="primary" bindtap="connect">加入联机试用</button><button wx:elif="{{!loading}}" class="primary" bindtap="retry" loading="{{retrying}}" disabled="{{retrying}}">重新获取</button><button wx:if="{{mode === 'live' && !loading && !needsJoin}}" class="text-button" bindtap="locationDetails">查看定位原因</button><button class="text-button" bindtap="nearby">返回附近地图</button></view>
 <privacy-gate />

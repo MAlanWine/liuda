@@ -1,14 +1,63 @@
-.post-card { margin-top: 30rpx; }
-.post-actions { margin-top: 18rpx; border-top: 1rpx solid #30333b; }
-.comment { padding: 24rpx 8rpx; border-bottom: 1rpx solid #30333b; }
-.comment .body { margin-top: 8rpx; font-size: 29rpx; }
-.reply-box { margin-top: 34rpx; }
-.reply-box textarea { min-height: 170rpx; font-size: 29rpx; }
-.reply-box .row { margin-top: 12rpx; }
-.reply-box button { padding: 0 30rpx; margin: 0; }
-.delete-button { background: transparent; color: #dfa5a5; font-size: 24rpx; }
-.thread-refresh { min-height:56rpx; line-height:56rpx; font-size:24rpx; }
-.thread-time { display:block; margin-top:8rpx; font-size:22rpx; }
-.continuation-note { margin-top:24rpx; padding:20rpx 24rpx; background:#1c2521; color:#bcd0c2; border-radius:18rpx; font-size:24rpx; line-height:1.7; }
-.continuation-tag { margin-left:16rpx; padding:3rpx 12rpx; border-radius:8rpx; color:#bcd0c2; background:#1c2521; font-size:20rpx; }
-.like-onsite { font-size:21rpx; margin-right:18rpx; }
+/* Keep native button defaults from sizing/centering individual thread actions. */
+.thread-page { padding: 24rpx 32rpx calc(48rpx + env(safe-area-inset-bottom)); }
+.thread-page button { display: flex; align-items: center; justify-content: center; width: 100%; min-width: 0; min-height: 88rpx; margin: 0; padding: 20rpx 24rpx; line-height: 1.5; border-radius: 22rpx; }
+.thread-page .text-button { width: auto; min-height: 64rpx; padding: 10rpx 12rpx; font-size: 23rpx; line-height: 1.5; background: transparent; flex-shrink: 0; border-radius: 14rpx; }
+.thread-page .text-button[disabled] { background: transparent !important; }
+.thread-header { display: flex; align-items: center; justify-content: space-between; gap: 16rpx; min-height: 64rpx; }
+.header-actions { display: flex; align-items: center; gap: 12rpx; margin-right: -12rpx; flex-shrink: 0; }
+.thread-page .thread-more { min-width: 64rpx; font-size: 32rpx; letter-spacing: 3rpx; }
+.thread-page .title { margin: 14rpx 0 12rpx; font-size: 40rpx; line-height: 1.4; letter-spacing: 0; overflow-wrap: anywhere; }
+.thread-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8rpx 24rpx; color: #a0a4ae; font-size: 22rpx; line-height: 1.6; }
+.thread-state { display: flex; align-items: flex-start; gap: 12rpx; margin-top: 20rpx; color: #a0a4ae; font-size: 23rpx; line-height: 1.6; }
+.thread-state text { min-width: 0; overflow-wrap: anywhere; }
+.state-dot { width: 8rpx; height: 8rpx; margin-top: 14rpx; border-radius: 50%; background: #a0a4ae; flex-shrink: 0; }
+.thread-state-participant { color: #cdd0d7; }
+.thread-state-participant .state-dot { background: #cdd0d7; }
+
+.thread-page .post-card { margin-top: 24rpx; padding: 24rpx; border-radius: 26rpx; }
+.post-card .body { font-size: 32rpx; line-height: 1.8; }
+.post-actions { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12rpx 16rpx; margin-top: 24rpx; padding-top: 18rpx; border-top: 1rpx solid #2c2f36; }
+.thread-page .like-button { width: auto; min-width: 104rpx; min-height: 64rpx; padding: 10rpx 18rpx; gap: 10rpx; border: 1rpx solid #34363e; border-radius: 32rpx; background: #22242a; color: #cdd0d7; font-size: 24rpx; font-variant-numeric: tabular-nums; }
+.thread-page .like-button[disabled] { background: transparent !important; color: #858a96 !important; }
+.thread-page .like-button.is-liked { border-color: #a0a4ae; color: #f3f4f6; }
+.like-icon { font-size: 29rpx; line-height: 1; }
+.onsite-actions { display: flex; align-items: center; gap: 12rpx; margin-left: auto; }
+.like-onsite { color: #a0a4ae; font-size: 21rpx; }
+.thread-page .location-update { margin-right: -12rpx; font-size: 22rpx; }
+
+.replies-heading { display: flex; align-items: center; gap: 12rpx; margin: 30rpx 0 8rpx; font-size: 28rpx; font-weight: 600; }
+.reply-count { color: #a0a4ae; font-size: 23rpx; font-weight: 400; font-variant-numeric: tabular-nums; }
+.comment { padding: 22rpx 0; border-bottom: 1rpx solid #272a31; }
+.comment:last-child { border-bottom: 0; }
+.comment-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 12rpx; }
+.comment-author { color: #a0a4ae; font-size: 22rpx; overflow-wrap: anywhere; }
+.continuation-tag { padding: 2rpx 10rpx; border-radius: 8rpx; color: #a0a4ae; background: #22242a; font-size: 19rpx; }
+.comment .body { margin-top: 10rpx; font-size: 28rpx; line-height: 1.8; }
+.reply-empty { padding: 20rpx 0; color: #858a96; font-size: 24rpx; line-height: 1.6; }
+.reply-box { margin-top: 18rpx; padding: 0; background: #15171c; border: 1rpx solid #2c2f36; border-radius: 26rpx; }
+.thread-page .reply-input { display: block; width: 100%; height: 160rpx; min-height: 160rpx; padding: 22rpx 24rpx; border: 0; border-radius: 26rpx 26rpx 0 0; background: transparent; font-size: 29rpx; line-height: 1.7; }
+.reply-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 20rpx; padding: 0 16rpx 16rpx 24rpx; }
+.reply-counter { flex-shrink: 0; color: #a0a4ae; font-size: 22rpx; font-variant-numeric: tabular-nums; }
+.thread-page .reply-send { width: 184rpx; min-width: 104px; min-height: 72rpx; max-width: 70%; padding: 14rpx 16rpx; border-radius: 18rpx; font-size: 25rpx; flex-shrink: 0; white-space: nowrap; }
+.reply-rule { display: block; margin: 14rpx 0 0; color: #858a96; font-size: 21rpx; line-height: 1.7; }
+.locked-card { margin-top: 24rpx; padding: 24rpx; background: #15171c; border: 1rpx solid #2c2f36; border-radius: 26rpx; color: #a0a4ae; font-size: 25rpx; line-height: 1.7; }
+.locked-card text { display: block; }
+.thread-page .locked-card button { margin-top: 20rpx; }
+.thread-footer { margin-top: 30rpx; padding-top: 24rpx; border-top: 1rpx solid #272a31; }
+.thread-page .nearby-button { min-height: 80rpx; font-size: 25rpx; }
+.thread-empty { display: flex; flex-direction: column; align-items: stretch; gap: 20rpx; padding-top: 100rpx; text-align: center; }
+.empty-title { display: block; margin-bottom: 16rpx; color: #cdd0d7; font-size: 28rpx; line-height: 1.7; overflow-wrap: anywhere; }
+.thread-page.thread-empty .text-button { width: 100%; }
+
+@media (max-width: 350px) {
+  .thread-page { padding-left: 24rpx; padding-right: 24rpx; }
+  .thread-page .title { font-size: 38rpx; }
+  .thread-page .post-card { padding: 22rpx; }
+  .post-actions { gap: 8rpx 12rpx; }
+  .onsite-actions { gap: 6rpx; }
+  .thread-meta, .thread-state, .comment-author, .reply-counter, .like-onsite, .reply-rule,
+  .thread-page .text-button, .thread-page .like-button, .thread-page .location-update { font-size: 12px; }
+  .thread-page .badge, .continuation-tag { font-size: 11px; }
+  .thread-page .reply-send, .reply-empty { font-size: 13px; }
+  .state-dot { margin-top: 8px; }
+}

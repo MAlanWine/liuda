@@ -6,7 +6,8 @@ const location = require('../../services/location')
 const time = require('../../utils/time')
 
 Page({
-  data:{ post:null, mode:'demo', reply:'',replyEditor:[{ id:0,value:'' }],replyLength:0, busy:false, status:'', missing:false, loading:true, needsJoin:false,retrying:false,timeLabel:'',locating:false },
+  data:{ post:null, mode:'demo', reply:'',replyEditor:[{ id:0,value:'' }],replyLength:0,hasReplyText:false,
+    busy:false,pendingAction:'',status:'',missing:false,loading:true,needsJoin:false,retrying:false,timeLabel:'',distanceLabel:'',locating:false },
   onLoad(options) { this._id = options.id || ''; this.setData({ mode:options.mode === 'demo' ? 'demo' : 'live' }) },
   onShow() {
     this._visible = true
@@ -41,7 +42,8 @@ Page({
       post = Object.assign({},post,{ photoPath:post.level === 'full' ? this._photoPath || '' : '' })
     }
     const check = geo.gate(position,post,this.data.mode)
-    this.setData({ post, missing:false, loading:false,timeLabel:time.label(post.createdAt),
+    const freshPosition = this.data.mode === 'demo' || (geo.valid(position) && position.source === 'gps' && Date.now() - position.timestamp <= geo.MAX_AGE)
+    this.setData({ post, missing:false, loading:false,timeLabel:time.label(post.createdAt),distanceLabel:freshPosition ? post.distanceLabel : '位置待更新',
       status:post.participated ? (this.data.mode === 'demo' ? '演示对话 · 已参与，可离场继续' : '已参与这条对话 · 离场也可继续') :
         this.data.mode === 'demo' ? '演示对话 · 首次接话需要到场' : check.ok ? '已到场 · 接一句后可离场继续' : check.reason })
   },
@@ -84,34 +86,40 @@ Page({
     if (!editor || Number(event.currentTarget.dataset.editor) !== editor.id || typeof event.detail.value !== 'string') return
     // Keep native typing independent of periodic location/thread rendering.
     this.data.reply = event.detail.value
-    if (this.data.replyLength !== this.data.reply.length) this.setData({ replyLength:this.data.reply.length })
+    const replyLength = this.data.reply.length,hasReplyText = !!this.data.reply.trim()
+    if (this.data.replyLength !== replyLength || this.data.hasReplyText !== hasReplyText) this.setData({ replyLength,hasReplyText })
   },
   clearReply() {
     const id = this.data.replyEditor[0].id + 1
-    this.setData({ reply:'',replyLength:0,replyEditor:[{ id,value:'' }] })
+    this.setData({ reply:'',replyLength:0,hasReplyText:false,replyEditor:[{ id,value:'' }] })
   },
   async position() { return this.data.mode === 'demo' ? this.currentPosition() : location.fresh() },
   async sendReply() {
     if (this.data.busy || !this.data.reply.trim() || !this.data.post || !this.data.post.canReply) return
     const text = this.data.reply,continuation = this.data.post.participated === true
     if (!this._replyAttempt || this._replyAttempt.text !== text) this._replyAttempt = { text,id:api.requestId() }
-    this.setData({ busy:true })
+    this.setData({ busy:true,pendingAction:'reply' })
     try {
       await repository.comment(this.data.mode,this._id,continuation ? null : await this.position(),text,this._replyAttempt.id,continuation)
       this._replyAttempt = null; this.clearReply(); await this.sync(true)
       wx.showToast({ title:continuation ? '已接上这段对话' : '已在现场接上',icon:'success' })
     } catch (error) { this.error(error) }
-    finally { this.setData({ busy:false }) }
+    finally { this.setData({ busy:false,pendingAction:'' }) }
   },
   async like() {
     if (this.data.busy || !this.data.post || !this.data.post.canLike) return
-    this.setData({ busy:true })
+    this.setData({ busy:true,pendingAction:'like' })
     try { await repository.like(this.data.mode,this._id,await this.position(),!this.data.post.liked); await this.sync(true) }
     catch (error) { this.error(error) }
-    finally { this.setData({ busy:false }) }
+    finally { this.setData({ busy:false,pendingAction:'' }) }
   },
   photo() { if (this.data.post && this.data.post.level === 'full' && this.data.post.photoPath) wx.previewImage({ urls:[this.data.post.photoPath] }) },
-  chat() { wx.showModal({ title:'私聊稍后接入',content:'当前先体验现场留话与回复，私聊和付费权益尚未开放。',showCancel:false }) },
+  more() {
+    if (this.data.busy || !this.data.post || !this.data.post.owned) return
+    wx.showActionSheet({ itemList:['删除我的留话'],itemColor:'#b94d4d',success:result => {
+      if (result.tapIndex === 0 && this._visible && this.data.post && this.data.post.owned) this.remove()
+    } })
+  },
   remove() {
     if (this.data.busy) return
     wx.showModal({ title:this.data.mode === 'demo' ? '删除这条演示留话？' : '删除这条留话？',
@@ -119,7 +127,7 @@ Page({
       success:async result => {
         if (!result.confirm) return
         if (!this._deleteRequestId) this._deleteRequestId = api.requestId()
-        this.setData({ busy:true })
+        this.setData({ busy:true,pendingAction:'delete' })
         try {
           await repository.remove(this.data.mode,this._id,this._deleteRequestId)
           getApp().globalData.removedPostId = this._id
@@ -129,7 +137,7 @@ Page({
           wx.navigateBack({ fail:() => wx.switchTab({ url:'/pages/explore/index' }) })
         }
         catch (error) { this.error(error) }
-        finally { this.setData({ busy:false }) }
+        finally { this.setData({ busy:false,pendingAction:'' }) }
       } })
   },
   connect() { api.openConnect() },
