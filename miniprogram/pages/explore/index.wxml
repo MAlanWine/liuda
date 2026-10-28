@@ -23,15 +23,23 @@
       </cover-view>
     </cover-view>
     <cover-view wx:if="{{selected && cardVisible && !sheetVisible}}" class="content-card">
-      <cover-view class="card-top"><cover-view class="card-heat">{{selectedHeatLabel}}</cover-view><cover-view class="handle" bindtap="expand"><cover-view class="handle-line"></cover-view></cover-view><cover-view class="close-card" bindtap="closeCard" aria-role="button" aria-label="关闭留言">×</cover-view></cover-view>
-      <cover-view class="card-meta"><cover-view class="place-name">{{selected.owned ? '我留下的 · ' : ''}}{{selected.name}}</cover-view><cover-view class="status">{{selected.participated || selected.owned ? '可续聊' : selected.canReply ? '可接话' : selected.level === 'full' ? '已走近' : '走近看看'}} · {{selected.distanceLabel}}</cover-view></cover-view>
+      <cover-view class="card-top">
+        <cover-view class="card-origin">{{selected.owned ? '我留下的' : selected.participated ? '我参与的' : '现场留话'}}</cover-view>
+        <cover-view class="card-context-dot">·</cover-view><cover-view class="card-distance">{{selectedDistanceLabel}}</cover-view>
+        <cover-view wx:if="{{selectedHeatLabel && selectedHeatLabel !== '普通'}}" class="card-heat">{{selectedHeatLabel}}</cover-view>
+        <cover-view class="actions-space"></cover-view><cover-view class="close-card" bindtap="closeCard" aria-role="button" aria-label="关闭留言">×</cover-view>
+      </cover-view>
+      <cover-view class="card-meta"><cover-view class="place-name">{{selected.name}}</cover-view><cover-view class="status">{{selected.participated || selected.owned ? '可续聊' : selected.canReply ? '可接话' : selected.level === 'full' ? '已走近' : '走近看看'}}</cover-view></cover-view>
       <cover-view class="card-scroll" style="max-height:{{cardMaxHeight}}px">
         <cover-view class="card-copy">{{selected.displayText}}</cover-view>
         <cover-image wx:if="{{selected.level === 'full' && selected.photoPath}}" class="card-photo" src="{{selected.photoPath}}" bindtap="openThread" />
         <cover-view wx:if="{{expanded && selected.level === 'full'}}" class="mini-replies"><cover-view wx:for="{{selected.previewComments}}" wx:key="id" class="mini-reply"><cover-view class="reply-author">{{item.name}}</cover-view><cover-view class="reply-copy">{{item.text}}</cover-view></cover-view><cover-view class="text-action" bindtap="openThread" aria-role="button">查看完整对话 →</cover-view></cover-view>
       </cover-view>
-      <cover-view class="card-actions"><cover-view class="reaction {{selected.liked ? 'liked' : ''}}" bindtap="like" aria-role="button">{{selected.liked ? '♥' : '♡'}} {{selected.likes}}</cover-view><cover-view class="reaction reply-count" bindtap="openThread" aria-role="button">◌ {{selected.commentCount}}</cover-view><cover-view class="actions-space"></cover-view><cover-view wx:if="{{selected.level === 'full'}}" class="expand" bindtap="expand" aria-role="button">{{expanded ? '收起' : '展开'}} {{expanded ? '⌄' : '⌃'}}</cover-view><cover-view class="reply-button" bindtap="openThread" aria-role="button">{{selected.participated || selected.owned ? '继续聊' : selected.canReply ? '接一句' : '走近看看'}}</cover-view></cover-view>
-      <cover-view wx:if="{{selected.canInteract || nearbyCount > 1}}" class="card-footer"><cover-view wx:if="{{selected.canInteract}}" class="card-link" bindtap="leaveHere" aria-role="button">在此再留一句 ＋</cover-view><cover-view class="actions-space"></cover-view><cover-view wx:if="{{selectedGroupCount > 1}}" class="card-link group-link" bindtap="selectedGroup" aria-role="button">这组 {{selectedGroupCount}} 条</cover-view><cover-view wx:if="{{nearbyCount > 1}}" class="card-link" bindtap="nextPost" aria-role="button">下一条 →</cover-view></cover-view>
+      <cover-view class="card-actions"><cover-view class="reaction {{selected.liked ? 'liked' : ''}}" bindtap="like" aria-role="button" aria-label="{{selected.liked ? '取消点赞' : '点赞'}}">{{selected.liked ? '♥' : '♡'}} {{selected.likes}}</cover-view><cover-view class="reaction reply-count" bindtap="openThread" aria-role="button" aria-label="查看接话">接话 {{selected.commentCount}}</cover-view><cover-view class="actions-space"></cover-view><cover-view wx:if="{{selected.level === 'full'}}" class="expand" bindtap="expand" aria-role="button" aria-label="{{expanded ? '收起留话预览' : '展开留话预览'}}">{{expanded ? '收起' : '展开'}}</cover-view><cover-view class="reply-button" bindtap="openThread" aria-role="button">{{selected.participated || selected.owned ? '继续聊' : selected.canReply ? '接一句' : '走近看看'}}</cover-view></cover-view>
+      <cover-view wx:if="{{selected.canInteract || nearbyCount > 1}}" class="card-footer">
+        <cover-view class="card-divider"></cover-view>
+        <cover-view class="footer-actions"><cover-view wx:if="{{selected.canInteract}}" class="card-link leave-link" bindtap="leaveHere" aria-role="button">＋ 在此留话</cover-view><cover-view class="actions-space"></cover-view><cover-view wx:if="{{selectedGroupCount > 1}}" class="card-link group-link" bindtap="selectedGroup" aria-role="button">这组 {{selectedGroupCount}} 条</cover-view><cover-view wx:if="{{nearbyCount > 1}}" class="card-link next-link" bindtap="nextPost" aria-role="button" aria-label="下一条留话">→</cover-view></cover-view>
+      </cover-view>
     </cover-view>
   </cover-view>
 </template>
@@ -49,7 +57,7 @@
       <view class="campus-scale"><view class="campus-scale-line" style="width:{{campusFrame.scaleWidth}}px"></view><text>{{campusFrame.scaleText}}</text></view>
     </view>
     <cover-view wx:if="{{view === 'campus'}}" class="campus-attribution" bindtap="campusInfo" aria-role="button" aria-label="校园底图来源与精度说明">© OpenStreetMap contributors · ODbL</cover-view>
-    <block wx:if="{{hasPosition || view === 'campus'}}"><template is="scene-ui" data="{{mode,view,sceneContext,mapNotice,pins,lookHint,posts,cardVisible,selected,expanded,cloudConnected,following,emptyLabel,nearbyLabel,nearbyCount,cardMaxHeight,sheetVisible,sheetTitle,sheetSubtitle,sheetRows,sheetSort,sheetMaxHeight,selectedGroupCount,selectedHeatLabel}}" /></block>
+    <block wx:if="{{hasPosition || view === 'campus'}}"><template is="scene-ui" data="{{mode,view,sceneContext,mapNotice,pins,lookHint,posts,cardVisible,selected,selectedDistanceLabel,expanded,cloudConnected,following,emptyLabel,nearbyLabel,nearbyCount,cardMaxHeight,sheetVisible,sheetTitle,sheetSubtitle,sheetRows,sheetSort,sheetMaxHeight,selectedGroupCount,selectedHeatLabel}}" /></block>
     <view wx:if="{{!hasPosition && view !== 'campus'}}" class="waiting"><image class="empty-mascot" src="/assets/brand/liuda-comma.png" mode="aspectFit" /><text class="waiting-title">先找到你的位置</text><text class="muted">在手机上开启定位，就能看看附近。</text><button class="primary" bindtap="recenter">开启定位</button><button class="text-button" bindtap="locationDetails">查看定位原因</button><button class="text-button" bindtap="openCampus">先看看贸大校园</button><button class="text-button" bindtap="chooseMode">切回演示模式</button></view>
   </view>
   <view wx:if="{{mode === 'demo'}}" class="walk-control"><text class="walk-label">模拟步行</text><slider class="walk-slider" min="0" max="160" step="2" value="{{walk}}" bindchanging="walk" bindchange="walk" activeColor="#e9ebef" backgroundColor="#353840" block-color="#f3f4f6" block-size="16" /><text class="walk-value">{{walk}}m</text></view>

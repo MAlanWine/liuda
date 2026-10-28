@@ -22,7 +22,7 @@ Page({
     sceneWidth: 390, sceneFrame: '', cloudConnected: false, cloudStatus: '联机未连接', privacyVisible:false,
     mapScale:18,syncState:'idle',syncBusy:false,emptyLabel:'看看附近',nearbyLabel:'附近留话',selectedIndex:0,nearbyCount:0,cardMaxHeight:210,
     sheetVisible:false,sheetTitle:'附近留话',sheetSubtitle:'',sheetRows:[],sheetSort:'heat',sheetMaxHeight:280,
-    selectedGroupCount:0,selectedHeatLabel:'',campusFrame:{labels:[],pins:[],user:null,transform:''},
+    selectedGroupCount:0,selectedHeatLabel:'',selectedDistanceLabel:'',campusFrame:{labels:[],pins:[],user:null,transform:''},
     campusWidth:campus.metadata.bounds.right-campus.metadata.bounds.left,
     campusHeight:campus.metadata.bounds.bottom-campus.metadata.bounds.top
   },
@@ -168,7 +168,8 @@ Page({
     }
     const emptyLabel = mode==='live'&&!good ? '开启定位，看看附近留话 →' : this.data.syncState === 'loading' ? '正在看看附近…' : this.data.syncState === 'join' ? '加入现场留话 →' :
       this.data.syncState === 'error' ? '暂未刷新，点此重试 ↻' : '这里还没有留话，留第一句 ＋'
-    const patch = { posts, selected, hasPosition: good, markers,
+    const selectedDistanceLabel = selected ? (mode === 'demo' || (good && age <= geo.MAX_AGE) ? selected.distanceLabel : '位置待更新') : ''
+    const patch = { posts, selected, selectedDistanceLabel, hasPosition: good, markers,
       gpsStatus,mapNotice,mapNoticeAction,
       sceneContext:mode === 'demo' ? '演示街区 · 虚构场景' : this.data.view === 'street' ? '3D 空间示意 · 非真实建筑' : this.data.view === 'campus' ? '贸大夜游 · 底图待现场校准' : '',
       emptyLabel,nearbyCount:count,selectedIndex:index + 1,nearbyLabel:count ? '附近 ' + count + ' 条' : '附近留话',
