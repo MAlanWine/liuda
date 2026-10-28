@@ -11,6 +11,13 @@ const mapPoints = require('../../utils/map-points')
 const campus = require('../../utils/campus-map')
 const { tabLayout, selectTab } = require('../../utils/layout')
 
+function countLabel(value) {
+  const count = Number.isFinite(value) ? Math.max(0,Math.floor(value)) : 0
+  if (count >= 10000) return (count / 10000).toFixed(1).replace(/\.0$/,'') + '万'
+  if (count >= 1000) return (count / 1000).toFixed(1).replace(/\.0$/,'') + '千'
+  return String(count)
+}
+
 Page({
   data: {
     mode: 'demo', view: 'street', overview: false, walk: 0, pins: [], posts: [],
@@ -58,7 +65,7 @@ Page({
   resizeStage() {
     const size = tabLayout(), stageHeight = Math.max(280, size.windowHeight - size.height)
     const patch = { stageHeight,sceneWidth:size.windowWidth,canvasHeight:stageHeight-(this.data.mode === 'demo' ? 42 : 0),
-      cardMaxHeight:Math.max(60,Math.min(210,stageHeight-260)),sheetMaxHeight:Math.max(90,Math.min(300,stageHeight-270)) }
+      cardMaxHeight:Math.max(60,Math.min(210,stageHeight-260)),sheetMaxHeight:Math.max(60,Math.min(340,stageHeight-250)) }
     const changed = {}
     Object.keys(patch).forEach(key => { if (patch[key] !== this.data[key]) changed[key] = patch[key] })
     if (Object.keys(changed).length) this.setData(changed)
@@ -421,13 +428,14 @@ Page({
   sheetPatch(posts) {
     const members = posts.filter(post => geo.distance(this._position,post)<=350 && (!this._sheetIds || this._sheetIds.includes(post.id)))
     const scenes = new Set(members.map(post => post.sceneId || post.id))
+    const freshPosition = this.data.mode === 'demo' || (geo.valid(this._position) && Date.now() - this._position.timestamp <= geo.MAX_AGE)
     const rows = mapPoints.ranked(members,this.data.sheetSort).map(post => {
       const heat = mapPoints.heat(post)
       // displayText is already distance/expiry filtered; never use cached raw text.
-      return { id:post.id,name:post.name,distanceLabel:post.distanceLabel,copy:post.displayText,
-        likes:post.likes || 0,commentCount:post.commentCount || 0,owned:post.owned,
-        tier:heat.tier,tag:heat.fresh && heat.tier === 1 ? '新留话' : heat.label,
-        access:post.participated || post.owned ? '继续聊' : post.canReply ? '可接话' : '走近看看' }
+      return { id:post.id,name:post.name,distanceLabel:freshPosition ? post.distanceLabel : '待定位',copy:post.displayText,
+        likesLabel:countLabel(post.likes),commentsLabel:countLabel(post.commentCount),owned:post.owned,participated:post.participated,
+        tier:heat.tier,
+        access:post.participated || post.owned ? '可续聊' : post.canReply ? '可接话' : '走近看看' }
     })
     return { sheetRows:rows,
       sheetTitle:this._sheetIds && scenes.size === 1 && members.length ? members[0].name : '附近的留话',

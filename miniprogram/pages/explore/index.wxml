@@ -11,15 +11,15 @@
   <cover-view class="bottom-area">
     <cover-view wx:if="{{mode === 'live' && !sheetVisible && (!cardVisible || !selected) && (!nearbyCount || !cloudConnected)}}" class="empty-prompt" bindtap="emptyAction">{{emptyLabel}}</cover-view>
     <cover-view wx:if="{{sheetVisible}}" class="point-sheet" catchtap="stopTap">
-      <cover-view class="sheet-header"><cover-view class="sheet-heading">{{sheetTitle}}</cover-view><cover-view class="sheet-close" bindtap="closeSheet" aria-role="button" aria-label="关闭列表">×</cover-view></cover-view>
-      <cover-view class="sheet-toolbar"><cover-view class="sheet-subtitle">{{sheetSubtitle}}</cover-view><cover-view class="sheet-sort {{sheetSort === 'heat' ? 'sheet-sort-active' : ''}}" data-sort="heat" bindtap="sortSheet">推荐</cover-view><cover-view class="sheet-sort {{sheetSort === 'latest' ? 'sheet-sort-active' : ''}}" data-sort="latest" bindtap="sortSheet">最新</cover-view></cover-view>
+      <cover-view class="sheet-header"><cover-view class="sheet-heading">{{sheetTitle}}</cover-view><cover-view class="sheet-close" bindtap="closeSheet" aria-role="button" aria-label="关闭列表"><cover-view class="sheet-close-glyph">×</cover-view></cover-view></cover-view>
+      <cover-view class="sheet-toolbar"><cover-view class="sheet-subtitle">{{sheetSubtitle}}</cover-view><cover-view class="sheet-segments"><cover-view class="sheet-sort {{sheetSort === 'heat' ? 'sheet-sort-active' : ''}}" data-sort="heat" bindtap="sortSheet" aria-role="button" aria-label="按推荐排序">推荐</cover-view><cover-view class="sheet-sort {{sheetSort === 'latest' ? 'sheet-sort-active' : ''}}" data-sort="latest" bindtap="sortSheet" aria-role="button" aria-label="按最新排序">最新</cover-view></cover-view></cover-view>
       <cover-view class="sheet-scroll" style="max-height:{{sheetMaxHeight}}px">
-        <cover-view wx:for="{{sheetRows}}" wx:key="id" class="sheet-row" data-id="{{item.id}}" bindtap="selectSheetPost" aria-role="button">
-          <cover-view class="sheet-row-top"><cover-view class="sheet-place">{{item.owned ? '我 · ' : ''}}{{item.name}}</cover-view><cover-view class="sheet-distance">{{item.distanceLabel}}</cover-view></cover-view>
+        <cover-view wx:for="{{sheetRows}}" wx:key="id" class="sheet-row" data-id="{{item.id}}" bindtap="selectSheetPost" aria-role="button" aria-label="查看留话：{{item.name}}">
+          <cover-view class="sheet-row-top"><cover-view wx:if="{{item.owned || item.participated}}" class="sheet-origin">{{item.owned ? '我' : '参与'}}</cover-view><cover-view class="sheet-place">{{item.name}}</cover-view><cover-view class="sheet-distance">{{item.distanceLabel}}</cover-view></cover-view>
           <cover-view class="sheet-copy">{{item.copy}}</cover-view>
-          <cover-view class="sheet-row-bottom"><cover-view class="sheet-tag tag-{{item.tier}}">{{item.tag}}</cover-view><cover-view class="sheet-counts">♡ {{item.likes}} · 接话 {{item.commentCount}}</cover-view><cover-view class="actions-space"></cover-view><cover-view class="sheet-access">{{item.access}} →</cover-view></cover-view>
+          <cover-view class="sheet-row-bottom"><cover-view class="sheet-counts">♡ {{item.likesLabel}} · 接话 {{item.commentsLabel}}</cover-view><cover-view wx:if="{{item.tier === 3}}" class="sheet-tag">热门</cover-view><cover-view class="sheet-access">{{item.access}}</cover-view><cover-view class="sheet-open">›</cover-view></cover-view>
         </cover-view>
-        <cover-view wx:if="{{!sheetRows.length}}" class="sheet-empty">这里暂时没有可显示的留话。</cover-view>
+        <cover-view wx:if="{{!sheetRows.length}}" class="sheet-empty"><cover-image class="sheet-empty-mark" src="/assets/brand/liuda-comma.png" /><cover-view class="sheet-empty-title">这里暂时没有留话</cover-view><cover-view class="sheet-empty-copy">换个方向走走，或在地图上留下第一句。</cover-view></cover-view>
       </cover-view>
     </cover-view>
     <cover-view wx:if="{{selected && cardVisible && !sheetVisible}}" class="content-card">

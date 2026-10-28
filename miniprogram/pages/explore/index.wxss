@@ -69,26 +69,33 @@
 .waiting { box-sizing:border-box; }
 .comma-pin { position:absolute; transform:translate(-50%,-50%); z-index:10; }
 .comma-image { display:block; }
-.point-sheet { padding:0 16px 8px; border:1px solid #3b3e46; border-radius:23px; color:#f3f4f6; background-color:#15171c; }
-.sheet-header { display:flex; align-items:center; height:48px; }
-.sheet-heading { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; height:28px; line-height:28px; font-size:17px; font-weight:600; }
-.sheet-close { width:36px; height:44px; line-height:42px; text-align:right; font-size:26px; color:#b4b8c2; }
-.sheet-toolbar { display:flex; align-items:center; height:32px; margin-bottom:6px; }
-.sheet-subtitle { flex:1; color:#a0a4ae; font-size:10px; height:28px; line-height:28px; }
-.sheet-sort { height:28px; line-height:28px; padding:0 10px; border-radius:14px; font-size:11px; color:#999fac; }
-.sheet-sort-active { background-color:#eceef2; color:#15171c; }
-.sheet-scroll { overflow-y:scroll; }
-.sheet-row { padding:13px 0; border-top:1px solid #30333b; }
-.sheet-row-top { display:flex; align-items:center; height:20px; }
-.sheet-place { flex:1; font-size:11px; color:#b8bdc8; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; height:20px; line-height:20px; }
-.sheet-distance { margin-left:12px; color:#a0a4ae; font-size:10px; height:20px; line-height:20px; }
-.sheet-copy { margin:7px 0 10px; font-size:16px; line-height:24px; max-height:48px; overflow:hidden; white-space:normal; }
-.sheet-row-bottom { height:22px; display:flex; align-items:center; }
-.sheet-tag { padding:0 7px; height:20px; line-height:20px; border-radius:6px; font-size:9px; color:#d2d6df; background-color:#343842; }
-.tag-3 { background-color:#eceef2; color:#15171c; }
-.sheet-counts { margin-left:9px; font-size:10px; color:#969da9; height:20px; line-height:20px; }
-.sheet-access { height:22px; line-height:22px; color:#dfe2e9; font-size:10px; }
-.sheet-empty { padding:24px 0; font-size:12px; color:#a0a4ae; white-space:normal; }
+/* Nearby sheet: quiet shell, inset entries, a single reading hierarchy. */
+.point-sheet { padding: 0 14px 14px; border: 1px solid #2b2e37; border-radius: 26px; color: #f3f4f6; background-color: #111318; }
+.sheet-header { display: flex; align-items: center; height: 64px; padding: 4px 2px 0 6px; }
+.sheet-heading { flex: 1; min-width: 0; max-height: 52px; overflow: hidden; white-space: normal; word-break: break-all; line-height: 26px; font-size: 21px; font-weight: 600; }
+.sheet-close { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin-left: 8px; margin-right: -6px; flex-shrink: 0; }
+.sheet-close-glyph { width: 30px; height: 30px; line-height: 28px; text-align: center; border-radius: 15px; background-color: #252830; color: #b4bac5; font-size: 23px; }
+.sheet-toolbar { display: flex; align-items: center; height: 48px; padding: 0 4px 8px 6px; }
+.sheet-subtitle { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #979eab; font-size: 12px; height: 24px; line-height: 24px; }
+.sheet-segments { display: flex; align-items: center; height: 36px; padding: 3px; margin-left: 12px; border-radius: 12px; background-color: #090b0f; flex-shrink: 0; }
+.sheet-sort { width: 50px; height: 30px; line-height: 30px; text-align: center; border-radius: 9px; font-size: 12px; color: #8d95a3; }
+.sheet-sort-active { background-color: #30343d; color: #f3f4f6; }
+.sheet-scroll { overflow-y: scroll; }
+.sheet-row { padding: 14px 14px 13px; margin-bottom: 10px; border: 0; border-radius: 18px; background-color: #1d2027; }
+.sheet-row-top { display: flex; align-items: center; height: 20px; }
+.sheet-origin { padding: 0 5px; margin-right: 6px; height: 18px; line-height: 18px; border-radius: 5px; background-color: #353a45; color: #d2d7e0; font-size: 10px; flex-shrink: 0; }
+.sheet-place { flex: 1; min-width: 0; font-size: 12px; color: #aeb5c2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; height: 20px; line-height: 20px; }
+.sheet-distance { margin-left: 10px; color: #8f98a7; font-size: 12px; height: 20px; line-height: 20px; flex-shrink: 0; }
+.sheet-copy { margin: 10px 0 12px; color: #f0f2f6; font-size: 17px; font-weight: 500; line-height: 26px; max-height: 52px; overflow: hidden; white-space: normal; word-break: break-all; }
+.sheet-row-bottom { height: 28px; display: flex; align-items: center; }
+.sheet-counts { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; color: #929baa; height: 24px; line-height: 24px; }
+.sheet-tag { margin-left: 8px; padding: 0 6px; height: 20px; line-height: 20px; border-radius: 6px; font-size: 10px; color: #d3d8e1; background-color: #323843; flex-shrink: 0; }
+.sheet-access { margin-left: 10px; height: 24px; line-height: 24px; color: #c6cdd9; font-size: 12px; flex-shrink: 0; }
+.sheet-open { width: 26px; height: 26px; margin-left: 8px; line-height: 24px; text-align: center; font-size: 22px; color: #cbd2df; background-color: #2b303a; border-radius: 13px; flex-shrink: 0; }
+.sheet-empty { padding: 22px 14px 28px; text-align: center; }
+.sheet-empty-mark { display: block; width: 44px; height: 44px; margin: 0 auto 12px; border-radius: 14px; }
+.sheet-empty-title { color: #d5dae4; font-size: 15px; line-height: 24px; height: 24px; }
+.sheet-empty-copy { margin-top: 8px; color: #858f9f; font-size: 12px; line-height: 20px; white-space: normal; }
 .card-heat { margin-left: 10px; font-size: 10px; color: #cdd0d7; height: 20px; line-height: 20px; }
 .group-link { padding: 0 8px; }
 .campus-world { background-color:#243b47;overflow:hidden; }
@@ -108,4 +115,15 @@
   .content-card { padding-left: 14px; padding-right: 14px; border-radius: 22px; }
   .reply-button { margin-left: 6px; padding: 0 12px; }
   .card-copy { font-size: 17px; line-height: 27px; }
+  .point-sheet { padding-left: 12px; padding-right: 12px; border-radius: 23px; }
+  .sheet-heading { font-size: 20px; }
+  .sheet-header { padding-left: 4px; }
+  .sheet-toolbar { padding-left: 4px; }
+  .sheet-segments { margin-left: 8px; }
+  .sheet-sort { width: 44px; }
+  .sheet-row { padding-left: 12px; padding-right: 12px; border-radius: 16px; }
+  .sheet-copy { font-size: 16px; }
+  .sheet-distance { margin-left: 8px; }
+  .sheet-access { margin-left: 8px; }
+  .sheet-tag { margin-left: 6px; padding: 0 5px; }
 }
