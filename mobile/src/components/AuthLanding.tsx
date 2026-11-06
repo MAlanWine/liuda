@@ -1,14 +1,16 @@
 import { useState } from 'react';
-import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { router } from 'expo-router';
+import { AnimatedLogo } from './AnimatedLogo';
+import { router, usePathname } from 'expo-router';
 import { useEntry } from '../state/entry';
 
 type LoginMethod = '微信' | 'Apple';
 
 export function AuthLanding() {
   const { begin, notice } = useEntry();
+  const pathname = usePathname();
   const { height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const compact = height - insets.top - insets.bottom < 650;
@@ -22,7 +24,7 @@ export function AuthLanding() {
   return <SafeAreaView style={s.screen}>
     <ScrollView bounces={false} showsVerticalScrollIndicator={false} contentContainerStyle={s.content}>
       <View style={[s.identity, compact && s.identityCompact]}>
-        <Image accessible={false} source={require('../../assets/liuda-comma.png')} style={[s.mark, compact && s.markCompact]} />
+        <AnimatedLogo size={compact ? 172 : 220} active={!loginOpen && (pathname === '/welcome' || pathname === '/login')} />
         <Text accessibilityRole="header" style={s.name}>留答</Text>
       </View>
       <View style={s.actions}>
@@ -54,8 +56,6 @@ const s = StyleSheet.create({
   content: { flexGrow: 1, paddingHorizontal: 32, paddingBottom: 12 },
   identity: { flex: 1, minHeight: 330, alignItems: 'center', justifyContent: 'center', paddingTop: 20, paddingBottom: 48 },
   identityCompact: { minHeight: 240, paddingTop: 4, paddingBottom: 26 },
-  mark: { width: 220, height: 220, resizeMode: 'contain' },
-  markCompact: { width: 172, height: 172 },
   name: { color: '#ededed', fontSize: 27, lineHeight: 40, fontWeight: '500', letterSpacing: 7, marginTop: 8, paddingLeft: 7 },
   actions: { gap: 12, paddingBottom: 16 },
   method: { minHeight: 54, borderRadius: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 40, paddingVertical: 14 },
