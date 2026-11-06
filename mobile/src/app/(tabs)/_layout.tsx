@@ -9,5 +9,6 @@ export default function TabLayout() {
     <Tabs.Screen name="discover" options={{ title: '发现', tabBarIcon: ({ color, size }) => <Ionicons name="compass-outline" size={size} color={typeof color === 'string' ? color : colors.muted} /> }} />
     <Tabs.Screen name="leave" options={{ title: '留下', tabBarIcon: ({ color, size }) => <Ionicons name="add-circle-outline" size={size} color={typeof color === 'string' ? color : colors.muted} /> }} />
     <Tabs.Screen name="messages" options={{ title: '消息', tabBarIcon: ({ color, size }) => <Ionicons name="chatbubble-ellipses-outline" size={size} color={typeof color === 'string' ? color : colors.muted} /> }} />
+    <Tabs.Screen name="me" options={{ title: '我', tabBarIcon: ({ color, size }) => <Ionicons name="person-outline" size={size} color={typeof color === 'string' ? color : colors.muted} /> }} />
   </Tabs>;
 }
