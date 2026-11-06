@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "留答",
+    "slug": "liuda-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/liuda-comma.png",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#101215",
+        "foregroundImage": "./assets/liuda-comma.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/liuda-comma.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font"
+    ],
+    "scheme": "liuda"
+  }
+}
