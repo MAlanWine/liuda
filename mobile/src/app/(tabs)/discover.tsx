@@ -34,7 +34,7 @@ export default function DiscoverScreen() {
   const [height, setHeight] = useState(0);
   if (!store.ready) return <Loading />;
   return <Screen>
-    <View style={styles.header}><View style={styles.brand}><Image source={require('../../../assets/liuda-comma.png')} style={styles.logo} /><Text style={styles.brandName}>留答</Text></View><Text style={styles.demo}>演示体验 · 模拟位置</Text></View>
+    <View style={styles.header}><Pressable accessibilityRole="button" accessibilityLabel="打开留答欢迎页" onPress={() => router.push('/welcome')} style={styles.brand}><Image source={require('../../../assets/liuda-comma.png')} style={styles.logo} /><Text style={styles.brandName}>留答</Text></Pressable><Text style={styles.demo}>演示体验 · 模拟位置</Text></View>
     {store.notice ? <Text style={styles.notice}>{store.notice}</Text> : null}
     <View style={styles.feed} onLayout={event => setHeight(event.nativeEvent.layout.height)}>
       {height > 0 && <FlatList key={Math.round(height)} data={store.places} extraData={[store.arrived, store.saved]} keyExtractor={place => place.id} pagingEnabled decelerationRate="fast" showsVerticalScrollIndicator={false} initialNumToRender={2} maxToRenderPerBatch={2} windowSize={3} getItemLayout={(_, index) => ({ length: height, offset: height * index, index })} renderItem={({ item }) => <PlaceCard place={item} height={height} />} />}
