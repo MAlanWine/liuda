@@ -16,7 +16,7 @@ ui_text += ''.join(chr(i) for i in range(32, 127))
 ui_text = ''.join(sorted(set(c for c in ui_text if ord(c) >= 32)))
 for filename, family, text in [
     ('serif-medium.otf', 'LiudaDisplay', '留答 '),
-    ('sans-regular.otf', 'LiudaInterface', ui_text),
+    ('sans-regular.otf', 'LiudaInterfaceV2', ui_text),
     ('sans-medium.otf', 'LiudaInterfaceMedium', ui_text),
 ]:
     original = source / filename

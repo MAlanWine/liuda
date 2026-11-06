@@ -13,7 +13,7 @@ export function AuthLanding() {
   const { begin, notice } = useEntry();
   const [fontsLoaded] = useFonts({
     LiudaDisplay: require('../../assets/fonts/LiudaDisplay.otf'),
-    LiudaInterface: require('../../assets/fonts/LiudaInterface.otf'),
+    LiudaInterfaceV2: require('../../assets/fonts/LiudaInterfaceV2.otf'),
     LiudaInterfaceMedium: require('../../assets/fonts/LiudaInterfaceMedium.otf'),
   });
   const regular = fontsLoaded ? s.interfaceFont : undefined;
@@ -34,6 +34,7 @@ export function AuthLanding() {
       <View style={[s.identity, compact && s.identityCompact]}>
         <AnimatedLogo size={compact ? 172 : 220} active={!loginOpen && (pathname === '/welcome' || pathname === '/login')} />
         <Text accessibilityRole="header" style={[s.name, fontsLoaded && s.displayFont]}>留答</Text>
+        <Text style={[s.tagline, regular]}>到哪都有人陪着你</Text>
       </View>
       <View style={s.actions}>
         <Pressable accessibilityRole="button" accessibilityLabel="微信登录" onPress={() => { setMethod('微信'); setLoginOpen(true); }} style={({ pressed }) => [s.method, s.primary, pressed && s.pressed]}>
@@ -61,13 +62,14 @@ export function AuthLanding() {
 }
 const s = StyleSheet.create({
   displayFont: { fontFamily: 'LiudaDisplay' },
-  interfaceFont: { fontFamily: 'LiudaInterface' },
+  interfaceFont: { fontFamily: 'LiudaInterfaceV2' },
   mediumFont: { fontFamily: 'LiudaInterfaceMedium' },
   screen: { flex: 1, backgroundColor: '#000' },
   content: { flexGrow: 1, paddingHorizontal: 32, paddingBottom: 12 },
   identity: { flex: 1, minHeight: 330, alignItems: 'center', justifyContent: 'center', paddingTop: 20, paddingBottom: 48 },
   identityCompact: { minHeight: 240, paddingTop: 4, paddingBottom: 26 },
   name: { color: '#ededed', fontSize: 29, lineHeight: 44, fontWeight: 'normal', letterSpacing: 8, marginTop: 6, paddingLeft: 8, includeFontPadding: false },
+  tagline: { color: '#999', fontSize: 12, lineHeight: 22, letterSpacing: 1.4, marginTop: 9, paddingLeft: 1.4, includeFontPadding: false },
   actions: { gap: 12, paddingBottom: 16 },
   method: { minHeight: 54, borderRadius: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 40, paddingVertical: 14 },
   methodIcon: { position: 'absolute', left: 21 },
