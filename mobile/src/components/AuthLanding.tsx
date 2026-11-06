@@ -16,8 +16,8 @@ export function AuthLanding() {
   const focused = pathname === '/welcome' || pathname === '/login';
   const insets = useSafeAreaInsets();
   const availableHeight = height - insets.top - insets.bottom;
-  const compact = availableHeight < 650;
-  const artSize = Math.min(width, availableHeight * (compact ? 0.37 : 0.47), 440);
+  const artHeight = Math.max(220, Math.min(availableHeight - 300, 620));
+  const artWidth = Math.min(width, 440);
   const [method, setMethod] = useState<LoginMethod>('微信');
   const [loginOpen, setLoginOpen] = useState(false);
   function browse() {
@@ -28,13 +28,16 @@ export function AuthLanding() {
   return <SafeAreaView style={s.screen}>
     {focused && <StatusBar style="dark" />}
     <ScrollView bounces={false} showsVerticalScrollIndicator={false} contentContainerStyle={s.content}>
-      <View style={[s.identity, compact && s.identityCompact]}>
-        <View accessible={false} style={{ width: artSize, height: artSize }}>
-          <Image source={require('../../assets/arrival-collage-v1.png')} style={s.art} />
+      <View style={s.brand}>
+        <Image accessibilityLabel="留答白色逗号 Logo" source={require('../../assets/liuda-comma.png')} style={s.logo} />
+        <Text accessibilityRole="header" style={s.name}>留答</Text>
+      </View>
+      <View style={s.identity}>
+        <View accessible={false} style={{ width: artWidth, height: artHeight }}>
+          <Image source={require('../../assets/arrival-collage-v2.png')} style={s.art} />
           <LinearGradient pointerEvents="none" colors={['#f3f1eb', '#f3f1eb00']} style={s.fadeTop} />
           <LinearGradient pointerEvents="none" colors={['#f3f1eb00', '#f3f1eb']} style={s.fadeBottom} />
         </View>
-        <Text accessibilityRole="header" style={s.name}>留答</Text>
       </View>
       <View style={s.actions}>
         <Pressable accessibilityRole="button" accessibilityLabel="微信登录" onPress={() => { setMethod('微信'); setLoginOpen(true); }} style={({ pressed }) => [s.method, s.primary, pressed && s.pressed]}>
@@ -62,13 +65,14 @@ export function AuthLanding() {
 }
 const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: '#f3f1eb' },
-  content: { flexGrow: 1, paddingHorizontal: 32, paddingBottom: 12 },
-  identity: { flex: 1, minHeight: 330, alignItems: 'center', justifyContent: 'center', paddingTop: 12, paddingBottom: 28 },
-  identityCompact: { minHeight: 240, paddingTop: 4, paddingBottom: 16 },
+  content: { flexGrow: 1, paddingHorizontal: 32, paddingTop: 10, paddingBottom: 12 },
+  brand: { height: 54, flexDirection: 'row', alignItems: 'center', gap: 12 },
+  logo: { width: 42, height: 42, borderRadius: 11 },
+  identity: { flex: 1, minHeight: 220, alignItems: 'center', justifyContent: 'center' },
   art: { width: '100%', height: '100%', resizeMode: 'contain' },
   fadeTop: { position: 'absolute', top: 0, left: 0, right: 0, height: 36 },
   fadeBottom: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 36 },
-  name: { color: '#24221f', fontSize: 27, lineHeight: 40, fontWeight: '500', letterSpacing: 7, marginTop: 8, paddingLeft: 7 },
+  name: { color: '#24221f', fontSize: 22, lineHeight: 32, fontWeight: '500', letterSpacing: 4 },
   actions: { gap: 12, paddingBottom: 16 },
   method: { minHeight: 54, borderRadius: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 40, paddingVertical: 14 },
   methodIcon: { position: 'absolute', left: 21 },
