@@ -15,6 +15,7 @@ export default function RootLayout() {
       <Stack.Screen name="login" options={{ headerShown: false }} />
       <Stack.Screen name="about-privacy" options={{ title: '匿名与数据' }} />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="me" options={{ headerShown: false }} />
       <Stack.Screen name="profile/edit" options={{ title: '编辑资料', headerBackTitle: '返回' }} />
       <Stack.Screen name="profile/activity" options={{ title: '我的记录', headerBackTitle: '返回' }} />
       <Stack.Screen name="place/[id]" options={{ title: '这个地方', headerBackTitle: '返回' }} />

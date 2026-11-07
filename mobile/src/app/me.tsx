@@ -1,10 +1,10 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useProfile } from '../../state/profile';
-import { usePlaces } from '../../state/places';
-import { Avatar } from '../../components/Avatar';
-import { colors, Loading, Screen } from '../../components/ui';
+import { useProfile } from '../state/profile';
+import { usePlaces } from '../state/places';
+import { Avatar } from '../components/Avatar';
+import { colors, Loading, Screen } from '../components/ui';
 
 export default function MeScreen() {
   const { profile, ready, notice } = useProfile();
@@ -16,7 +16,12 @@ export default function MeScreen() {
     { key: 'saved', icon: 'bookmark-outline' as const, title: '想去的地方', description: '给下一次出门留点期待', count: store.saved.filter(id => store.places.some(p => p.id === id)).length },
   ];
   return <Screen><ScrollView contentContainerStyle={s.content}>
-    <Text style={s.pageTitle}>我</Text>
+    <View style={s.heading}>
+      <Pressable accessibilityRole="button" accessibilityLabel="返回" onPress={() => { if (router.canGoBack()) router.back(); else router.replace('/discover'); }} style={s.back}>
+        <Ionicons name="arrow-back" size={22} color={colors.text} />
+      </Pressable>
+      <Text accessibilityRole="header" style={s.pageTitle}>我</Text>
+    </View>
     <Pressable accessibilityRole="button" accessibilityLabel="编辑我的资料" onPress={() => router.push('/profile/edit')} style={({ pressed }) => [s.identity, pressed && { opacity: 0.7 }]}>
       <Avatar uri={profile.avatar} size={74} /><View style={{ flex: 1, gap: 7 }}><Text numberOfLines={2} style={s.nickname}>{profile.nickname}</Text><Text style={s.edit}>编辑头像与昵称</Text></View><Ionicons name="chevron-forward" size={18} color="#757c72" />
     </Pressable>
@@ -32,7 +37,9 @@ export default function MeScreen() {
 }
 const s = StyleSheet.create({
   content: { padding: 24, paddingTop: 26, paddingBottom: 40 },
-  pageTitle: { color: colors.text, fontSize: 26, fontWeight: '500', marginBottom: 32 },
+  heading: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 24 },
+  back: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', marginLeft: -10 },
+  pageTitle: { color: colors.text, fontSize: 26, fontWeight: '500' },
   identity: { flexDirection: 'row', alignItems: 'center', gap: 18, paddingBottom: 34 },
   nickname: { color: colors.text, fontSize: 23, fontWeight: '500', lineHeight: 32 },
   edit: { color: '#8a9184', fontSize: 12, lineHeight: 20 },

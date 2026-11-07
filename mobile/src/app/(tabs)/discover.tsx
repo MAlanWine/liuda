@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { FlatList, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
 import { Place, usePlaces } from '../../state/places';
+import { useProfile } from '../../state/profile';
+import { Avatar } from '../../components/Avatar';
 import { colors, Loading, moods, Screen } from '../../components/ui';
 
 function PlaceCard({ place, height }: { place: Place; height: number }) {
@@ -31,10 +33,17 @@ function PlaceCard({ place, height }: { place: Place; height: number }) {
 
 export default function DiscoverScreen() {
   const store = usePlaces();
+  const { profile, ready: profileReady } = useProfile();
   const [height, setHeight] = useState(0);
-  if (!store.ready) return <Loading />;
+  if (!store.ready || !profileReady) return <Loading />;
   return <Screen>
-    <View style={styles.header}><Pressable accessibilityRole="button" accessibilityLabel="打开留答欢迎页" onPress={() => router.push('/welcome')} style={styles.brand}><Image source={require('../../../assets/liuda-comma.png')} style={styles.logo} /><Text style={styles.brandName}>留答</Text></Pressable><Text style={styles.demo}>演示体验 · 模拟位置</Text></View>
+    <View style={styles.header}>
+      <Pressable accessibilityRole="button" accessibilityLabel="打开个人中心" onPress={() => router.push('/me')} style={({ pressed }) => [styles.profile, pressed && { opacity: 0.65 }]}>
+        <Avatar uri={profile.avatar} size={34} />
+        <Text numberOfLines={1} style={styles.profileName}>{profile.nickname}</Text>
+      </Pressable>
+      <Text style={styles.demo}>演示体验 · 模拟位置</Text>
+    </View>
     {store.notice ? <Text style={styles.notice}>{store.notice}</Text> : null}
     <View style={styles.feed} onLayout={event => setHeight(event.nativeEvent.layout.height)}>
       {height > 0 && <FlatList key={Math.round(height)} data={store.places} extraData={[store.arrived, store.saved]} keyExtractor={place => place.id} pagingEnabled decelerationRate="fast" showsVerticalScrollIndicator={false} initialNumToRender={2} maxToRenderPerBatch={2} windowSize={3} getItemLayout={(_, index) => ({ length: height, offset: height * index, index })} renderItem={({ item }) => <PlaceCard place={item} height={height} />} />}
@@ -43,10 +52,9 @@ export default function DiscoverScreen() {
   </Screen>;
 }
 const styles = StyleSheet.create({
-  header: { height: 65, paddingHorizontal: 23, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  brand: { flexDirection: 'row', alignItems: 'center', gap: 9 },
-  logo: { width: 31, height: 31, borderRadius: 10 },
-  brandName: { color: colors.text, fontSize: 23, fontWeight: '600' },
+  header: { height: 65, paddingHorizontal: 23, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 16 },
+  profile: { flexDirection: 'row', alignItems: 'center', gap: 9, minHeight: 44, flexShrink: 1, minWidth: 0 },
+  profileName: { color: colors.text, fontSize: 15, fontWeight: '500', flexShrink: 1 },
   demo: { color: colors.muted, fontSize: 11 },
   notice: { color: '#d3bf99', fontSize: 12, paddingHorizontal: 24 },
   feed: { flex: 1 },
