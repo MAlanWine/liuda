@@ -11,7 +11,7 @@ const eyes = [
   { x: 758, y: 500, width: 73, height: 111, colors: ['#f5f4f4', '#efeeee', '#ebebeb'] as const },
 ];
 
-export function AnimatedLogo({ size, active }: { size: number; active: boolean }) {
+export function AnimatedLogo({ size, active, blinkOnStart = false }: { size: number; active: boolean; blinkOnStart?: boolean }) {
   const glowId = useId().replace(/:/g, '');
   const [float] = useState(() => new Animated.Value(0));
   const [blink] = useState(() => new Animated.Value(0));
@@ -58,6 +58,7 @@ export function AnimatedLogo({ size, active }: { size: number; active: boolean }
       Animated.timing(float, { toValue: 0, duration: 2700, easing: Easing.inOut(Easing.sin), useNativeDriver: true, isInteraction: false }),
     ]));
     floating.start();
+    if (blinkOnStart) blinkOnce();
     let timer: ReturnType<typeof setTimeout>;
     let stopped = false;
     const schedule = () => {
@@ -76,7 +77,7 @@ export function AnimatedLogo({ size, active }: { size: number; active: boolean }
       float.setValue(0);
       blink.setValue(0);
     };
-  }, [enabled, blinkOnce, float, blink]);
+  }, [enabled, blinkOnce, blinkOnStart, float, blink]);
 
   const scale = size / sourceSize;
   const opacity = blink.interpolate({ inputRange: [0, 0.035, 0.08, 1], outputRange: [0, 0, 1, 1], extrapolate: 'clamp' });

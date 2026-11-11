@@ -1,3 +1,4 @@
+import { atPoint, isPoint, type Fix, type Point } from '../location/geo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 
@@ -7,6 +8,7 @@ export type Place = {
   name: string;
   location: string;
   distance: number;
+  point?: Point;
   teaser: string;
   text: string;
   mood: 'sage' | 'sand' | 'blue';
@@ -49,9 +51,9 @@ type Store = State & {
   arrive: (id: string) => void;
   depart: (id: string) => void;
   save: (id: string) => void;
-  like: (id: string) => void;
-  reply: (id: string, text: string) => void;
-  create: (name: string, location: string, text: string) => string;
+  like: (id: string, fix?: Fix | null) => void;
+  reply: (id: string, text: string, fix?: Fix | null) => void;
+  create: (name: string, location: string, text: string, point?: Point) => string;
 };
 const Context = createContext<Store | null>(null);
 const key = 'liuda-mobile-demo-v1';
@@ -61,6 +63,7 @@ function validPlace(value: unknown): value is Place {
   const place = value as Place;
   return ['id', 'name', 'location', 'teaser', 'text'].every(field => typeof (place as unknown as Record<string, unknown>)[field] === 'string')
     && ['sage', 'sand', 'blue'].includes(place.mood)
+    && (place.point === undefined || isPoint(place.point))
     && Number.isFinite(place.distance) && Number.isFinite(place.likes)
     && ['liked', 'participated', 'owned'].every(field => typeof (place as unknown as Record<string, unknown>)[field] === 'boolean')
     && Array.isArray(place.replies) && place.replies.every(reply => typeof reply.id === 'string' && typeof reply.text === 'string' && typeof reply.mine === 'boolean')
@@ -105,23 +108,23 @@ export function PlacesProvider({ children }: { children: React.ReactNode }) {
   function save(id: string) {
     setState(current => ({ ...current, saved: current.saved.includes(id) ? current.saved.filter(value => value !== id) : [...current.saved, id] }));
   }
-  function like(id: string) {
+  function like(id: string, fix?: Fix | null) {
     setState(current => ({ ...current, places: current.places.map(place => {
-      if (place.id !== id || !current.arrived.includes(id)) return place;
+      if (place.id !== id || !(place.point ? atPoint(fix, place.point) : current.arrived.includes(id))) return place;
       return { ...place, liked: !place.liked, likes: place.likes + (place.liked ? -1 : 1) };
     }) }));
   }
-  function reply(id: string, text: string) {
+  function reply(id: string, text: string, fix?: Fix | null) {
     if (!text.trim()) return;
     setState(current => ({ ...current, places: current.places.map(place => {
-      if (place.id !== id || (!place.participated && !current.arrived.includes(id))) return place;
+      if (place.id !== id || (!place.participated && !(place.point ? atPoint(fix, place.point) : current.arrived.includes(id)))) return place;
       return { ...place, participated: true, replies: [...place.replies, { id: Date.now() + '-' + Math.random(), text: text.trim(), mine: true }] };
     }) }));
   }
-  function create(name: string, location: string, text: string) {
+  function create(name: string, location: string, text: string, point?: Point) {
     const id = 'local-' + Date.now() + '-' + Math.random().toString(36).slice(2);
-    const place: Place = { id, name: name.trim(), location: location.trim(), text: text.trim(), teaser: text.trim(), distance: 0, mood: 'sage', likes: 0, liked: false, participated: true, owned: true, replies: [] };
-    setState(current => ({ ...current, places: [place, ...current.places], arrived: [...current.arrived, id] }));
+    const place: Place = { id, name: name.trim() || '现场留话', location: location.trim(), text: text.trim(), teaser: text.trim(), distance: 0, point, mood: 'sage', likes: 0, liked: false, participated: true, owned: true, replies: [] };
+    setState(current => ({ ...current, places: [place, ...current.places], arrived: point ? current.arrived : [...current.arrived, id] }));
     return id;
   }
   return <Context.Provider value={{ ...state, ready, notice, arrive, depart, save, like, reply, create }}>{children}</Context.Provider>;

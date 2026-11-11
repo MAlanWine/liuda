@@ -17,6 +17,7 @@
       "predictiveBackGestureEnabled": false
     },
     "web": {
+      "output": "server",
       "favicon": "./assets/liuda-comma.png"
     },
     "plugins": [
@@ -28,6 +29,12 @@
           "photosPermission": "选择照片以设置你的留答头像。",
           "cameraPermission": false,
           "microphonePermission": false
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "允许留答使用你的位置，以记录现场留话地点并显示与你的距离。"
         }
       ]
     ],

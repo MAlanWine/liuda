@@ -10,7 +10,7 @@ import { useEntry } from '../state/entry';
 type LoginMethod = '微信' | 'Apple';
 
 export function AuthLanding() {
-  const { begin, notice } = useEntry();
+  const { started, notice } = useEntry();
   const [fontsLoaded] = useFonts({
     LiudaDisplay: require('../../assets/fonts/LiudaDisplay.otf'),
     LiudaInterfaceV2: require('../../assets/fonts/LiudaInterfaceV2.otf'),
@@ -26,8 +26,7 @@ export function AuthLanding() {
   const [loginOpen, setLoginOpen] = useState(false);
   function browse() {
     setLoginOpen(false);
-    begin();
-    router.replace('/discover');
+    router.replace(started ? '/discover' : '/onboarding');
   }
   return <SafeAreaView style={s.screen}>
     <ScrollView bounces={false} showsVerticalScrollIndicator={false} contentContainerStyle={s.content}>

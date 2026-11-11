@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { FlatList, Image, Pressable, ScrollView, StyleSheet, Text, View, type ImageSourcePropType } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { AccessibilityInfo, FlatList, Image, Pressable, ScrollView, StyleSheet, Text, View, type ImageSourcePropType } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { router } from 'expo-router';
+import { router, usePathname } from 'expo-router';
 import { Place, usePlaces } from '../../state/places';
 import { useProfile } from '../../state/profile';
 import { Avatar } from '../../components/Avatar';
@@ -14,13 +14,52 @@ const placeArt = new Map<string, ImageSourcePropType>([
   ['corner', require('../../../assets/place-art/corner.jpg')],
 ]);
 
-function PlaceCard({ place, height }: { place: Place; height: number }) {
+const viewabilityConfig = { itemVisiblePercentThreshold: 70 };
+
+function PlaceCard({ place, height, active }: { place: Place; height: number; active: boolean }) {
   const store = usePlaces();
   const palette = moods[place.mood];
   const illustration = placeArt.get(place.id);
   const hasIllustration = illustration !== undefined;
   const artHeight = Math.min(200, Math.round(height * 0.29));
-  const joined = store.arrived.includes(place.id) || place.participated;
+  const onsite = store.arrived.includes(place.id);
+  const unlocked = onsite || place.participated;
+  const [closer, setCloser] = useState(false);
+  const distance = closer ? Math.min(15, place.distance) : place.distance;
+  const nearby = distance <= 25;
+  const available = Array.from(unlocked ? place.text : place.teaser.replace(/[.…]+$/, ''))
+    .slice(0, unlocked ? undefined : nearby ? 22 : 9);
+  const [revealed, setRevealed] = useState(0);
+  const [reduceMotion, setReduceMotion] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    let changed = false;
+    const listener = AccessibilityInfo.addEventListener('reduceMotionChanged', value => {
+      changed = true;
+      setReduceMotion(value);
+    });
+    AccessibilityInfo.isReduceMotionEnabled()
+      .then(value => { if (mounted && !changed) setReduceMotion(value); })
+      .catch(() => { if (mounted && !changed) setReduceMotion(false); });
+    return () => { mounted = false; listener.remove(); };
+  }, []);
+
+  const visibleCount = reduceMotion ? available.length : Math.min(revealed, available.length);
+  const finished = visibleCount === available.length;
+  const lastLetter = available[visibleCount - 1];
+  const pause = lastLetter && /[，。？！]/.test(lastLetter) ? 160 : 48;
+  useEffect(() => {
+    if (!active || finished || reduceMotion === null) return;
+    const timer = setTimeout(() => setRevealed(count => count + 1), pause);
+    return () => clearTimeout(timer);
+  }, [active, finished, pause, reduceMotion, revealed]);
+
+  function advance() {
+    if (place.point || unlocked) open();
+    else if (nearby) store.arrive(place.id);
+    else setCloser(true);
+  }
   const saved = store.saved.includes(place.id);
   const open = () => router.push({ pathname: '/place/[id]', params: { id: place.id } });
   return <View style={{ height, paddingHorizontal: 16, paddingVertical: 10 }}>
@@ -40,15 +79,36 @@ function PlaceCard({ place, height }: { place: Place; height: number }) {
           />
         </View>
       )}
-      <ScrollView scrollEnabled={height < (hasIllustration ? 560 : 520)} nestedScrollEnabled showsVerticalScrollIndicator={false} contentContainerStyle={[styles.cardContent, hasIllustration && styles.illustratedContent]}>
-        <View style={styles.meta}><Text style={[styles.location, { color: palette.soft }]}>{place.location}</Text><View style={styles.distance}><Ionicons name="walk-outline" color={palette.ink} size={14} /><Text style={styles.distanceText}>{store.arrived.includes(place.id) ? '演示已到场' : `约 ${place.distance} 米`}</Text></View></View>
-        <Text style={[styles.placeName, hasIllustration && styles.illustratedName, { color: palette.ink }]}>{place.name}</Text>
-        <View style={[styles.story, hasIllustration && styles.illustratedStory]}><Text style={[styles.storyText, hasIllustration && styles.illustratedStoryText, { color: palette.ink }]}>{place.teaser}</Text></View>
-        {place.task && <Pressable onPress={open} style={styles.task}><Ionicons name="flag-outline" color={palette.soft} size={17} /><Text style={[styles.taskText, { color: palette.ink }]}>{place.task.title}</Text><Text style={[styles.reward, { color: palette.soft }]}>¥{place.task.reward} · 演示任务</Text></Pressable>}
+      <ScrollView scrollEnabled={available.length > 36 || height < (hasIllustration ? 560 : 520)} nestedScrollEnabled showsVerticalScrollIndicator={false} contentContainerStyle={[styles.cardContent, hasIllustration && styles.illustratedContent]}>
+        <View style={styles.meta}>
+          <Text numberOfLines={1} style={[styles.placeName, { color: palette.soft }]}>{place.name}</Text>
+          <Text style={[styles.distanceText, { color: palette.soft }]}>
+            {place.point ? '真实地点' : onsite ? '演示已到场' : `约 ${distance} 米`}
+          </Text>
+        </View>
+        <View style={styles.story}>
+          <Text
+            accessibilityLabel={available.join('')}
+            style={[styles.storyText, hasIllustration && styles.illustratedStoryText, { color: palette.ink }]}
+          >
+            {available.slice(0, visibleCount).join('')}
+            {finished && !unlocked ? '…' : ''}
+            <Text style={styles.unrevealed}>{available.slice(visibleCount).join('')}{!finished && !unlocked ? '…' : ''}</Text>
+          </Text>
+          {!unlocked && (
+            <View style={styles.storyHint}>
+              {finished && <Text style={[styles.distanceText, { color: palette.soft }]}>再走近一点，就能看到更多</Text>}
+            </View>
+          )}
+        </View>
         <View style={styles.cardBottom}>
-          <View style={styles.stats}><Text style={[styles.statsText, { color: palette.soft }]}>♡ {place.likes}　接话 {place.replies.length}</Text><Pressable accessibilityLabel={saved ? '取消想去' : '标记想去'} onPress={() => store.save(place.id)} hitSlop={12}><Ionicons name={saved ? 'bookmark' : 'bookmark-outline'} size={23} color={palette.ink} /></Pressable></View>
-          <Pressable onPress={open} style={({ pressed }) => [styles.open, { backgroundColor: palette.ink, opacity: pressed ? 0.8 : 1 }]}><Text style={styles.openText}>{joined ? '回到这里的对话' : '走近看看'}</Text><Ionicons name="arrow-forward" size={20} color="#202921" /></Pressable>
-          <Text style={[styles.hint, { color: palette.soft }]}>{joined ? '你参与过的对话，离场也能继续' : '到场后，读完整留话、接上这段对话'}</Text>
+          <Pressable accessibilityRole="button" onPress={advance} style={({ pressed }) => [styles.open, pressed && styles.pressed]}>
+            <Text style={[styles.openText, { color: palette.ink }]}>{place.point ? '查看位置' : unlocked ? '继续对话' : nearby ? '模拟到场' : '模拟走近'}</Text>
+            <Ionicons name="arrow-forward" size={17} color={palette.ink} />
+          </Pressable>
+          <Pressable accessibilityRole="button" accessibilityLabel={saved ? '取消想去' : '标记想去'} onPress={() => store.save(place.id)} style={styles.save}>
+            <Ionicons name={saved ? 'bookmark' : 'bookmark-outline'} size={20} color={palette.soft} />
+          </Pressable>
         </View>
       </ScrollView>
     </LinearGradient>
@@ -59,6 +119,11 @@ export default function DiscoverScreen() {
   const store = usePlaces();
   const { profile, ready: profileReady } = useProfile();
   const [height, setHeight] = useState(0);
+  const [visibleId, setVisibleId] = useState<string>();
+  const focused = usePathname() === '/discover';
+  const onViewableItemsChanged = useCallback(({ viewableItems }: { viewableItems: { item: Place }[] }) => {
+    setVisibleId(viewableItems[0]?.item.id);
+  }, []);
   if (!store.ready || !profileReady) return <Loading />;
   return <Screen>
     <View style={styles.header}>
@@ -66,11 +131,11 @@ export default function DiscoverScreen() {
         <Avatar uri={profile.avatar} size={34} />
         <Text numberOfLines={1} style={styles.profileName}>{profile.nickname}</Text>
       </Pressable>
-      <Text style={styles.demo}>演示体验 · 模拟位置</Text>
+      <Text style={styles.demo}>本机体验</Text>
     </View>
     {store.notice ? <Text style={styles.notice}>{store.notice}</Text> : null}
     <View style={styles.feed} onLayout={event => setHeight(event.nativeEvent.layout.height)}>
-      {height > 0 && <FlatList key={Math.round(height)} data={store.places} extraData={[store.arrived, store.saved]} keyExtractor={place => place.id} pagingEnabled decelerationRate="fast" showsVerticalScrollIndicator={false} initialNumToRender={2} maxToRenderPerBatch={2} windowSize={3} getItemLayout={(_, index) => ({ length: height, offset: height * index, index })} renderItem={({ item }) => <PlaceCard place={item} height={height} />} />}
+      {height > 0 && <FlatList key={Math.round(height)} data={store.places} extraData={[store.arrived, store.saved, visibleId, focused]} viewabilityConfig={viewabilityConfig} onViewableItemsChanged={onViewableItemsChanged} keyExtractor={place => place.id} pagingEnabled decelerationRate="fast" showsVerticalScrollIndicator={false} initialNumToRender={2} maxToRenderPerBatch={2} windowSize={3} getItemLayout={(_, index) => ({ length: height, offset: height * index, index })} renderItem={({ item }) => <PlaceCard place={item} height={height} active={focused && visibleId === item.id} />} />}
     </View>
     <Text style={styles.swipeHint}>向上滑，遇见下一个地方</Text>
   </Screen>;
@@ -86,25 +151,19 @@ const styles = StyleSheet.create({
   artFrame: { backgroundColor: '#e6d8bf', overflow: 'hidden' },
   art: { width: '100%', height: '100%' },
   illustratedContent: { paddingTop: 16, paddingBottom: 16 },
-  illustratedName: { marginTop: 9, fontSize: 27, lineHeight: 38 },
-  illustratedStory: { minHeight: 0, paddingVertical: 12 },
-  illustratedStoryText: { fontSize: 20, lineHeight: 31 },
+  illustratedStoryText: { fontSize: 23, lineHeight: 34 },
   cardContent: { flexGrow: 1, padding: 24 },
-  meta: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
-  location: { flex: 1, fontSize: 12, lineHeight: 21 },
-  distance: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingTop: 2 },
-  distanceText: { fontSize: 11, color: '#e4e8dc' },
-  placeName: { marginTop: 28, fontSize: 31, lineHeight: 43, fontWeight: '600' },
-  story: { flexGrow: 1, justifyContent: 'center', paddingVertical: 26, minHeight: 150 },
-  storyText: { fontSize: 23, lineHeight: 38, fontWeight: '400' },
-  task: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 16, borderTopWidth: 1, borderTopColor: '#ffffff20' },
-  taskText: { flex: 1, fontSize: 13, lineHeight: 20 },
-  reward: { fontSize: 11 },
-  cardBottom: { paddingTop: 10, gap: 15 },
-  stats: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  statsText: { fontSize: 13 },
-  open: { minHeight: 54, borderRadius: 17, paddingHorizontal: 20, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  openText: { color: '#202921', fontWeight: '600', fontSize: 16 },
-  hint: { textAlign: 'center', fontSize: 11, lineHeight: 18 },
+  meta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
+  placeName: { flex: 1, fontSize: 13, lineHeight: 20 },
+  distanceText: { fontSize: 11 },
+  story: { flexGrow: 1, justifyContent: 'center', paddingVertical: 22 },
+  storyHint: { minHeight: 24, paddingTop: 7 },
+  unrevealed: { color: 'transparent' },
+  storyText: { fontSize: 28, lineHeight: 41, fontWeight: '600' },
+  cardBottom: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#ffffff20', paddingTop: 6 },
+  open: { minHeight: 44, flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 },
+  openText: { fontWeight: '600', fontSize: 14 },
+  save: { width: 44, height: 44, justifyContent: 'center', alignItems: 'flex-end' },
+  pressed: { opacity: 0.65 },
   swipeHint: { color: '#777e76', textAlign: 'center', fontSize: 11, paddingVertical: 8 },
 });

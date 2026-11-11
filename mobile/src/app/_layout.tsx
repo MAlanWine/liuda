@@ -13,6 +13,8 @@ export default function RootLayout() {
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="welcome" options={{ headerShown: false, contentStyle: { backgroundColor: '#000' } }} />
       <Stack.Screen name="login" options={{ headerShown: false }} />
+      <Stack.Screen name="onboarding" options={{ headerShown: false, gestureEnabled: false }} />
+      <Stack.Screen name="street-view-demo" options={{ title: '街景预览' }} />
       <Stack.Screen name="about-privacy" options={{ title: '匿名与数据' }} />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="me" options={{ headerShown: false }} />

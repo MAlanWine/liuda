@@ -1,7 +1,10 @@
-import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
-import { router } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import RealPlaceMap from '../../components/RealPlaceMap';
+import { router, usePathname } from 'expo-router';
+import { describePosition, readPosition, readPositionIfAllowed, type PositionDescription } from '../../location/device';
+import { usableFix, type Fix } from '../../location/geo';
 import { usePlaces } from '../../state/places';
 import { Action, colors, Loading, Screen, ui } from '../../components/ui';
 
@@ -10,22 +13,111 @@ export default function LeaveScreen() {
   const [name, setName] = useState('');
   const [location, setLocation] = useState('');
   const [text, setText] = useState('');
-  const [onsite, setOnsite] = useState(false);
+  const [naming, setNaming] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [notice, setNotice] = useState('');
+  const [fix, setFix] = useState<Fix | null>(null);
+  const [resolvedAddress, setResolvedAddress] = useState<{ fix: Fix; description: PositionDescription | null }>();
+  const description = resolvedAddress?.fix === fix ? resolvedAddress.description : null;
+  const [locating, setLocating] = useState(false);
+  const isHere = usePathname() === '/leave';
+
+  useEffect(() => {
+    if (!isHere) return;
+    let active = true;
+    readPositionIfAllowed()
+      .then(value => { if (active && value) setFix(current => current && current.timestamp > value.timestamp ? current : value); })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [isHere]);
+
+  useEffect(() => {
+    if (!fix) return;
+    let active = true;
+    describePosition(fix).then(description => { if (active) setResolvedAddress({ fix, description }); });
+    return () => { active = false; };
+  }, [fix]);
+
+  async function locate() {
+    setLocating(true);
+    setNotice('');
+    try {
+      setFix(await readPosition());
+    } catch (error) {
+      setFix(null);
+      setNotice(error instanceof Error ? error.message : '无法获取位置，请重试。');
+    } finally {
+      setLocating(false);
+    }
+  }
+
+  async function publish() {
+    setBusy(true);
+    setNotice('');
+    try {
+      const fix = await readPosition();
+      setFix(fix);
+      if (!usableFix(fix)) {
+        setNotice('定位还不够准。可以走到开阔处，再试一次。');
+        return;
+      }
+      const id = store.create(name, location, text, { latitude: fix.latitude, longitude: fix.longitude });
+      setName(''); setLocation(''); setText(''); setDetailsOpen(false); setNaming(false);
+      router.push({ pathname: '/place/[id]', params: { id } });
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : '无法获取位置，请重试。');
+    } finally {
+      setBusy(false);
+    }
+  }
   if (!store.ready) return <Loading />;
   return <Screen><KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
     <ScrollView contentContainerStyle={ui.content} keyboardShouldPersistTaps="handled">
-      <Text style={ui.muted}>留下一句，让后来的人遇见。</Text><Text style={ui.title}>{'这个地方，\n你想说点什么？'}</Text>
-      <Text style={ui.muted}>不需要好看的照片。一个准确的位置，一句自己的话，就够了。</Text>
-      <View><Text style={ui.label}>给这个小地点起个名字</Text><TextInput value={name} onChangeText={setName} maxLength={40} placeholder="例如：西门第一张长椅" placeholderTextColor={colors.muted} style={ui.input} accessibilityLabel="地点名称" /></View>
-      <View><Text style={ui.label}>在哪里能找到它</Text><TextInput value={location} onChangeText={setLocation} maxLength={80} placeholder="例如：图书馆西门，梧桐树下" placeholderTextColor={colors.muted} style={ui.input} accessibilityLabel="具体位置" /></View>
-      <View><Text style={ui.label}>留话</Text><TextInput value={text} onChangeText={setText} multiline maxLength={300} placeholder="一个吐槽、提醒、问题，或者一句玩笑……" placeholderTextColor={colors.muted} style={[ui.input, { minHeight: 150 }]} textAlignVertical="top" accessibilityLabel="留话内容" /><Text style={[ui.muted, { textAlign: 'right', marginTop: 8 }]}>{text.length} / 300</Text></View>
-      <Pressable accessibilityRole="checkbox" accessibilityState={{ checked: onsite }} onPress={() => setOnsite(!onsite)} style={{ flexDirection: 'row', gap: 12, alignItems: 'center', paddingVertical: 10 }}><Ionicons name={onsite ? 'checkbox' : 'square-outline'} size={25} color={colors.accent} /><Text style={[ui.body, { flex: 1, fontSize: 15 }]}>确认模拟到场（仅用于本机演示）</Text></Pressable>
-      <Action title="在这里留下" disabled={!name.trim() || !location.trim() || !text.trim() || !onsite} onPress={() => {
-        const id = store.create(name, location, text);
-        setName(''); setLocation(''); setText(''); setOnsite(false);
-        router.push({ pathname: '/place/[id]', params: { id } });
-      }} />
-      <Text style={ui.muted}>当前不采集真实位置，也不会发布到公共平台。正式版的到场校验与内容审核将由服务端完成。</Text>
+      <Text style={ui.title}>想在这里留句话？</Text>
+      <View style={styles.position}>
+        <View style={styles.positionRow}>
+          <Ionicons name="location-outline" size={20} color={colors.accent} />
+          <View style={styles.positionText}>
+            <Text style={styles.positionTitle}>当前位置</Text>
+            <Text style={ui.muted}>
+              {locating ? '正在定位…' : fix ? name.trim() || description?.area || description?.address || '已定位' : '等待获取位置'}
+            </Text>
+            {fix && !name.trim() && description?.landmark ? <Text style={ui.muted}>附近地标 · {description.landmark}</Text> : null}
+            {fix?.accuracy != null && <Text style={ui.muted}>精度约 {Math.round(fix.accuracy)} 米</Text>}
+          </View>
+          <Pressable accessibilityRole="button" disabled={locating || busy} onPress={locate} style={styles.locate}>
+            <Text style={styles.locateText}>{fix ? '刷新' : '获取位置'}</Text>
+          </Pressable>
+        </View>
+        {fix && <RealPlaceMap point={fix} fix={fix} currentOnly />}
+        <Pressable accessibilityRole="button" accessibilityState={{ expanded: naming }} onPress={() => setNaming(open => !open)} style={styles.locate}>
+          <Text style={styles.locateText}>{naming ? '完成' : name.trim() ? '修改地点名' : '补充或纠正地点名'}</Text>
+        </Pressable>
+        {naming && <TextInput value={name} onChangeText={setName} maxLength={40} placeholder="输入小区、建筑或店铺名称" placeholderTextColor={colors.muted} style={ui.input} accessibilityLabel="实际地点名（选填）" />}
+      </View>
+      <View>
+        <TextInput value={text} onChangeText={setText} multiline maxLength={300} placeholder="一个吐槽、提醒，或者一句玩笑……" placeholderTextColor={colors.muted} style={[ui.input, { minHeight: 150 }]} textAlignVertical="top" accessibilityLabel="留话内容" />
+        <Text style={[ui.muted, { textAlign: 'right', marginTop: 8 }]}>{text.length} / 300</Text>
+      </View>
+      <Pressable accessibilityRole="button" accessibilityState={{ expanded: detailsOpen }} onPress={() => setDetailsOpen(open => !open)} style={{ minHeight: 44, justifyContent: 'center' }}>
+        <Text style={ui.muted}>{detailsOpen ? '收起地点线索' : '＋ 补充地点线索（选填）'}</Text>
+      </Pressable>
+      {detailsOpen && <>
+        <View><Text style={ui.label}>现场怎么找</Text><TextInput value={location} onChangeText={setLocation} maxLength={80} placeholder="例如：进西门右转，梧桐树下" placeholderTextColor={colors.muted} style={ui.input} accessibilityLabel="现场线索（选填）" /></View>
+      </>}
+      <Action title={busy ? '正在获取现场位置…' : '定位并留在这里'} disabled={busy || locating || !text.trim()} onPress={publish} />
+      {notice ? <Text accessibilityLiveRegion="polite" style={ui.muted}>{notice}</Text> : null}
+      <Text style={ui.muted}>地点坐标和留话保存在这台设备上。</Text>
     </ScrollView>
   </KeyboardAvoidingView></Screen>;
 }
+
+const styles = StyleSheet.create({
+  position: { backgroundColor: colors.surface, borderRadius: 16, padding: 12, gap: 10 },
+  positionRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  positionText: { flex: 1 },
+  positionTitle: { color: colors.text, fontSize: 14, fontWeight: '600' },
+  locate: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 4 },
+  locateText: { color: colors.accent, fontSize: 13 },
+});
