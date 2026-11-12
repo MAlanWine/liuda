@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
-import { useHeaderHeight } from 'expo-router/react-navigation';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { describeError, type ChatMeta, type Comment, type ReportTarget } from '../../api';
 import { emptyAttempt, type Attempt } from '../../domain/attempt';
@@ -17,6 +16,7 @@ import { useThread } from '../../state/thread';
 import { LivePlacePosition } from '../../components/LivePlacePosition';
 import { ErrorView } from '../../components/common/ErrorView';
 import { Notice } from '../../components/common/Notice';
+import { KeyboardAlignedScrollView } from '../../components/KeyboardAlignedScrollView';
 import { PermissionHelp } from '../../components/common/PermissionHelp';
 import { PositionModeChip } from '../../components/common/PositionModeChip';
 import { ReportSheet } from '../../components/common/ReportSheet';
@@ -41,7 +41,6 @@ function goDiscover() {
 export default function PlaceScreen() {
   const params = useLocalSearchParams<{ id: string }>();
   const postId = typeof params.id === 'string' ? params.id : '';
-  const headerHeight = useHeaderHeight();
   const now = useNow();
   const { thread, loading, error, refresh } = useThread(postId);
   const position = usePosition();
@@ -154,8 +153,8 @@ export default function PlaceScreen() {
 
   const reportComment = (comment: Comment) => setReportTarget({ kind: 'comment', postId: post.id, commentId: comment.id });
 
-  return <KeyboardAvoidingView style={ui.screen} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={headerHeight}>
-    <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={ui.content}
+  return <>
+    <KeyboardAlignedScrollView style={ui.screen} contentContainerStyle={ui.content}
       refreshControl={<RefreshControl refreshing={pulling} onRefresh={() => { setPulling(true); refresh().finally(() => setPulling(false)); }} tintColor={colors.accent} />}>
       <View style={s.row}>
         <Text accessibilityRole="header" style={[ui.title, s.flex]}>{post.name}</Text>
@@ -179,11 +178,11 @@ export default function PlaceScreen() {
       {!post.owned && chat.kind !== 'request' && <Action secondary title={chat.label} onPress={() => openChat(chat.chatId)} />}
       {canRequestChat && <Action secondary title="申请私聊（演示权益）" onPress={() => setChatOpen(true)} />}
       <Action secondary title="回到发现" onPress={goDiscover} />
-    </ScrollView>
+    </KeyboardAlignedScrollView>
     <ReportSheet visible={reportTarget !== null} target={reportTarget} onClose={() => setReportTarget(null)} onDone={reportDone}
       allowBlock={reportTarget?.kind !== 'post' || post.level !== 'dot'} />
     <ChatRequestSheet visible={chatOpen && chat.kind === 'request'} post={post} fix={position.fix} onClose={() => setChatOpen(false)} onSent={chatSent} />
-  </KeyboardAvoidingView>;
+  </>;
 }
 
 const s = StyleSheet.create({

@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
-import { useHeaderHeight } from 'expo-router/react-navigation';
 import * as ImagePicker from 'expo-image-picker';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -9,6 +8,7 @@ import { useProfile } from '../../state/profile';
 import { useSession } from '../../state/session';
 import { normalizeProfile } from '../../state/profile-data';
 import { Avatar } from '../../components/Avatar';
+import { AlignedTextInput, KeyboardAlignedScrollView } from '../../components/KeyboardAlignedScrollView';
 import { Action, colors, Loading, ui } from '../../components/ui';
 
 class PhotoError extends Error {}
@@ -26,7 +26,6 @@ export default function EditProfileScreen() {
 }
 function ProfileEditor() {
   const { profile, save } = useProfile();
-  const headerHeight = useHeaderHeight();
   const [nickname, setNickname] = useState(profile.nickname);
   const [avatar, setAvatar] = useState(profile.avatar);
   const [busy, setBusy] = useState<'image' | 'save' | null>(null);
@@ -70,14 +69,13 @@ function ProfileEditor() {
       if (mounted.current) setError(cause instanceof Error ? cause.message : '资料未保存，请稍后重试。');
     } finally { if (mounted.current) setBusy(null); }
   }
-  return <KeyboardAvoidingView style={ui.screen} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={headerHeight}>
-    <ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
+  return <KeyboardAlignedScrollView style={ui.screen} contentContainerStyle={s.content}>
       <View style={s.avatarBlock}>
         <Pressable accessibilityRole="button" accessibilityLabel="选择头像照片" disabled={busy !== null} onPress={chooseAvatar} style={s.avatarButton}><Avatar uri={avatar} size={98} /><View style={s.camera}><Ionicons name="camera-outline" size={17} color={colors.onAccent} /></View></Pressable>
         <Pressable accessibilityRole="button" disabled={busy !== null} onPress={chooseAvatar} style={s.choose}><Text style={s.chooseText}>{busy === 'image' ? '正在处理图片…' : '选择照片'}</Text></Pressable>
         {avatar && <Pressable accessibilityRole="button" disabled={busy !== null} onPress={() => { setAvatar(null); setError(''); }} hitSlop={10}><Text style={s.restore}>恢复默认头像</Text></Pressable>}
       </View>
-      <View><Text style={s.label}>昵称</Text><TextInput value={nickname} onChangeText={setNickname} maxLength={32} editable={busy !== 'save'} placeholder="你想被怎么称呼？" placeholderTextColor={colors.muted} accessibilityLabel="我的昵称" style={s.input} autoCorrect={false} returnKeyType="done" />
+      <View><Text style={s.label}>昵称</Text><AlignedTextInput value={nickname} onChangeText={setNickname} maxLength={32} editable={busy !== 'save'} placeholder="你想被怎么称呼？" placeholderTextColor={colors.muted} accessibilityLabel="我的昵称" style={s.input} autoCorrect={false} returnKeyType="done" />
         <View style={s.hintRow}><Text style={s.hint}>可以重名，1–16 个字</Text><Text style={[s.hint, nameLength > 16 && { color: colors.danger }]}>{nameLength} / 16</Text></View>
       </View>
       <View style={s.note}><Ionicons name="eye-off-outline" color={colors.muted} size={18} /><Text style={s.noteText}>头像和昵称只在你自己的手机上显示。别人看到的是每条对话里的临时代称（如「路人 3F2A」），看不到你的昵称、头像和完整记录。</Text></View>
@@ -85,8 +83,7 @@ function ProfileEditor() {
       <Action title={busy === 'save' ? '正在保存…' : '保存资料'} disabled={!valid || busy !== null || !changed} onPress={submit} />
       <Action secondary title="取消" disabled={busy !== null} onPress={back} />
       <Text style={s.footnote}>资料保存在这台手机的模拟后端（演示账号），换机暂不能恢复。照片会居中裁为方形；修改后点击保存才会生效。</Text>
-    </ScrollView>
-  </KeyboardAvoidingView>;
+    </KeyboardAlignedScrollView>;
 }
 const s = StyleSheet.create({
   content: { padding: 24, gap: 20, paddingBottom: 44 },
@@ -97,7 +94,7 @@ const s = StyleSheet.create({
   chooseText: { fontSize: 13, color: colors.subtle },
   restore: { fontSize: 11, color: colors.muted, lineHeight: 20 },
   label: { color: colors.subtle, fontSize: 14, marginBottom: 12 },
-  input: { color: colors.text, backgroundColor: colors.surface, borderRadius: 15, padding: 17, fontSize: 17, lineHeight: 25 },
+  input: { color: colors.text, backgroundColor: colors.surface, borderRadius: 15, paddingLeft: 17, paddingRight: 28, paddingVertical: 18, fontSize: 17, minHeight: 60, includeFontPadding: true },
   hintRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 10, marginTop: 10 },
   hint: { color: colors.muted, fontSize: 11, lineHeight: 20 },
   note: { flexDirection: 'row', gap: 11, paddingVertical: 10 },

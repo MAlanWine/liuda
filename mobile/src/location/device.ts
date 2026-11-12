@@ -2,6 +2,7 @@ import * as Location from 'expo-location';
 import { Platform } from 'react-native';
 import type { PositionEvidence } from '../api/types';
 import type { GeoPoint } from '../domain/geo';
+import { devApiUrl } from './api';
 
 /** Converts a CoreLocation reading into API position evidence (WGS-84, source `gps`). */
 export function toEvidence(location: Location.LocationObject): PositionEvidence {
@@ -27,7 +28,7 @@ export type PositionDescription = { landmark: string; address: string; area?: st
 export async function describePosition(point: GeoPoint): Promise<PositionDescription | null> {
   if (__DEV__) {
     try {
-      const response = await fetch('/api/place-name', {
+      const response = await fetch(devApiUrl('/api/place-name'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ latitude: point.latitude, longitude: point.longitude }),

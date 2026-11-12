@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View } from 'react-native';
+import { ActivityIndicator, Alert, KeyboardAvoidingView, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -14,6 +14,7 @@ import { useDraft, type Draft } from '../../state/draft';
 import { useNearby } from '../../state/nearby';
 import { usePosition, useSignificantFix, useTrackWhileFocused } from '../../state/position';
 import { Notice } from '../../components/common/Notice';
+import { AlignedTextInput, KeyboardAlignedScrollView } from '../../components/KeyboardAlignedScrollView';
 import { PlaceChooser, onsiteScenes, type Scene } from '../../components/compose/PlaceChooser';
 import { PhotoCapture } from '../../components/compose/PhotoCapture';
 import { PositionCard } from '../../components/compose/PositionCard';
@@ -181,7 +182,7 @@ export default function LeaveScreen() {
   return <Screen>
     <KeyboardAvoidingView style={s.flex} behavior="padding" keyboardVerticalOffset={keyboardOffset}
       onLayout={event => { const { y, height } = event.nativeEvent.layout; setFrameBottom(y + height); }}>
-      <ScrollView style={s.flex} contentContainerStyle={s.content} keyboardShouldPersistTaps="handled" keyboardDismissMode="interactive">
+      <KeyboardAlignedScrollView contentContainerStyle={s.content} keyboardDismissMode="interactive">
         <View style={s.titleRow}>
           <Text accessibilityRole="header" style={[ui.title, s.flex]}>想在这里留句话？</Text>
           {hasDraft ? <Pressable accessibilityRole="button" accessibilityLabel="清空草稿" disabled={busy} hitSlop={8} onPress={confirmClear} style={({ pressed }) => [s.clear, pressed && ui.pressed]}>
@@ -195,7 +196,7 @@ export default function LeaveScreen() {
 
         <View>
           <Text style={ui.label}>地点名</Text>
-          <TextInput value={name} editable={!busy && !draft.sceneId}
+          <AlignedTextInput value={name} editable={!busy && !draft.sceneId}
             onChangeText={value => { setNameSource('user'); edit({ name: clip(value, NAME_MAX) }); }}
             placeholder="例如：西门梧桐树下、三号楼侧门" placeholderTextColor={colors.muted} style={[ui.input, draft.sceneId ? s.locked : null]} accessibilityLabel="地点名" returnKeyType="next" />
           <View style={s.metaRow}>
@@ -208,7 +209,7 @@ export default function LeaveScreen() {
         </View>
 
         <View>
-          <TextInput value={draft.text} editable={!busy} multiline onChangeText={value => edit({ text: clip(value, TEXT_MAX) })}
+          <AlignedTextInput value={draft.text} editable={!busy} multiline onChangeText={value => edit({ text: clip(value, TEXT_MAX) })}
             placeholder="一个吐槽、提醒，或者一句玩笑……" placeholderTextColor={colors.muted} style={[ui.input, s.textArea]} textAlignVertical="top" accessibilityLabel="留话内容" />
           <Text style={[ui.muted, s.count]}>{textLength} / {TEXT_MAX}</Text>
         </View>
@@ -218,7 +219,7 @@ export default function LeaveScreen() {
             <Text style={ui.muted}>{clueOpen ? '收起现场线索' : '＋ 补充现场线索（选填）'}</Text>
           </Pressable>
           {clueOpen ? <>
-            <TextInput value={draft.clue} editable={!busy} onChangeText={value => edit({ clue: clip(value, CLUE_MAX) })}
+            <AlignedTextInput value={draft.clue} editable={!busy} onChangeText={value => edit({ clue: clip(value, CLUE_MAX) })}
               placeholder="例如：进西门右转，梧桐树下" placeholderTextColor={colors.muted} style={ui.input} accessibilityLabel="现场线索（选填）" />
             <Text style={[ui.muted, s.count]}>{clueLength} / {CLUE_MAX}</Text>
           </> : null}
@@ -227,7 +228,7 @@ export default function LeaveScreen() {
         <PhotoCapture photo={draft.photo} disabled={busy} onChange={photo => edit({ photo })} />
 
         <Text style={ui.muted}>留话内容会经过演示审核。留下后，离开现场也能在「消息」里继续看回应。</Text>
-      </ScrollView>
+      </KeyboardAlignedScrollView>
 
       <View style={s.footer}>
         {progress ? <Steps progress={progress} hasPhoto={!!draft.photo} /> : null}

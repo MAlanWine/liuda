@@ -1,10 +1,11 @@
 import { useRef, useState } from 'react';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { describeError, isApiError, type PositionEvidence, type PostSummary } from '../../api';
 import { editAttempt, emptyAttempt, exclusive, renewAttempt, type Attempt } from '../../domain/attempt';
 import { codePoints, TEXT_MAX, THREAD_CAP } from '../../domain/text';
 import { replyTo } from '../../state/actions';
 import { Notice } from '../common/Notice';
+import { AlignedTextInput } from '../KeyboardAlignedScrollView';
 import { Action, colors, ui } from '../ui';
 
 /**
@@ -54,7 +55,7 @@ export function Composer({ post, onsite, fix, draft, onDraft }: {
   const button = busy ? '正在发送…' : onsite ? '发送接话' : '继续接话';
   return <View style={s.box}>
     <Text style={ui.label}>{label}</Text>
-    <TextInput value={text} onChangeText={change} multiline editable={!busy && !full} placeholder={full ? '这条留话的接话已满' : '有什么想接着说的？'}
+    <AlignedTextInput value={text} onChangeText={change} multiline editable={!busy && !full} placeholder={full ? '这条留话的接话已满' : '有什么想接着说的？'}
       placeholderTextColor={colors.muted} style={[ui.input, s.input]} textAlignVertical="top" accessibilityLabel="接话内容" />
     <View style={s.meta}>
       <Text style={[ui.muted, tooLong && s.over]}>{codePoints(text)} / {TEXT_MAX}</Text>
