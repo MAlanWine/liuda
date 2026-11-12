@@ -1,5 +1,6 @@
 import * as Location from 'expo-location';
 import { Platform } from 'react-native';
+import { devApiUrl } from './api';
 import type { Fix, Point } from './geo';
 
 export function toFix(location: Location.LocationObject): Fix {
@@ -30,18 +31,21 @@ export type PositionDescription = { landmark: string; address: string; area?: st
 
 export async function describePosition(point: Point): Promise<PositionDescription | null> {
   if (__DEV__) {
-    try {
-      const response = await fetch('/api/place-name', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ latitude: point.latitude, longitude: point.longitude }),
-      });
-      if (response.ok) {
-        const data = await response.json() as PositionDescription;
-        if (data.area || data.address || data.landmark) return data;
+    const url = devApiUrl('/api/place-name');
+    if (url) {
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ latitude: point.latitude, longitude: point.longitude }),
+        });
+        if (response.ok) {
+          const data = await response.json() as PositionDescription;
+          if (data.area || data.address || data.landmark) return data;
+        }
+      } catch {
+        // Use the system address when the preview server is unavailable.
       }
-    } catch {
-      // Use the system address when the preview server is unavailable.
     }
   }
   if (Platform.OS === 'web') return null;

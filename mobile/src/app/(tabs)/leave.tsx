@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { AlignedTextInput, KeyboardAlignedScrollView } from '../../components/KeyboardAlignedScrollView';
 import RealPlaceMap from '../../components/RealPlaceMap';
 import { router, usePathname } from 'expo-router';
 import { describePosition, readPosition, readPositionIfAllowed, type PositionDescription } from '../../location/device';
@@ -72,8 +73,7 @@ export default function LeaveScreen() {
     }
   }
   if (!store.ready) return <Loading />;
-  return <Screen><KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-    <ScrollView contentContainerStyle={ui.content} keyboardShouldPersistTaps="handled">
+  return <Screen><KeyboardAlignedScrollView contentContainerStyle={ui.content}>
       <Text style={ui.title}>想在这里留句话？</Text>
       <View style={styles.position}>
         <View style={styles.positionRow}>
@@ -94,23 +94,22 @@ export default function LeaveScreen() {
         <Pressable accessibilityRole="button" accessibilityState={{ expanded: naming }} onPress={() => setNaming(open => !open)} style={styles.locate}>
           <Text style={styles.locateText}>{naming ? '完成' : name.trim() ? '修改地点名' : '补充或纠正地点名'}</Text>
         </Pressable>
-        {naming && <TextInput value={name} onChangeText={setName} maxLength={40} placeholder="输入小区、建筑或店铺名称" placeholderTextColor={colors.muted} style={ui.input} accessibilityLabel="实际地点名（选填）" />}
+        {naming && <AlignedTextInput value={name} onChangeText={setName} maxLength={40} placeholder="输入小区、建筑或店铺名称" placeholderTextColor={colors.muted} style={ui.input} accessibilityLabel="实际地点名（选填）" />}
       </View>
       <View>
-        <TextInput value={text} onChangeText={setText} multiline maxLength={300} placeholder="一个吐槽、提醒，或者一句玩笑……" placeholderTextColor={colors.muted} style={[ui.input, { minHeight: 150 }]} textAlignVertical="top" accessibilityLabel="留话内容" />
+        <AlignedTextInput value={text} onChangeText={setText} multiline maxLength={300} placeholder="一个吐槽、提醒，或者一句玩笑……" placeholderTextColor={colors.muted} style={[ui.input, { minHeight: 150 }]} textAlignVertical="top" accessibilityLabel="留话内容" />
         <Text style={[ui.muted, { textAlign: 'right', marginTop: 8 }]}>{text.length} / 300</Text>
       </View>
       <Pressable accessibilityRole="button" accessibilityState={{ expanded: detailsOpen }} onPress={() => setDetailsOpen(open => !open)} style={{ minHeight: 44, justifyContent: 'center' }}>
         <Text style={ui.muted}>{detailsOpen ? '收起地点线索' : '＋ 补充地点线索（选填）'}</Text>
       </Pressable>
       {detailsOpen && <>
-        <View><Text style={ui.label}>现场怎么找</Text><TextInput value={location} onChangeText={setLocation} maxLength={80} placeholder="例如：进西门右转，梧桐树下" placeholderTextColor={colors.muted} style={ui.input} accessibilityLabel="现场线索（选填）" /></View>
+        <View><Text style={ui.label}>现场怎么找</Text><AlignedTextInput value={location} onChangeText={setLocation} maxLength={80} placeholder="例如：进西门右转，梧桐树下" placeholderTextColor={colors.muted} style={ui.input} accessibilityLabel="现场线索（选填）" /></View>
       </>}
       <Action title={busy ? '正在获取现场位置…' : '定位并留在这里'} disabled={busy || locating || !text.trim()} onPress={publish} />
       {notice ? <Text accessibilityLiveRegion="polite" style={ui.muted}>{notice}</Text> : null}
       <Text style={ui.muted}>地点坐标和留话保存在这台设备上。</Text>
-    </ScrollView>
-  </KeyboardAvoidingView></Screen>;
+    </KeyboardAlignedScrollView></Screen>;
 }
 
 const styles = StyleSheet.create({

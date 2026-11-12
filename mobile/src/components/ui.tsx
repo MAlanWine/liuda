@@ -27,7 +27,9 @@ export const ui = StyleSheet.create({
   body: { color: colors.text, fontSize: 17, lineHeight: 29 },
   muted: { color: colors.muted, fontSize: 13, lineHeight: 21 },
   label: { color: colors.muted, fontSize: 13, marginBottom: 9 },
-  input: { color: colors.text, backgroundColor: colors.surface, borderRadius: 16, padding: 16, fontSize: 16, lineHeight: 26 },
+  // 不写死 lineHeight：iOS 上它会让中文字形与光标定位错位，造成最后一个字被裁切。
+  // 高度交给 minHeight + 纵向内边距，字体变化时输入框能自行撑开。
+  input: { color: colors.text, backgroundColor: colors.surface, borderRadius: 16, paddingLeft: 16, paddingRight: 26, paddingVertical: 15, fontSize: 16, minHeight: 56, includeFontPadding: true },
   action: { minHeight: 52, borderRadius: 16, backgroundColor: colors.accent, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20, paddingVertical: 13 },
   actionText: { color: '#172019', fontSize: 16, fontWeight: '600' },
   secondary: { backgroundColor: colors.surface },

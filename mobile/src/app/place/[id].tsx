@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { AlignedTextInput, KeyboardAlignedScrollView } from '../../components/KeyboardAlignedScrollView';
 import { router, useLocalSearchParams } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useProfile } from '../../state/profile';
@@ -26,8 +27,7 @@ export default function PlaceScreen() {
   const onsite = point ? atPoint(fix, point) : store.arrived.includes(place.id);
   const unlocked = onsite || place.participated;
   const palette = moods[place.mood];
-  return <KeyboardAvoidingView style={ui.screen} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={90}>
-    <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={ui.content}>
+  return <KeyboardAlignedScrollView style={ui.screen} contentContainerStyle={ui.content}>
       <View style={styles.placeMeta}><Text style={[ui.title, { flex: 1 }]}>{place.name}</Text><Pressable onPress={() => store.save(place.id)} accessibilityLabel="切换想去" hitSlop={12}><Ionicons name={store.saved.includes(place.id) ? 'bookmark' : 'bookmark-outline'} size={23} color={colors.accent} /></Pressable></View>
       {point
         ? <LivePlacePosition key={place.id} point={point} location={place.location} onFix={updatePosition} />
@@ -41,7 +41,7 @@ export default function PlaceScreen() {
       {unlocked && <>
         <View style={styles.placeMeta}><Text style={styles.sectionTitle}>这里的接话</Text><Text style={ui.muted}>{place.replies.length} 句</Text></View>
         {place.replies.length === 0 ? <Text style={ui.muted}>还没有人接话。你可以留下第一句。</Text> : place.replies.map(item => <View key={item.id} style={[ui.panel, item.mine && styles.myReply]}><Author mine={item.mine} original={item.mine && place.owned} /><Text style={ui.body}>{item.text}</Text></View>)}
-        <View style={{ gap: 12 }}><Text style={ui.label}>{onsite ? '在这里，接一句' : '离开现场，也能接着聊'}</Text><TextInput value={draft} onChangeText={setDraft} multiline maxLength={300} placeholder="有什么想接着说的？" placeholderTextColor={colors.muted} style={[ui.input, styles.composer]} textAlignVertical="top" accessibilityLabel="接话内容" />
+        <View style={{ gap: 12 }}><Text style={ui.label}>{onsite ? '在这里，接一句' : '离开现场，也能接着聊'}</Text><AlignedTextInput value={draft} onChangeText={setDraft} multiline maxLength={300} placeholder="有什么想接着说的？" placeholderTextColor={colors.muted} style={[ui.input, styles.composer]} textAlignVertical="top" accessibilityLabel="接话内容" />
           <View style={styles.placeMeta}><Text style={ui.muted}>{draft.length} / 300</Text><Text style={ui.muted}>匿名 · 仅保存在本机</Text></View>
           <Action title="发送接话" disabled={!draft.trim()} onPress={() => { store.reply(place.id, draft, fix); setDraft(''); }} /></View>
       </>}
@@ -49,8 +49,7 @@ export default function PlaceScreen() {
       {!point && !onsite && unlocked && <Action secondary title="模拟再次到场" onPress={() => store.arrive(place.id)} />}
       <Action secondary title="回到发现" onPress={() => router.replace('/')} />
       {!point && <Text style={ui.muted}>演示数据仅用于体验，不对应真实校园留言。首次在现场接话后，该对话会进入「消息」。</Text>}
-    </ScrollView>
-  </KeyboardAvoidingView>;
+    </KeyboardAlignedScrollView>;
 }
 const styles = StyleSheet.create({
   placeMeta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
