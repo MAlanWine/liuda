@@ -10,3 +10,6 @@ node_modules/
 *.key
 .cache/
 miniprogram_npm/
+
+# Local working notes (not shared)
+a-doc/

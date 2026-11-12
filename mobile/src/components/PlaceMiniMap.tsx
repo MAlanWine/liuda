@@ -1,18 +1,22 @@
 import { StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Line } from 'react-native-svg';
+import { FULL_RADIUS } from '../domain/gate';
+import { colors } from './ui';
 
 const center = 64;
-const rangeMeters = 30;
+/** Scale = the on-site radius (D-6: 50 m). */
+const rangeMeters = FULL_RADIUS;
 const rangeRadius = 48;
-const rings = [10, 20, rangeMeters];
+const rings = [rangeMeters / 3, rangeMeters * 2 / 3, rangeMeters];
 
+/** Distance sketch (not a map). Legacy demo helper; kept for `street-view-demo`. */
 export function PlaceMiniMap({ distance, onsite, location }: { distance: number; onsite: boolean; location: string }) {
   const hasDistance = Number.isFinite(distance) && distance > 0;
   const radius = hasDistance ? Math.min(distance / rangeMeters, 1) * rangeRadius : 0;
   const noteX = onsite ? center : center + radius;
   const status = onsite ? '已到场' : hasDistance ? `约 ${Math.round(distance)} 米` : '距离未知';
   const scaleLabel = hasDistance && !onsite && distance > rangeMeters
-    ? '超出 30 米示意范围'
+    ? `超出 ${rangeMeters} 米示意范围`
     : '距离示意 · 非导航';
 
   return (
@@ -20,16 +24,16 @@ export function PlaceMiniMap({ distance, onsite, location }: { distance: number;
       <View style={styles.map}>
         <Svg width={128} height={128} viewBox="0 0 128 128">
           {rings.map(meters => (
-            <Circle key={meters} cx={center} cy={center} r={meters / rangeMeters * rangeRadius} stroke="#354247" fill="none" />
+            <Circle key={meters} cx={center} cy={center} r={meters / rangeMeters * rangeRadius} stroke={colors.line} fill="none" />
           ))}
-          {onsite && <Circle cx={center} cy={center} r={12} stroke="#f1f4ef" fill="none" />}
+          {onsite && <Circle cx={center} cy={center} r={12} stroke={colors.text} fill="none" />}
           {!onsite && hasDistance && (
             <>
-              <Line x1={center} y1={center} x2={noteX} y2={center} stroke="#90a1a6" strokeDasharray="2 3" />
-              <Circle cx={noteX} cy={center} r={3} fill="#f1f4ef" />
+              <Line x1={center} y1={center} x2={noteX} y2={center} stroke={colors.muted} strokeDasharray="2 3" />
+              <Circle cx={noteX} cy={center} r={3} fill={colors.text} />
             </>
           )}
-          <Circle cx={center} cy={center} r={5.5} fill="#309de3" stroke="#dcf1ff" strokeWidth={1.5} />
+          <Circle cx={center} cy={center} r={5.5} fill={colors.userDot} stroke={colors.text} strokeWidth={1.5} />
         </Svg>
         {(onsite || hasDistance) && (
           <Text style={[styles.note, { left: noteX - 10, top: center - 30 }]}>❜</Text>
@@ -47,11 +51,11 @@ export function PlaceMiniMap({ distance, onsite, location }: { distance: number;
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: 16 },
-  map: { width: 128, height: 128, backgroundColor: '#1a2225', borderRadius: 64, overflow: 'hidden' },
+  map: { width: 128, height: 128, backgroundColor: colors.surface, borderRadius: 64, overflow: 'hidden' },
   info: { flex: 1, gap: 4 },
-  distance: { fontSize: 25, fontWeight: '600', color: '#f1f4ef' },
-  location: { fontSize: 14, lineHeight: 21, color: '#d3dbd9' },
-  caption: { fontSize: 11, lineHeight: 17, color: '#a6b1b5' },
-  note: { position: 'absolute', width: 20, height: 20, borderRadius: 10, overflow: 'hidden', backgroundColor: '#394346', color: '#fff', textAlign: 'center', fontSize: 16, lineHeight: 20 },
-  you: { position: 'absolute', top: 75, left: 52, width: 24, textAlign: 'center', color: '#c1e8ff', fontSize: 11 },
+  distance: { fontSize: 25, fontWeight: '600', color: colors.text },
+  location: { fontSize: 14, lineHeight: 21, color: colors.subtle },
+  caption: { fontSize: 11, lineHeight: 17, color: colors.muted },
+  note: { position: 'absolute', width: 20, height: 20, borderRadius: 10, overflow: 'hidden', backgroundColor: colors.raised, color: colors.text, textAlign: 'center', fontSize: 16, lineHeight: 20 },
+  you: { position: 'absolute', top: 75, left: 52, width: 24, textAlign: 'center', color: colors.userDot, fontSize: 11 },
 });

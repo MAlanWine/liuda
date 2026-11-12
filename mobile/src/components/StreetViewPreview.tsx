@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'expo-router';
 import { Image, Text, View } from 'react-native';
-import type { Point } from '../location/geo';
+import type { GeoPoint as Point } from '../domain/geo';
 import { Action, ui } from './ui';
 
 export function StreetViewPreview({ point }: { point: Point }) {

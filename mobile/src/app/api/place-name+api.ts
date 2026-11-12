@@ -1,4 +1,4 @@
-import { isPoint } from '../../location/geo';
+import { isPoint } from '../../domain/geo';
 
 type MapResult = {
   status?: string;

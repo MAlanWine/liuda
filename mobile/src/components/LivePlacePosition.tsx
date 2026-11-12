@@ -1,76 +1,83 @@
-import { useEffect, useState } from 'react';
-import { Linking, Platform, Text, View } from 'react-native';
-import * as Location from 'expo-location';
-import { readPosition, toFix } from '../location/device';
-import { atPoint, distanceMeters, type Fix, type Point } from '../location/geo';
+import { useState } from 'react';
+import { Linking, Platform, StyleSheet, Text, View } from 'react-native';
+import type { PostSummary } from '../api';
+import { toMapCoordinate } from '../domain/crs';
+import { distanceMeters } from '../domain/geo';
+import { permissionMessage } from '../location/permission';
+import { usePosition } from '../state/position';
+import { PermissionHelp } from './common/PermissionHelp';
+import { PositionModeChip } from './common/PositionModeChip';
+import { Notice } from './common/Notice';
 import { StreetViewPreview } from './StreetViewPreview';
 import RealPlaceMap from './RealPlaceMap';
-import { Action, ui } from './ui';
+import { Action, colors, ui } from './ui';
 
-export function LivePlacePosition({ point, location, onFix }: { point: Point; location: string; onFix: (fix: Fix | null) => void }) {
-  const [fix, setFix] = useState<Fix | null>(null);
-  const [tracking, setTracking] = useState(false);
+/**
+ * Position block of the place detail: mode chip, interactive map, distance, accuracy and the global position notice
+ * (stale GPS shows 位置已过期，正在刷新…, never cleared). Reads the one global position (`usePosition()`); GPS
+ * tracking itself is requested by the screen via `useTrackWhileFocused` (`tracking` says whether it wants it).
+ * In 模拟位置: 模拟走近 (120 m, preview) / 模拟到场 (8 m, full). Otherwise 我在现场，更新位置 calls `onRequestUpdate`.
+ */
+export function LivePlacePosition({ post, onsite, tracking, onRequestUpdate }: {
+  post: PostSummary; onsite: boolean; tracking: boolean; onRequestUpdate: () => Promise<void>;
+}) {
+  const { mode, fix, fresh, notice, permission, simulateNear } = usePosition();
   const [busy, setBusy] = useState(false);
-  const [notice, setNotice] = useState('');
+  const [error, setError] = useState('');
+  const simulated = mode === 'simulated';
+  const distance = fix ? Math.round(distanceMeters(fix, post)) : null;
+  const known = distance !== null && Number.isFinite(distance);
 
-  useEffect(() => {
-    if (!tracking) return;
-    let active = true;
-    let subscription: Location.LocationSubscription | undefined;
-    Location.watchPositionAsync({ accuracy: Location.Accuracy.High, distanceInterval: 2, timeInterval: 2000 }, value => {
-      if (active) setFix(toFix(value));
-    }, () => {
-      if (active) setNotice('定位更新中断，可以重新定位。');
-    }).then(result => {
-      if (active) subscription = result;
-      else result.remove();
-    }).catch(() => { if (active) setNotice('暂时无法持续定位，可以重新定位。'); });
-    return () => { active = false; subscription?.remove(); };
-  }, [tracking]);
-
-  useEffect(() => {
-    onFix(fix);
-    if (!fix) return;
-    const timer = setTimeout(() => setFix(null), Math.max(0, fix.timestamp + 30_000 - Date.now()));
-    return () => clearTimeout(timer);
-  }, [fix, onFix]);
-
-  async function locate() {
+  async function update() {
     setBusy(true);
-    setNotice('');
-    setTracking(false);
-    setFix(null);
-    try {
-      setFix(await readPosition());
-      setTracking(true);
-    } catch (error) {
-      setNotice(error instanceof Error ? error.message : '定位暂时不可用。');
-    } finally {
-      setBusy(false);
-    }
+    setError('');
+    try { await onRequestUpdate(); }
+    finally { setBusy(false); }
   }
 
   async function directions() {
-    const destination = encodeURIComponent(`${point.latitude},${point.longitude}`);
+    const target = toMapCoordinate(post);
+    const destination = encodeURIComponent(`${target.latitude},${target.longitude}`);
     const url = Platform.OS === 'ios'
       ? `https://maps.apple.com/?daddr=${destination}&dirflg=w`
       : `https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=walking`;
     try { await Linking.openURL(url); }
-    catch { setNotice('无法打开地图，请稍后重试。'); }
+    catch { setError('无法打开地图，请稍后重试。'); }
   }
 
+  const staleIdle = !simulated && !!fix && !fresh && !tracking;
+  const status = known ? `直线约 ${distance} 米${onsite ? ' · 已到场' : ''}` : simulated ? '模拟位置尚未设置' : '定位后查看距离';
+
   return (
-    <View style={{ gap: 10 }}>
-      <RealPlaceMap point={point} fix={fix} />
-      <Text style={ui.body}>{fix ? `直线约 ${Math.round(distanceMeters(fix, point))} 米${atPoint(fix, point) ? ' · 已到场' : ''}` : '定位后查看距离'}</Text>
-      {location ? <Text style={ui.muted}>{location}</Text> : null}
-      {fix?.accuracy != null && <Text style={ui.muted}>定位精度约 {Math.round(fix.accuracy)} 米</Text>}
-      {notice ? <Text accessibilityLiveRegion="polite" style={ui.muted}>{notice}</Text> : null}
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-        <Action secondary title={busy ? '正在定位…' : fix ? '刷新定位' : '定位我'} disabled={busy} onPress={locate} />
-        <Action secondary title="打开步行路线" onPress={directions} />
+    <View style={s.box}>
+      <View style={s.row}>
+        <Text style={[ui.body, s.flex]} accessibilityLiveRegion="polite">{status}</Text>
+        <PositionModeChip />
       </View>
-      {__DEV__ && <StreetViewPreview key={`${point.latitude},${point.longitude}`} point={point} />}
+      <RealPlaceMap point={post} fix={fix} />
+      {!simulated && fix?.accuracy != null && <Text style={ui.muted}>定位精度约 {Math.round(fix.accuracy)} 米{fresh ? '' : ' · 不是最新位置'}</Text>}
+      {/* PermissionHelp (below) already explains approximate location; don't repeat it. */}
+      <Notice message={(tracking || simulated) && notice === permissionMessage(permission) ? '' : notice} />
+      <Notice message={staleIdle ? '位置不是最新的。到场后点「我在现场，更新位置」。' : ''} />
+      <Notice tone="error" message={error} />
+      {(tracking || simulated) && <PermissionHelp showSimulated />}
+      {simulated
+        ? <View style={s.actions}>
+            <View style={s.flex}><Action secondary title="模拟走近" onPress={() => simulateNear(post, 120)} /></View>
+            <View style={s.flex}><Action secondary title="模拟到场" disabled={onsite} onPress={() => simulateNear(post, 8)} /></View>
+          </View>
+        : !onsite && <Action title={busy ? '正在定位…' : '我在现场，更新位置'} disabled={busy} onPress={update} />}
+      <Action secondary title="打开步行路线" onPress={directions} />
+      {simulated && <Text style={[ui.muted, s.demo]}>模拟位置只在本机演示中使用，不会读取或改变你的真实位置。</Text>}
+      {__DEV__ && <StreetViewPreview key={`${post.latitude},${post.longitude}`} point={post} />}
     </View>
   );
 }
+
+const s = StyleSheet.create({
+  box: { gap: 10 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  flex: { flex: 1 },
+  actions: { flexDirection: 'row', gap: 8 },
+  demo: { color: colors.demo },
+});

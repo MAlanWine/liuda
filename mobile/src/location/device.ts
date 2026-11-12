@@ -1,26 +1,22 @@
 import * as Location from 'expo-location';
 import { Platform } from 'react-native';
-import type { Fix, Point } from './geo';
+import type { PositionEvidence } from '../api/types';
+import type { GeoPoint } from '../domain/geo';
 
-export function toFix(location: Location.LocationObject): Fix {
+/** Converts a CoreLocation reading into API position evidence (WGS-84, source `gps`). */
+export function toEvidence(location: Location.LocationObject): PositionEvidence {
   const { latitude, longitude, accuracy } = location.coords;
-  return { latitude, longitude, accuracy, timestamp: location.timestamp };
+  return {
+    latitude, longitude, crs: 'wgs84',
+    accuracy: typeof accuracy === 'number' && Number.isFinite(accuracy) ? accuracy : null,
+    timestamp: location.timestamp, source: 'gps',
+  };
 }
 
-export async function readPositionIfAllowed() {
-  const permission = await Location.getForegroundPermissionsAsync();
-  return permission.granted ? currentFix() : null;
-}
-
-export async function readPosition() {
-  const permission = await Location.requestForegroundPermissionsAsync();
-  if (!permission.granted) throw new Error('请在系统设置中允许留答访问位置。');
-  return currentFix();
-}
-
-async function currentFix() {
+/** One high-accuracy GPS read without prompting; throws a Chinese message on failure. */
+export async function readOnce(): Promise<PositionEvidence> {
   try {
-    return toFix(await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High }));
+    return toEvidence(await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High }));
   } catch {
     throw new Error('暂时无法定位，试试走到室外再刷新。');
   }
@@ -28,7 +24,7 @@ async function currentFix() {
 
 export type PositionDescription = { landmark: string; address: string; area?: string };
 
-export async function describePosition(point: Point): Promise<PositionDescription | null> {
+export async function describePosition(point: GeoPoint): Promise<PositionDescription | null> {
   if (__DEV__) {
     try {
       const response = await fetch('/api/place-name', {
@@ -46,7 +42,7 @@ export async function describePosition(point: Point): Promise<PositionDescriptio
   }
   if (Platform.OS === 'web') return null;
   try {
-    const [result] = await Location.reverseGeocodeAsync(point);
+    const [result] = await Location.reverseGeocodeAsync({ latitude: point.latitude, longitude: point.longitude });
     if (!result) return null;
     const parts = [result.city, result.district, result.street?.match(/^\d+号线$/) ? null : result.street, result.streetNumber]
       .flatMap(part => part?.trim() ? [part.trim()] : []);

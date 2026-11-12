@@ -7,7 +7,12 @@
     "icon": "./assets/liuda-comma.png",
     "userInterfaceStyle": "dark",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false,
+      "bundleIdentifier": "com.liuda.app",
+      "infoPlist": {
+        "CFBundleDevelopmentRegion": "zh_CN",
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -27,16 +32,21 @@
         "expo-image-picker",
         {
           "photosPermission": "选择照片以设置你的留答头像。",
-          "cameraPermission": false,
+          "cameraPermission": "允许留答使用相机，在现场拍摄留话配图。",
           "microphonePermission": false
         }
       ],
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "允许留答使用你的位置，以记录现场留话地点并显示与你的距离。"
+          "locationWhenInUsePermission": "允许留答使用你的位置，以记录现场留话地点并显示与你的距离。",
+          "locationAlwaysAndWhenInUsePermission": false,
+          "locationAlwaysPermission": false,
+          "motionUsagePermission": false,
+          "locationFullAccuracyPermission": "需要精确位置来判断你是否在留话现场。"
         }
-      ]
+      ],
+      "expo-status-bar"
     ],
     "scheme": "liuda"
   }

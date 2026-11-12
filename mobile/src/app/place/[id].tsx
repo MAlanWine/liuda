@@ -1,62 +1,193 @@
-import { useCallback, useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Alert, KeyboardAvoidingView, Platform, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { useHeaderHeight } from 'expo-router/react-navigation';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useProfile } from '../../state/profile';
+import { describeError, type ChatMeta, type Comment, type ReportTarget } from '../../api';
+import { emptyAttempt, type Attempt } from '../../domain/attempt';
+import { chatEntry } from '../../domain/chat';
+import { placeWantsTracking } from '../../domain/refresh';
+import { EXPIRED_TEXT } from '../../domain/tiers';
+import { deletePost, setLike } from '../../state/actions';
+import { useInbox } from '../../state/inbox';
+import { useNearby } from '../../state/nearby';
+import { useNow } from '../../state/now';
+import { usePosition, useSignificantFix, useTrackWhileFocused } from '../../state/position';
+import { useThread } from '../../state/thread';
 import { LivePlacePosition } from '../../components/LivePlacePosition';
-import { atPoint, type Fix } from '../../location/geo';
-import { PlaceMiniMap } from '../../components/PlaceMiniMap';
-import { Author } from '../../components/Author';
-import { usePlaces } from '../../state/places';
-import { Action, colors, Loading, moods, ui } from '../../components/ui';
+import { ErrorView } from '../../components/common/ErrorView';
+import { Notice } from '../../components/common/Notice';
+import { PermissionHelp } from '../../components/common/PermissionHelp';
+import { PositionModeChip } from '../../components/common/PositionModeChip';
+import { ReportSheet } from '../../components/common/ReportSheet';
+import { ChatRequestSheet } from '../../components/thread/ChatRequestSheet';
+import { CommentList } from '../../components/thread/CommentList';
+import { Composer } from '../../components/thread/Composer';
+import { PostPanel } from '../../components/thread/PostPanel';
+import { ThreadMenu } from '../../components/thread/ThreadMenu';
+import { Action, colors, ui } from '../../components/ui';
+
+/** Back to where the user came from without stacking another discover (D-8). */
+function leave() {
+  if (router.canGoBack()) router.back();
+  else router.dismissTo('/discover');
+}
+
+/** 回到发现 means the feed itself, even when this place was opened from 已留下 / 消息 (dismissTo pops to the tabs, D-8). */
+function goDiscover() {
+  router.dismissTo('/discover');
+}
 
 export default function PlaceScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
-  const store = usePlaces();
-  const { ready: profileReady } = useProfile();
-  const [position, setPosition] = useState<{ id: string; fix: Fix | null }>();
-  const updatePosition = useCallback((fix: Fix | null) => setPosition({ id, fix }), [id]);
-  const [draft, setDraft] = useState('');
-  const [taskOpen, setTaskOpen] = useState(false);
-  if (!store.ready || !profileReady) return <Loading />;
-  const place = store.places.find(value => value.id === id);
-  if (!place) return <View style={[ui.screen, ui.content]}><Text style={ui.title}>这个地点暂时找不到了</Text><Action title="回到发现" onPress={() => router.replace('/')} /></View>;
-  const point = place.point;
-  const fix = position?.id === id ? position?.fix : null;
-  const onsite = point ? atPoint(fix, point) : store.arrived.includes(place.id);
-  const unlocked = onsite || place.participated;
-  const palette = moods[place.mood];
-  return <KeyboardAvoidingView style={ui.screen} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={90}>
-    <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={ui.content}>
-      <View style={styles.placeMeta}><Text style={[ui.title, { flex: 1 }]}>{place.name}</Text><Pressable onPress={() => store.save(place.id)} accessibilityLabel="切换想去" hitSlop={12}><Ionicons name={store.saved.includes(place.id) ? 'bookmark' : 'bookmark-outline'} size={23} color={colors.accent} /></Pressable></View>
-      {point
-        ? <LivePlacePosition key={place.id} point={point} location={place.location} onFix={updatePosition} />
-        : <PlaceMiniMap distance={place.distance} onsite={onsite} location={place.location} />}
-      {!onsite && place.participated && <Text style={ui.muted}>参与过的对话 · 离场也能继续</Text>}
-      <View style={[ui.panel, { backgroundColor: palette.background }]}><Author mine={place.owned} original /><Text style={[ui.body, { color: palette.ink }]}>{unlocked ? place.text : place.teaser}</Text>
-        <View style={styles.engagement}><Pressable disabled={!onsite} onPress={() => store.like(place.id, fix)} accessibilityLabel={place.liked ? '取消点赞' : '点赞'} style={styles.like}><Ionicons name={place.liked ? 'heart' : 'heart-outline'} size={19} color={place.liked ? '#e5b9a9' : palette.soft} /><Text style={{ color: palette.soft }}>{place.likes}</Text></Pressable><Text style={[ui.muted, { color: palette.soft }]}>{onsite ? '现场可以点赞' : '点赞需到场'}</Text></View>
+  const params = useLocalSearchParams<{ id: string }>();
+  const postId = typeof params.id === 'string' ? params.id : '';
+  const headerHeight = useHeaderHeight();
+  const now = useNow();
+  const { thread, loading, error, refresh } = useThread(postId);
+  const position = usePosition();
+  const { toggleBookmark, posts: nearbyPosts } = useNearby();
+  // My open chat request on this post (pending / active) comes from the inbox; refreshed whenever this screen is focused.
+  const { inbox, refresh: refreshInbox } = useInbox();
+  useFocusEffect(useCallback(() => { refreshInbox(); }, [refreshInbox]));
+  const [updateRequested, setUpdateRequested] = useState(false);
+  const [likeBusy, setLikeBusy] = useState(false);
+  const [notice, setNotice] = useState('');
+  const [reportTarget, setReportTarget] = useState<ReportTarget | null>(null);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [pulling, setPulling] = useState(false);
+  // Reply draft lives here, above the tier branch: a brief collapse (expiry, blur) never wipes what the user typed.
+  const [replyDraft, setReplyDraft] = useState<Attempt>(emptyAttempt);
+
+  const post = thread?.post ?? null;
+  const participant = post?.participated === true;
+  // Participants never start GPS unless they ask (我在现场，更新位置); others track while this screen is focused —
+  // from the first frame, not only after the thread loaded (the fix used to go stale in that gap).
+  const knownParticipant = !!inbox?.threads.some(t => t.id === postId) || nearbyPosts.some(p => p.id === postId && p.participated);
+  const wantsTracking = placeWantsTracking({ updateRequested, participated: post ? participant : null, knownParticipant, errorCode: error?.code });
+  useTrackWhileFocused(wantsTracking);
+
+  // useThread refetches non-participants on movement; participants only after they asked or moved in 模拟位置.
+  const moved = useSignificantFix(10);
+  const lastMoved = useRef(moved);
+  useEffect(() => {
+    if (moved === lastMoved.current) return;
+    lastMoved.current = moved;
+    if (participant && (updateRequested || position.mode === 'simulated')) refresh();
+  }, [moved, participant, updateRequested, position.mode, refresh]);
+
+  const requestUpdate = useCallback(async () => {
+    setUpdateRequested(true);
+    const next = await position.refresh();
+    if (next) await refresh();
+  }, [position, refresh]);
+
+  if (!post) {
+    if (error?.code === 'POST_MISSING') {
+      return <View style={ui.screen}><ErrorView title="这条留话已不可用" message="它可能已被作者删除，或已对你隐藏。" onRetry={goDiscover} retryLabel="回到发现" /></View>;
+    }
+    if (error) {
+      const needsPosition = ['LOCATION_REQUIRED', 'STALE_LOCATION', 'WEAK_LOCATION', 'INVALID_LOCATION'].includes(error.code);
+      return <ScrollView style={ui.screen} contentContainerStyle={ui.content}>
+        <View style={s.row}><Text style={[ui.title, s.flex]}>{needsPosition ? '需要确认位置' : '暂时打不开'}</Text><PositionModeChip /></View>
+        <Notice tone="error" message={describeError(error)} />
+        <Notice message={position.notice} />
+        {needsPosition && <PermissionHelp showSimulated />}
+        <Action title={loading ? '正在打开…' : '重试'} disabled={loading} onPress={() => { refresh(); }} />
+        <Action secondary title="回到发现" onPress={goDiscover} />
+      </ScrollView>;
+    }
+    return <View style={[ui.screen, ui.center]}><Text style={ui.muted}>正在打开这条留话…</Text></View>;
+  }
+
+  const onsite = post.canInteract && position.fresh && !!position.fix;
+  const full = post.level === 'full';
+  const expired = post.displayText === EXPIRED_TEXT;
+  const likeEnabled = post.canLike && onsite;
+  const chat = chatEntry(inbox?.chats, post.id);
+  const canRequestChat = full && onsite && !post.owned && chat.kind === 'request';
+
+  async function like() {
+    if (!post || !position.fix) return;
+    setLikeBusy(true);
+    setNotice('');
+    try { await setLike(post, !post.liked, position.fix); }
+    catch (e) { setNotice(describeError(e)); }
+    finally { setLikeBusy(false); }
+  }
+
+  async function bookmark() {
+    if (!post) return;
+    setNotice('');
+    try { await toggleBookmark(post.id, !post.saved); }
+    catch (e) { setNotice(describeError(e)); }
+  }
+
+  function confirmDelete() {
+    Alert.alert('删除这条留话？', '删除后所有人都无法再查看和接话，私聊申请也会失效。此操作无法撤销。', [
+      { text: '取消', style: 'cancel' },
+      { text: '删除', style: 'destructive', onPress: async () => {
+        try { await deletePost(postId); leave(); }
+        catch (e) { setNotice(describeError(e)); }
+      } },
+    ]);
+  }
+
+  function reportDone(result: { kind: 'report'; hidden: boolean } | { kind: 'block' }) {
+    const target = reportTarget;
+    if (result.kind === 'block' || target?.kind === 'post') {
+      // Let the sheet's modal finish closing before presenting the alert (iOS presents one at a time).
+      setTimeout(() => Alert.alert(result.kind === 'block' ? '已屏蔽' : '已举报',
+        result.kind === 'block' ? '不会再看到对方的留话、接话和私聊。' : '这条留话已对你隐藏。', [{ text: '好', onPress: leave }]), 400);
+    } else {
+      setNotice('已举报，这条接话已对你隐藏。');
+    }
+  }
+
+  function openChat(chatId: string) {
+    router.push({ pathname: '/chat/[id]', params: { id: chatId } });
+  }
+
+  function chatSent(sent: ChatMeta) {
+    setChatOpen(false);
+    openChat(sent.id);
+  }
+
+  const reportComment = (comment: Comment) => setReportTarget({ kind: 'comment', postId: post.id, commentId: comment.id });
+
+  return <KeyboardAvoidingView style={ui.screen} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={headerHeight}>
+    <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={ui.content}
+      refreshControl={<RefreshControl refreshing={pulling} onRefresh={() => { setPulling(true); refresh().finally(() => setPulling(false)); }} tintColor={colors.accent} />}>
+      <View style={s.row}>
+        <Text accessibilityRole="header" style={[ui.title, s.flex]}>{post.name}</Text>
+        <Pressable onPress={bookmark} accessibilityRole="button" accessibilityLabel={post.saved ? '取消想去' : '加入想去'} accessibilityState={{ selected: post.saved }} hitSlop={10} style={s.icon}>
+          <Ionicons name={post.saved ? 'bookmark' : 'bookmark-outline'} size={23} color={colors.accent} />
+        </Pressable>
+        <ThreadMenu post={post} canRequestChat={canRequestChat} chat={chat} onRequestChat={() => setChatOpen(true)} onOpenChat={openChat}
+          onReport={() => setReportTarget({ kind: 'post', postId: post.id })} onDelete={confirmDelete} />
       </View>
-      {!point && !unlocked && <View style={ui.panel}><Text style={ui.body}>这里的完整留话，留给走近的人。</Text><Text style={ui.muted}>原型用按钮模拟到场。当前没有读取 GPS，也不会改变你的真实位置。</Text><Action title="模拟走近并到场" onPress={() => store.arrive(place.id)} /></View>}
-      {place.task && <View style={ui.panel}><Pressable onPress={() => setTaskOpen(!taskOpen)} style={styles.placeMeta}><Text style={[ui.body, { flex: 1 }]}>⚑ {place.task.title}</Text><Text style={{ color: colors.accent }}>¥{place.task.reward} · 演示</Text><Ionicons name={taskOpen ? 'chevron-up' : 'chevron-down'} size={17} color={colors.muted} /></Pressable>{taskOpen && <Text style={ui.muted}>{place.task.requirement} 此版本不支持任务提交、支付或提现。</Text>}</View>}
-      {unlocked && <>
-        <View style={styles.placeMeta}><Text style={styles.sectionTitle}>这里的接话</Text><Text style={ui.muted}>{place.replies.length} 句</Text></View>
-        {place.replies.length === 0 ? <Text style={ui.muted}>还没有人接话。你可以留下第一句。</Text> : place.replies.map(item => <View key={item.id} style={[ui.panel, item.mine && styles.myReply]}><Author mine={item.mine} original={item.mine && place.owned} /><Text style={ui.body}>{item.text}</Text></View>)}
-        <View style={{ gap: 12 }}><Text style={ui.label}>{onsite ? '在这里，接一句' : '离开现场，也能接着聊'}</Text><TextInput value={draft} onChangeText={setDraft} multiline maxLength={300} placeholder="有什么想接着说的？" placeholderTextColor={colors.muted} style={[ui.input, styles.composer]} textAlignVertical="top" accessibilityLabel="接话内容" />
-          <View style={styles.placeMeta}><Text style={ui.muted}>{draft.length} / 300</Text><Text style={ui.muted}>匿名 · 仅保存在本机</Text></View>
-          <Action title="发送接话" disabled={!draft.trim()} onPress={() => { store.reply(place.id, draft, fix); setDraft(''); }} /></View>
+      <LivePlacePosition post={post} onsite={onsite} tracking={wantsTracking} onRequestUpdate={requestUpdate} />
+      <PostPanel post={post} now={now} likeEnabled={likeEnabled} likeBusy={likeBusy} onLike={like} />
+      {expired && <Notice message="对话信息已过期。" actionLabel={loading ? '正在刷新…' : '刷新'} onAction={() => { refresh(); }} />}
+      <Notice tone="error" message={notice} />
+      {full && <>
+        <CommentList comments={thread?.comments ?? []} total={post.commentCount} now={now} onReport={reportComment} />
+        {post.canReply && (onsite || participant)
+          ? <Composer key={post.id} post={post} onsite={onsite} fix={position.fix} draft={replyDraft} onDraft={setReplyDraft} />
+          : <Text style={ui.muted}>到场后可以接第一句；接过话之后，离开现场也能继续。</Text>}
       </>}
-      {!point && onsite && <Action secondary title="模拟离开现场" onPress={() => store.depart(place.id)} />}
-      {!point && !onsite && unlocked && <Action secondary title="模拟再次到场" onPress={() => store.arrive(place.id)} />}
-      <Action secondary title="回到发现" onPress={() => router.replace('/')} />
-      {!point && <Text style={ui.muted}>演示数据仅用于体验，不对应真实校园留言。首次在现场接话后，该对话会进入「消息」。</Text>}
+      {!full && !expired && <Text style={ui.muted}>{post.level === 'preview' ? '再走近一些，到场后就能看到全文、照片和接话。' : '这里有人留过话。走近到 200 米内能看到预览，到场后看到全文。'}</Text>}
+      {!post.owned && chat.kind !== 'request' && <Action secondary title={chat.label} onPress={() => openChat(chat.chatId)} />}
+      {canRequestChat && <Action secondary title="申请私聊（演示权益）" onPress={() => setChatOpen(true)} />}
+      <Action secondary title="回到发现" onPress={goDiscover} />
     </ScrollView>
+    <ReportSheet visible={reportTarget !== null} target={reportTarget} onClose={() => setReportTarget(null)} onDone={reportDone}
+      allowBlock={reportTarget?.kind !== 'post' || post.level !== 'dot'} />
+    <ChatRequestSheet visible={chatOpen && chat.kind === 'request'} post={post} fix={position.fix} onClose={() => setChatOpen(false)} onSent={chatSent} />
   </KeyboardAvoidingView>;
 }
-const styles = StyleSheet.create({
-  placeMeta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
-  engagement: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 12 },
-  like: { flexDirection: 'row', gap: 7, alignItems: 'center', paddingVertical: 6, paddingRight: 16 },
-  sectionTitle: { color: colors.text, fontSize: 20, fontWeight: '600' },
-  myReply: { borderLeftWidth: 2, borderLeftColor: '#9bae8b' },
-  composer: { minHeight: 110 },
+
+const s = StyleSheet.create({
+  row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  flex: { flex: 1 },
+  icon: { minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' },
 });

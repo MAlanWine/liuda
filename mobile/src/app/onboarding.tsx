@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { router, usePathname } from 'expo-router';
-import { AccessibilityInfo, Animated, Easing, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { AccessibilityInfo, ActivityIndicator, Animated, Easing, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { AnimatedLogo } from '../components/AnimatedLogo';
+import { colors } from '../components/ui';
+import { api, describeError } from '../api';
 import { useEntry } from '../state/entry';
 
 type Step = 'hello' | 'unavailable' | 'demo';
@@ -92,15 +94,29 @@ export default function OnboardingScreen() {
   const { begin } = useEntry();
   const pathname = usePathname();
 
-  function finish(destination: '/discover' | '/place/bench') {
+  const [opening, setOpening] = useState(false);
+  const [error, setError] = useState('');
+
+  function skip() {
     begin();
-    router.replace(destination);
+    router.replace('/discover');
+  }
+  /** D-21: discover becomes the base of the stack, the demo post opens on top of it (back -> discover). */
+  async function openIntro() {
+    if (opening) return;
+    setOpening(true); setError('');
+    let postId: string;
+    try { postId = (await api.demoIntro({})).postId; }
+    catch (cause) { setError(`${describeError(cause)} 可以先跳过，去发现页看看。`); setOpening(false); return; }
+    begin();
+    router.replace('/discover');
+    router.push({ pathname: '/place/[id]', params: { id: postId } });
   }
 
   return (
     <SafeAreaView style={styles.screen}>
       <View style={styles.top}>
-        <Pressable accessibilityRole="button" onPress={() => finish('/discover')} style={styles.skip}>
+        <Pressable accessibilityRole="button" onPress={skip} style={styles.skip}>
           <Text style={styles.quiet}>跳过</Text>
         </Pressable>
       </View>
@@ -136,18 +152,21 @@ export default function OnboardingScreen() {
         <View style={styles.actions}>
           <Pressable
             accessibilityRole="button"
+            accessibilityState={{ busy: opening }}
+            disabled={opening}
             onPress={() => {
               if (step === 'hello') setStep('unavailable');
               else if (step === 'unavailable') setStep('demo');
-              else finish('/place/bench');
+              else openIntro();
             }}
             style={({ pressed }) => [styles.primary, pressed && styles.pressed]}
           >
             <Text style={styles.buttonText}>
               {step === 'hello' ? '看看附近' : step === 'unavailable' ? '看一个演示' : '看看这条留话'}
             </Text>
-            <Ionicons name="arrow-forward" size={19} color="#101010" />
+            {opening ? <ActivityIndicator color={colors.black} /> : <Ionicons name="arrow-forward" size={19} color={colors.black} />}
           </Pressable>
+          {error ? <Text accessibilityLiveRegion="polite" style={styles.error}>{error}</Text> : null}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -155,22 +174,23 @@ export default function OnboardingScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: '#000' },
+  screen: { flex: 1, backgroundColor: colors.black },
   top: { alignItems: 'flex-end', paddingHorizontal: 20 },
   skip: { minHeight: 44, minWidth: 56, justifyContent: 'center', alignItems: 'center' },
   content: { flexGrow: 1, paddingHorizontal: 30, paddingBottom: 24 },
   dialogue: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 22, paddingVertical: 24 },
   entranceStage: { width: 158, height: 158, justifyContent: 'center', alignItems: 'center' },
   ink: { position: 'absolute', width: 84, height: 84, justifyContent: 'center', alignItems: 'center' },
-  comma: { color: '#fff', fontFamily: 'serif', fontWeight: '700', fontSize: 82, lineHeight: 82, marginTop: -37 },
-  ripple: { position: 'absolute', width: 64, height: 64, borderRadius: 32, borderWidth: 1, borderColor: '#e9e7e2' },
+  comma: { color: colors.authButton, fontFamily: 'serif', fontWeight: '700', fontSize: 82, lineHeight: 82, marginTop: -37 },
+  ripple: { position: 'absolute', width: 64, height: 64, borderRadius: 32, borderWidth: 1, borderColor: colors.text },
   words: { alignSelf: 'stretch', gap: 12, paddingHorizontal: 4 },
   unrevealed: { color: 'transparent' },
-  greeting: { color: '#b8b8b8', fontSize: 16, lineHeight: 24 },
-  question: { color: '#f4f4f4', fontSize: 27, lineHeight: 39, fontWeight: '600' },
-  quiet: { color: '#a6a6a6', fontSize: 14, lineHeight: 23 },
-  actions: { paddingTop: 14 },
-  primary: { minHeight: 56, backgroundColor: '#f4f4f4', borderRadius: 16, paddingHorizontal: 20, paddingVertical: 12, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 12 },
-  buttonText: { color: '#101010', fontSize: 16, fontWeight: '600', flexShrink: 1 },
+  greeting: { color: colors.subtle, fontSize: 16, lineHeight: 24 },
+  question: { color: colors.authButton, fontSize: 27, lineHeight: 39, fontWeight: '600' },
+  quiet: { color: colors.muted, fontSize: 14, lineHeight: 23 },
+  actions: { paddingTop: 14, gap: 12 },
+  primary: { minHeight: 56, backgroundColor: colors.authButton, borderRadius: 16, paddingHorizontal: 20, paddingVertical: 12, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 12 },
+  buttonText: { color: colors.black, fontSize: 16, fontWeight: '600', flexShrink: 1 },
   pressed: { opacity: 0.75 },
+  error: { color: colors.danger, fontSize: 13, lineHeight: 20 },
 });

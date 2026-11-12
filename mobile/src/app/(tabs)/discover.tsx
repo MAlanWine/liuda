@@ -1,169 +1,115 @@
-import { useCallback, useEffect, useState } from 'react';
-import { AccessibilityInfo, FlatList, Image, Pressable, ScrollView, StyleSheet, Text, View, type ImageSourcePropType } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { router, usePathname } from 'expo-router';
-import { Place, usePlaces } from '../../state/places';
+import { useCallback, useState } from 'react';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { router, useIsFocused } from 'expo-router';
+import { describeError, type PostSummary } from '../../api';
+import { NEARBY_RADIUS, PREVIEW_RADIUS } from '../../domain/gate';
+import { permissionMessage } from '../../location/permission';
+import { useNearby } from '../../state/nearby';
+import { usePosition, useTrackWhileFocused } from '../../state/position';
 import { useProfile } from '../../state/profile';
-import { Avatar } from '../../components/Avatar';
-import { colors, Loading, moods, Screen } from '../../components/ui';
+import { Notice } from '../../components/common/Notice';
+import { PermissionHelp } from '../../components/common/PermissionHelp';
+import { DiscoverHeader } from '../../components/feed/DiscoverHeader';
+import { FeedList } from '../../components/feed/FeedList';
+import DiscoverMap from '../../components/map/DiscoverMap';
+import { Action, colors, Loading, Screen, ui } from '../../components/ui';
 
-const placeArt = new Map<string, ImageSourcePropType>([
-  ['bench', require('../../../assets/place-art/bench.jpg')],
-  ['stairs', require('../../../assets/place-art/stairs.jpg')],
-  ['corner', require('../../../assets/place-art/corner.jpg')],
-]);
-
-const viewabilityConfig = { itemVisiblePercentThreshold: 70 };
-
-function PlaceCard({ place, height, active }: { place: Place; height: number; active: boolean }) {
-  const store = usePlaces();
-  const palette = moods[place.mood];
-  const illustration = placeArt.get(place.id);
-  const hasIllustration = illustration !== undefined;
-  const artHeight = Math.min(200, Math.round(height * 0.29));
-  const onsite = store.arrived.includes(place.id);
-  const unlocked = onsite || place.participated;
-  const [closer, setCloser] = useState(false);
-  const distance = closer ? Math.min(15, place.distance) : place.distance;
-  const nearby = distance <= 25;
-  const available = Array.from(unlocked ? place.text : place.teaser.replace(/[.…]+$/, ''))
-    .slice(0, unlocked ? undefined : nearby ? 22 : 9);
-  const [revealed, setRevealed] = useState(0);
-  const [reduceMotion, setReduceMotion] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    let mounted = true;
-    let changed = false;
-    const listener = AccessibilityInfo.addEventListener('reduceMotionChanged', value => {
-      changed = true;
-      setReduceMotion(value);
-    });
-    AccessibilityInfo.isReduceMotionEnabled()
-      .then(value => { if (mounted && !changed) setReduceMotion(value); })
-      .catch(() => { if (mounted && !changed) setReduceMotion(false); });
-    return () => { mounted = false; listener.remove(); };
-  }, []);
-
-  const visibleCount = reduceMotion ? available.length : Math.min(revealed, available.length);
-  const finished = visibleCount === available.length;
-  const lastLetter = available[visibleCount - 1];
-  const pause = lastLetter && /[，。？！]/.test(lastLetter) ? 160 : 48;
-  useEffect(() => {
-    if (!active || finished || reduceMotion === null) return;
-    const timer = setTimeout(() => setRevealed(count => count + 1), pause);
-    return () => clearTimeout(timer);
-  }, [active, finished, pause, reduceMotion, revealed]);
-
-  function advance() {
-    if (place.point || unlocked) open();
-    else if (nearby) store.arrive(place.id);
-    else setCloser(true);
-  }
-  const saved = store.saved.includes(place.id);
-  const open = () => router.push({ pathname: '/place/[id]', params: { id: place.id } });
-  return <View style={{ height, paddingHorizontal: 16, paddingVertical: 10 }}>
-    <LinearGradient
-      colors={hasIllustration ? [palette.background, palette.background, '#141d1a'] : [palette.background, '#141d1a']}
-      locations={hasIllustration ? [0, Math.min(0.95, artHeight / Math.max(1, height - 20)), 1] : undefined}
-      style={styles.card}
-    >
-      {hasIllustration && (
-        <View style={[styles.artFrame, { height: artHeight }]}>
-          <Image source={illustration} style={styles.art} resizeMode="cover" accessible={false} />
-          <LinearGradient
-            pointerEvents="none"
-            colors={[`${palette.background}00`, `${palette.background}00`, `${palette.background}99`, palette.background]}
-            locations={[0, 0.43, 0.77, 1]}
-            style={StyleSheet.absoluteFill}
-          />
-        </View>
-      )}
-      <ScrollView scrollEnabled={available.length > 36 || height < (hasIllustration ? 560 : 520)} nestedScrollEnabled showsVerticalScrollIndicator={false} contentContainerStyle={[styles.cardContent, hasIllustration && styles.illustratedContent]}>
-        <View style={styles.meta}>
-          <Text numberOfLines={1} style={[styles.placeName, { color: palette.soft }]}>{place.name}</Text>
-          <Text style={[styles.distanceText, { color: palette.soft }]}>
-            {place.point ? '真实地点' : onsite ? '演示已到场' : `约 ${distance} 米`}
-          </Text>
-        </View>
-        <View style={styles.story}>
-          <Text
-            accessibilityLabel={available.join('')}
-            style={[styles.storyText, hasIllustration && styles.illustratedStoryText, { color: palette.ink }]}
-          >
-            {available.slice(0, visibleCount).join('')}
-            {finished && !unlocked ? '…' : ''}
-            <Text style={styles.unrevealed}>{available.slice(visibleCount).join('')}{!finished && !unlocked ? '…' : ''}</Text>
-          </Text>
-          {!unlocked && (
-            <View style={styles.storyHint}>
-              {finished && <Text style={[styles.distanceText, { color: palette.soft }]}>再走近一点，就能看到更多</Text>}
-            </View>
-          )}
-        </View>
-        <View style={styles.cardBottom}>
-          <Pressable accessibilityRole="button" onPress={advance} style={({ pressed }) => [styles.open, pressed && styles.pressed]}>
-            <Text style={[styles.openText, { color: palette.ink }]}>{place.point ? '查看位置' : unlocked ? '继续对话' : nearby ? '模拟到场' : '模拟走近'}</Text>
-            <Ionicons name="arrow-forward" size={17} color={palette.ink} />
-          </Pressable>
-          <Pressable accessibilityRole="button" accessibilityLabel={saved ? '取消想去' : '标记想去'} onPress={() => store.save(place.id)} style={styles.save}>
-            <Ionicons name={saved ? 'bookmark' : 'bookmark-outline'} size={20} color={palette.soft} />
-          </Pressable>
-        </View>
-      </ScrollView>
-    </LinearGradient>
-  </View>;
-}
+type Message = { text: string; tone: 'info' | 'error' };
 
 export default function DiscoverScreen() {
-  const store = usePlaces();
-  const { profile, ready: profileReady } = useProfile();
-  const [height, setHeight] = useState(0);
-  const [visibleId, setVisibleId] = useState<string>();
-  const focused = usePathname() === '/discover';
-  const onViewableItemsChanged = useCallback(({ viewableItems }: { viewableItems: { item: Place }[] }) => {
-    setVisibleId(viewableItems[0]?.item.id);
+  useTrackWhileFocused();
+  const nearby = useNearby();
+  const { mode, fix, permission, notice: positionNotice, simulateNear } = usePosition();
+  const { ready: profileReady } = useProfile();
+  const focused = useIsFocused();
+  const [message, setMessage] = useState<Message | null>(null);
+  const [busyIds, setBusyIds] = useState<string[]>([]);
+  const [reanchoring, setReanchoring] = useState(false);
+  const { toggleBookmark, reanchorHere, refresh } = nearby;
+
+  const open = useCallback((post: PostSummary) => {
+    router.push({ pathname: '/place/[id]', params: { id: post.id } });
   }, []);
-  if (!store.ready || !profileReady) return <Loading />;
+  // 模拟走近 / 模拟到场 only exist in 模拟位置 mode (PlaceCard never offers them in GPS mode).
+  const simulate = useCallback((post: PostSummary, metres: number) => {
+    setMessage(null);
+    simulateNear({ latitude: post.latitude, longitude: post.longitude }, metres);
+  }, [simulateNear]);
+  const bookmark = useCallback(async (post: PostSummary) => {
+    setBusyIds(ids => ids.includes(post.id) ? ids : [...ids, post.id]);
+    try {
+      await toggleBookmark(post.id, !post.saved);
+    } catch (e) {
+      setMessage({ text: describeError(e), tone: 'error' });
+    } finally {
+      setBusyIds(ids => ids.filter(id => id !== post.id));
+    }
+  }, [toggleBookmark]);
+  const reanchor = async () => {
+    if (reanchoring) return;
+    setReanchoring(true);
+    try {
+      await reanchorHere();
+      setMessage({ text: '演示地点已移到你附近。', tone: 'info' });
+    } catch (e) {
+      setMessage({ text: describeError(e), tone: 'error' });
+    } finally {
+      setReanchoring(false);
+    }
+  };
+
+  if (!profileReady) return <Loading />;
+
+  const gps = mode === 'gps';
+  const needsHelp = gps && permission !== 'granted';
+  const noFix = !fix;
+  const empty = nearby.ready && !nearby.error && nearby.posts.length === 0;
+  const allFar = nearby.posts.length > 0 && nearby.posts.every(p => !p.participated && p.distance !== null && p.distance > PREVIEW_RADIUS);
+  const reanchorLabel = reanchoring ? '正在移动演示地点…' : '把演示地点移到我附近';
+
+  let body;
+  if (noFix && gps) {
+    body = <View style={s.state}>
+      {needsHelp ? <PermissionHelp /> : <View style={s.center}><ActivityIndicator color={colors.accent} /><Text style={ui.muted}>{positionNotice || '正在定位…'}</Text></View>}
+    </View>;
+  } else if (!nearby.ready) {
+    body = <View style={s.center}><ActivityIndicator color={colors.accent} /><Text style={ui.muted}>正在寻找附近的留话</Text></View>;
+  } else if (empty && nearby.view === 'cards') {
+    body = <View style={s.state}>
+      <View style={ui.panel}>
+        <Text style={s.title}>附近 {NEARBY_RADIUS} 米内还没有留话</Text>
+        <Text style={ui.muted}>可以在这里留下第一句。{fix ? '想先体验，也可以把演示地点移到你身边。' : ''}</Text>
+        <Action title="在这里留话" onPress={() => router.push('/leave')} />
+        {fix && <Action secondary disabled={reanchoring} title={reanchorLabel} onPress={reanchor} />}
+      </View>
+    </View>;
+  } else if (nearby.view === 'map') {
+    body = <DiscoverMap posts={nearby.posts} fix={fix} mode={mode} sort={nearby.sort} onSortChange={nearby.setSort} onOpen={open} onSimulate={simulate} />;
+  } else {
+    body = <FeedList posts={nearby.posts} focused={focused} mode={mode} onOpen={open} onSimulate={simulate}
+      onBookmark={bookmark} busyIds={busyIds} onRefresh={refresh} />;
+  }
+
+  const showFarHint = nearby.ready && fix !== null && (allFar || (empty && nearby.view === 'map'));
   return <Screen>
-    <View style={styles.header}>
-      <Pressable accessibilityRole="button" accessibilityLabel="打开个人中心" onPress={() => router.push('/me')} style={({ pressed }) => [styles.profile, pressed && { opacity: 0.65 }]}>
-        <Avatar uri={profile.avatar} size={34} />
-        <Text numberOfLines={1} style={styles.profileName}>{profile.nickname}</Text>
-      </Pressable>
-      <Text style={styles.demo}>本机体验</Text>
+    <DiscoverHeader view={nearby.view} onViewChange={nearby.setView} sort={nearby.sort} onSortChange={nearby.setSort} />
+    <View style={s.notices}>
+      {needsHelp && !noFix && <PermissionHelp />}
+      {/* PermissionHelp already says it for approximate location; show the global notice only when it adds something. */}
+      {gps && !noFix && positionNotice && !(needsHelp && positionNotice === permissionMessage(permission)) ? <Notice message={positionNotice} /> : null}
+      {nearby.error && <Notice tone="error" message={describeError(nearby.error)} actionLabel="重试" onAction={() => { refresh(); }} />}
+      {message && <Notice tone={message.tone} message={message.text} actionLabel="知道了" onAction={() => setMessage(null)} />}
+      {showFarHint && <Notice message={empty ? `附近 ${NEARBY_RADIUS} 米内还没有留话。` : `附近的留话都在 ${PREVIEW_RADIUS} 米外。`}
+        actionLabel={reanchorLabel} onAction={reanchor} />}
+      {nearby.limited && !nearby.error && <Notice message="附近留话较多，仅显示最近 50 条。" />}
     </View>
-    {store.notice ? <Text style={styles.notice}>{store.notice}</Text> : null}
-    <View style={styles.feed} onLayout={event => setHeight(event.nativeEvent.layout.height)}>
-      {height > 0 && <FlatList key={Math.round(height)} data={store.places} extraData={[store.arrived, store.saved, visibleId, focused]} viewabilityConfig={viewabilityConfig} onViewableItemsChanged={onViewableItemsChanged} keyExtractor={place => place.id} pagingEnabled decelerationRate="fast" showsVerticalScrollIndicator={false} initialNumToRender={2} maxToRenderPerBatch={2} windowSize={3} getItemLayout={(_, index) => ({ length: height, offset: height * index, index })} renderItem={({ item }) => <PlaceCard place={item} height={height} active={focused && visibleId === item.id} />} />}
-    </View>
-    <Text style={styles.swipeHint}>向上滑，遇见下一个地方</Text>
+    <View style={s.body}>{body}</View>
   </Screen>;
 }
-const styles = StyleSheet.create({
-  header: { height: 65, paddingHorizontal: 23, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 16 },
-  profile: { flexDirection: 'row', alignItems: 'center', gap: 9, minHeight: 44, flexShrink: 1, minWidth: 0 },
-  profileName: { color: colors.text, fontSize: 15, fontWeight: '500', flexShrink: 1 },
-  demo: { color: colors.muted, fontSize: 11 },
-  notice: { color: '#d3bf99', fontSize: 12, paddingHorizontal: 24 },
-  feed: { flex: 1 },
-  card: { flex: 1, borderRadius: 28, overflow: 'hidden' },
-  artFrame: { backgroundColor: '#e6d8bf', overflow: 'hidden' },
-  art: { width: '100%', height: '100%' },
-  illustratedContent: { paddingTop: 16, paddingBottom: 16 },
-  illustratedStoryText: { fontSize: 23, lineHeight: 34 },
-  cardContent: { flexGrow: 1, padding: 24 },
-  meta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
-  placeName: { flex: 1, fontSize: 13, lineHeight: 20 },
-  distanceText: { fontSize: 11 },
-  story: { flexGrow: 1, justifyContent: 'center', paddingVertical: 22 },
-  storyHint: { minHeight: 24, paddingTop: 7 },
-  unrevealed: { color: 'transparent' },
-  storyText: { fontSize: 28, lineHeight: 41, fontWeight: '600' },
-  cardBottom: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#ffffff20', paddingTop: 6 },
-  open: { minHeight: 44, flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 },
-  openText: { fontWeight: '600', fontSize: 14 },
-  save: { width: 44, height: 44, justifyContent: 'center', alignItems: 'flex-end' },
-  pressed: { opacity: 0.65 },
-  swipeHint: { color: '#777e76', textAlign: 'center', fontSize: 11, paddingVertical: 8 },
+const s = StyleSheet.create({
+  notices: { paddingHorizontal: 20, gap: 6 },
+  body: { flex: 1 },
+  state: { flex: 1, padding: 20, justifyContent: 'center' },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 14 },
+  title: { color: colors.text, fontSize: 16, fontWeight: '600' },
 });

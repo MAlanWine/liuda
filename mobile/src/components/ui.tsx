@@ -1,13 +1,33 @@
 import { StyleSheet, Text, Pressable, View, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import type { EdgeInsets } from 'react-native-safe-area-context';
 import type { ReactNode } from 'react';
 
-export const colors = { background: '#101215', surface: '#1b1e23', text: '#f3f0e8', muted: '#9b9e9b', line: '#30342f', accent: '#d5e6bb' };
+/** App palette (DECISIONS: keep the current RN colours; new code uses only these tokens). */
+export const colors = {
+  background: '#101215', surface: '#1b1e23', text: '#f3f0e8', muted: '#9b9e9b', line: '#30342f', accent: '#d5e6bb',
+  /** Text on accent buttons. */ onAccent: '#172019',
+  /** Raised surface inside a surface (chips, inputs on panels). */ raised: '#252930',
+  /** Secondary readable text (author names, captions). */ subtle: '#dfe3da',
+  /** Faint fill for tags/badges. */ tag: '#ffffff0c',
+  /** Hairline on dark chrome (tab bar top border). */ chromeLine: '#292d29',
+  /** Inactive tab icons/labels. */ inactive: '#81867f',
+  /** Outer letterbox behind the app (web max width). */ chrome: '#090c0b',
+  /** Errors and destructive actions. */ danger: '#e4a5a5',
+  /** Demo / simulated labels (演示 / 模拟). */ demo: '#c8b38e', demoFill: '#c8b38e1f',
+  /** Modal backdrop. */ scrim: '#000000a6',
+  /** Current-position dot and accuracy circle on maps (= moods.blue.soft). */ userDot: '#aac0ce',
+  /** Auth / onboarding stage. */ black: '#000', authButton: '#f4f4f4',
+};
 export const moods = {
   sage: { background: '#202e29', soft: '#aac0af', ink: '#f1f0dc' },
   sand: { background: '#332c24', soft: '#c8b38e', ink: '#f1e7d2' },
   blue: { background: '#243039', soft: '#aac0ce', ink: '#e8eff1' },
 };
+/** Tab bar height used by `(tabs)/_layout.tsx`; screens above the tab bar pad by this. */
+export function tabBarHeight(insets: Pick<EdgeInsets, 'bottom'>) {
+  return 64 + insets.bottom;
+}
 export function Screen({ children }: { children: ReactNode }) {
   return <SafeAreaView edges={['top', 'left', 'right']} style={ui.screen}>{children}</SafeAreaView>;
 }
@@ -29,11 +49,10 @@ export const ui = StyleSheet.create({
   label: { color: colors.muted, fontSize: 13, marginBottom: 9 },
   input: { color: colors.text, backgroundColor: colors.surface, borderRadius: 16, padding: 16, fontSize: 16, lineHeight: 26 },
   action: { minHeight: 52, borderRadius: 16, backgroundColor: colors.accent, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20, paddingVertical: 13 },
-  actionText: { color: '#172019', fontSize: 16, fontWeight: '600' },
+  actionText: { color: colors.onAccent, fontSize: 16, fontWeight: '600' },
   secondary: { backgroundColor: colors.surface },
   secondaryText: { color: colors.text },
   disabled: { opacity: 0.4 },
   pressed: { opacity: 0.72 },
   panel: { backgroundColor: colors.surface, padding: 20, borderRadius: 20, gap: 12 },
-  line: { height: 1, backgroundColor: colors.line },
 });

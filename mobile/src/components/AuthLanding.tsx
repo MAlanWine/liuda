@@ -1,16 +1,24 @@
 import { useState } from 'react';
 import { useFonts } from 'expo-font';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { AnimatedLogo } from './AnimatedLogo';
 import { router, usePathname } from 'expo-router';
+import { AnimatedLogo } from './AnimatedLogo';
+import { SignInSheet } from './account/SignInSheet';
+import { colors } from './ui';
+import { describeError, type AuthMethod } from '../api';
 import { useEntry } from '../state/entry';
+import { useSession } from '../state/session';
 
-type LoginMethod = '微信' | 'Apple';
-
+/**
+ * `/welcome` (first screen) and `/login` (modal, the shell adds 关闭). 微信 / Apple / 游客 open the mock `SignInSheet`;
+ * 先逛逛 continues as the device guest (signing in as guest first when signed out).
+ * The subset fonts (`LiudaDisplay`, `LiudaInterface*`) only cover the original copy; every newer string uses the system font.
+ */
 export function AuthLanding() {
-  const { started, notice } = useEntry();
+  const { started, notice: entryNotice } = useEntry();
+  const { ready: sessionReady, session, notice: sessionNotice, signIn } = useSession();
   const [fontsLoaded] = useFonts({
     LiudaDisplay: require('../../assets/fonts/LiudaDisplay.otf'),
     LiudaInterfaceV2: require('../../assets/fonts/LiudaInterfaceV2.otf'),
@@ -22,69 +30,81 @@ export function AuthLanding() {
   const { height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const compact = height - insets.top - insets.bottom < 650;
-  const [method, setMethod] = useState<LoginMethod>('微信');
-  const [loginOpen, setLoginOpen] = useState(false);
-  function browse() {
-    setLoginOpen(false);
-    router.replace(started ? '/discover' : '/onboarding');
+  const [method, setMethod] = useState<AuthMethod | null>(null);
+  const [browsing, setBrowsing] = useState(false);
+  const [error, setError] = useState('');
+
+  /** Leaves the landing without stacking a second discover (D-8): back when possible, else replace. */
+  function leave() {
+    setMethod(null);
+    if (router.canGoBack()) router.back();
+    else router.replace(started ? '/discover' : '/onboarding');
   }
+  async function browse() {
+    if (browsing) return;
+    setError('');
+    if (!session) {
+      setBrowsing(true);
+      try { await signIn('guest'); }
+      catch (cause) { setError(describeError(cause)); setBrowsing(false); return; }
+      setBrowsing(false);
+    }
+    leave();
+  }
+  const notice = error || sessionNotice || entryNotice;
   return <SafeAreaView style={s.screen}>
     <ScrollView bounces={false} showsVerticalScrollIndicator={false} contentContainerStyle={s.content}>
       <View style={[s.identity, compact && s.identityCompact]}>
-        <AnimatedLogo size={compact ? 172 : 220} active={!loginOpen && (pathname === '/welcome' || pathname === '/login')} />
+        <AnimatedLogo size={compact ? 172 : 220} active={method === null && (pathname === '/welcome' || pathname === '/login')} />
         <Text accessibilityRole="header" style={[s.name, fontsLoaded && s.displayFont]}>留答</Text>
         <Text style={[s.tagline, regular]}>到哪都有人陪着你</Text>
       </View>
       <View style={s.actions}>
-        <Pressable accessibilityRole="button" accessibilityLabel="微信登录" onPress={() => { setMethod('微信'); setLoginOpen(true); }} style={({ pressed }) => [s.method, s.primary, pressed && s.pressed]}>
-          <Ionicons name="logo-wechat" size={22} color="#111" style={s.methodIcon} /><Text style={[s.primaryText, medium]}>微信登录</Text>
+        <Pressable accessibilityRole="button" accessibilityLabel="微信登录（演示）" onPress={() => setMethod('wechat')} style={({ pressed }) => [s.method, s.primary, pressed && s.pressed]}>
+          <Ionicons name="logo-wechat" size={22} color={colors.black} style={s.methodIcon} /><Text style={[s.primaryText, medium]}>微信登录</Text>
         </Pressable>
-        <Pressable accessibilityRole="button" accessibilityLabel="通过 Apple 登录" onPress={() => { setMethod('Apple'); setLoginOpen(true); }} style={({ pressed }) => [s.method, s.secondary, pressed && s.pressed]}>
-          <Ionicons name="logo-apple" size={22} color="#eee" style={s.methodIcon} /><Text style={[s.secondaryText, medium]}>通过 Apple 登录</Text>
+        <Pressable accessibilityRole="button" accessibilityLabel="通过 Apple 登录（演示）" onPress={() => setMethod('apple')} style={({ pressed }) => [s.method, s.secondary, pressed && s.pressed]}>
+          <Ionicons name="logo-apple" size={22} color={colors.text} style={s.methodIcon} /><Text style={[s.secondaryText, medium]}>通过 Apple 登录</Text>
         </Pressable>
-        <Pressable accessibilityRole="button" onPress={browse} style={({ pressed }) => [s.guest, pressed && s.pressed]}><Text style={[s.guestText, regular]}>先逛逛</Text></Pressable>
+        <Pressable accessibilityRole="button" accessibilityLabel="游客登录（演示）" onPress={() => setMethod('guest')} style={({ pressed }) => [s.method, s.outline, pressed && s.pressed]}>
+          <Ionicons name="person-outline" size={20} color={colors.muted} style={s.methodIcon} /><Text style={s.outlineText}>游客登录</Text>
+        </Pressable>
+        <Pressable accessibilityRole="button" accessibilityState={{ busy: browsing }} disabled={browsing || !sessionReady} onPress={browse} style={({ pressed }) => [s.guest, pressed && s.pressed]}>
+          {browsing ? <ActivityIndicator color={colors.muted} /> : <Text style={[s.guestText, regular]}>先逛逛</Text>}
+        </Pressable>
       </View>
+      <Text style={s.current}>{session ? `当前：${session.accountLabel}` : sessionReady ? '尚未登录 · 演示账号不会连接微信或 Apple' : '正在准备演示账号…'}</Text>
       <Pressable accessibilityRole="link" onPress={() => router.push('/about-privacy')} style={s.privacy}><Text style={[s.privacyText, regular]}>隐私说明</Text></Pressable>
-      {!!notice && <Text style={[s.notice, regular]}>{notice}</Text>}
+      {!!notice && <Text accessibilityLiveRegion="polite" style={[s.notice, error && s.error]}>{notice}</Text>}
     </ScrollView>
-    <Modal visible={loginOpen} transparent animationType="fade" onRequestClose={() => setLoginOpen(false)}>
-      <View style={s.modalBackground}>
-        <Pressable accessibilityRole="button" accessibilityLabel="关闭登录说明" style={StyleSheet.absoluteFill} onPress={() => setLoginOpen(false)} />
-        <View accessibilityViewIsModal style={[s.sheet, { paddingBottom: Math.max(insets.bottom, 24) }]}>
-          <View style={s.sheetHeader}><Text accessibilityRole="header" style={[s.sheetTitle, medium]}>{method}登录</Text><Pressable accessibilityRole="button" accessibilityLabel="关闭登录说明" hitSlop={12} onPress={() => setLoginOpen(false)}><Ionicons name="close" size={23} color="#a1a1a1" /></Pressable></View>
-          <Text style={[s.sheetBody, regular]}>账号服务尚未接入。现在可以先浏览演示内容。</Text>
-          <Pressable accessibilityRole="button" onPress={browse} style={({ pressed }) => [s.method, s.primary, pressed && s.pressed]}><Text style={[s.primaryText, medium]}>先逛逛</Text></Pressable>
-        </View>
-      </View>
-    </Modal>
+    <SignInSheet method={method} onClose={() => setMethod(null)} onSignedIn={leave} />
   </SafeAreaView>;
 }
 const s = StyleSheet.create({
   displayFont: { fontFamily: 'LiudaDisplay' },
   interfaceFont: { fontFamily: 'LiudaInterfaceV2' },
   mediumFont: { fontFamily: 'LiudaInterfaceMedium' },
-  screen: { flex: 1, backgroundColor: '#000' },
+  screen: { flex: 1, backgroundColor: colors.black },
   content: { flexGrow: 1, paddingHorizontal: 32, paddingBottom: 12 },
-  identity: { flex: 1, minHeight: 330, alignItems: 'center', justifyContent: 'center', paddingTop: 20, paddingBottom: 48 },
-  identityCompact: { minHeight: 240, paddingTop: 4, paddingBottom: 26 },
-  name: { color: '#ededed', fontSize: 29, lineHeight: 44, fontWeight: 'normal', letterSpacing: 8, marginTop: 6, paddingLeft: 8, includeFontPadding: false },
-  tagline: { color: '#999', fontSize: 12, lineHeight: 22, letterSpacing: 1.4, marginTop: 9, paddingLeft: 1.4, includeFontPadding: false },
-  actions: { gap: 12, paddingBottom: 16 },
+  identity: { flex: 1, minHeight: 300, alignItems: 'center', justifyContent: 'center', paddingTop: 20, paddingBottom: 40 },
+  identityCompact: { minHeight: 220, paddingTop: 4, paddingBottom: 20 },
+  name: { color: colors.text, fontSize: 29, lineHeight: 44, fontWeight: 'normal', letterSpacing: 8, marginTop: 6, paddingLeft: 8, includeFontPadding: false },
+  tagline: { color: colors.muted, fontSize: 12, lineHeight: 22, letterSpacing: 1.4, marginTop: 9, paddingLeft: 1.4, includeFontPadding: false },
+  actions: { gap: 12, paddingBottom: 8 },
   method: { minHeight: 54, borderRadius: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 40, paddingVertical: 14 },
   methodIcon: { position: 'absolute', left: 21 },
-  primary: { backgroundColor: '#f4f4f4' },
-  primaryText: { color: '#111', fontSize: 15, lineHeight: 22, fontWeight: 'normal', letterSpacing: 0.4, includeFontPadding: false },
-  secondary: { backgroundColor: '#131313', borderWidth: 1, borderColor: '#242424' },
-  secondaryText: { color: '#e8e8e8', fontSize: 15, lineHeight: 22, fontWeight: 'normal', letterSpacing: 0.4, includeFontPadding: false },
+  primary: { backgroundColor: colors.authButton },
+  primaryText: { color: colors.black, fontSize: 15, lineHeight: 22, fontWeight: 'normal', letterSpacing: 0.4, includeFontPadding: false },
+  secondary: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.line },
+  secondaryText: { color: colors.text, fontSize: 15, lineHeight: 22, fontWeight: 'normal', letterSpacing: 0.4, includeFontPadding: false },
+  outline: { minHeight: 48, borderWidth: 1, borderColor: colors.line },
+  outlineText: { color: colors.subtle, fontSize: 15, lineHeight: 22, letterSpacing: 0.4 },
   guest: { minHeight: 48, justifyContent: 'center', alignItems: 'center' },
-  guestText: { color: '#a0a0a0', fontSize: 13, lineHeight: 22, letterSpacing: 0.8, includeFontPadding: false },
-  privacy: { minHeight: 38, alignItems: 'center', justifyContent: 'center' },
-  privacyText: { color: '#7d7d7d', fontSize: 12, lineHeight: 20, letterSpacing: 0.2, includeFontPadding: false },
+  guestText: { color: colors.muted, fontSize: 13, lineHeight: 22, letterSpacing: 0.8, includeFontPadding: false },
+  current: { color: colors.muted, fontSize: 12, lineHeight: 18, textAlign: 'center' },
+  privacy: { minHeight: 44, alignItems: 'center', justifyContent: 'center' },
+  privacyText: { color: colors.muted, fontSize: 12, lineHeight: 20, letterSpacing: 0.2, includeFontPadding: false },
   pressed: { opacity: 0.7, transform: [{ scale: 0.99 }] },
-  notice: { color: '#aaa', fontSize: 12, lineHeight: 20, letterSpacing: 0.2, includeFontPadding: false, textAlign: 'center' },
-  modalBackground: { flex: 1, backgroundColor: '#000000aa', justifyContent: 'flex-end', alignItems: 'center' },
-  sheet: { width: '100%', maxWidth: 480, backgroundColor: '#191919', borderTopLeftRadius: 26, borderTopRightRadius: 26, padding: 26, gap: 22 },
-  sheetHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 16 },
-  sheetTitle: { fontSize: 20, fontWeight: 'normal', color: '#f4f4f4' },
-  sheetBody: { color: '#aaa', fontSize: 14, lineHeight: 24, marginBottom: 4 },
+  notice: { color: colors.muted, fontSize: 12, lineHeight: 20, letterSpacing: 0.2, textAlign: 'center' },
+  error: { color: colors.danger },
 });
